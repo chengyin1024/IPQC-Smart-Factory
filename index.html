@@ -3,355 +3,231 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#176b4d">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="IPQC Smart">
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-192.png">
-<title>IPQC Smart Factory V1.2</title>
+<meta name="theme-color" content="#173f31">
+<link rel="manifest" href="./manifest.json">
+<title>IPQC Smart Factory V2.0</title>
 <style>
-:root{--p:#176b4d;--p2:#0f5138;--bg:#f4f7f5;--card:#fff;--line:#dfe7e2;--text:#1e2b25;--muted:#6b7771;--ok:#20865c;--ng:#c43d3d;--warn:#b7791f}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",Arial,sans-serif;color:var(--text)}
-button,input,select,textarea{font:inherit}.hidden{display:none!important}
-header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}
-.head{max-width:760px;margin:auto;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px}
-.brand{font-weight:950;font-size:19px;color:var(--p2)}.sub{font-size:11px;color:var(--muted)}
-.actions{display:flex;gap:6px;align-items:center}.mini{min-height:36px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:0 10px;font-weight:800;font-size:12px}
-main{max-width:760px;margin:auto;padding:14px 14px 95px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 3px 14px rgba(25,62,46,.05)}
-h2,h3{margin:0 0 10px}.muted{color:var(--muted);font-size:13px}.small{font-size:12px}.danger{color:var(--ng)}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.stat{padding:13px;border:1px solid var(--line);border-radius:14px;background:#fbfdfc}.stat b{display:block;font-size:23px;margin-top:4px}
-.field{margin-bottom:11px}.field label{display:block;font-size:13px;font-weight:850;margin-bottom:6px}
-input,select,textarea{width:100%;min-height:44px;border:1px solid #cfdad4;border-radius:11px;background:#fff;padding:9px 11px}
-textarea{min-height:80px;resize:vertical}.row{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.btn{width:100%;min-height:46px;border:0;border-radius:12px;font-weight:900;cursor:pointer;touch-action:manipulation}
-.btn-primary{background:var(--p);color:#fff}.btn-secondary{background:#fff;border:1px solid var(--line)}.btn-danger{background:#fdecec;color:var(--ng);border:1px solid #efb0b0}
-.tabs{position:fixed;bottom:0;left:0;right:0;z-index:30;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding-bottom:env(safe-area-inset-bottom)}
-.tab{border:0;background:#fff;padding:9px 3px 8px;font-size:11px;color:var(--muted);font-weight:800}.tab.active{color:var(--p)}.tab span{display:block;font-size:19px;margin-bottom:2px}
-.badge{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:5px 8px;font-size:11px;font-weight:850;background:#eef4f1}.badge.ng{background:#fdecec;color:var(--ng)}.badge.ok{background:#eaf7f1;color:var(--ok)}.badge.warn{background:#fff6df;color:var(--warn)}
-.record{border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:9px}.record-top{display:flex;justify-content:space-between;gap:8px}.record-actions{display:flex;gap:6px;margin-top:9px}.record-actions button{min-height:38px;border-radius:9px;padding:0 10px;font-size:12px;font-weight:850}
-.login-wrap{min-height:100vh;display:grid;place-items:center;padding:18px;background:linear-gradient(145deg,#e9f4ef,#f7faf8)}
-.login{width:min(420px,100%);background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:0 12px 40px rgba(16,70,49,.12)}
-.logo{width:64px;height:64px;border-radius:18px;background:var(--p);color:#fff;display:grid;place-items:center;font-weight:950;margin-bottom:12px}
-.notice{padding:10px 11px;border-radius:11px;background:#fff7df;border:1px solid #f1d28c;font-size:12px;color:#6f5311}
-.modal-mask{position:fixed;inset:0;background:rgba(12,28,21,.55);z-index:100;display:grid;place-items:center;padding:15px}.modal{width:min(480px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:17px;padding:16px}.modal-actions{display:flex;gap:8px;margin-top:12px}
-.role-pill{padding:4px 7px;border-radius:999px;background:#edf4f1;font-size:11px;font-weight:850}
-@media(min-width:640px){.grid{grid-template-columns:repeat(4,1fr)}.tabs{max-width:760px;left:50%;transform:translateX(-50%);border-left:1px solid var(--line);border-right:1px solid var(--line)}}
-.update-banner{position:fixed;left:50%;transform:translateX(-50%);bottom:78px;z-index:90;width:min(720px,calc(100% - 24px));background:#173f31;color:#fff;border-radius:14px;padding:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 10px 28px rgba(0,0,0,.25)}
-.update-banner button{border:0;border-radius:10px;padding:9px 13px;font-weight:900;background:#fff;color:#173f31}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI","Noto Sans TC",sans-serif;background:#f3f6f5;color:#183028}
+button,input,select,textarea{font:inherit}.hidden{display:none!important}.wrap{max-width:1050px;margin:auto;padding:15px}
+header{position:sticky;top:0;z-index:20;background:#173f31;color:#fff;padding:14px}.head{max-width:1050px;margin:auto;display:flex;justify-content:space-between;gap:12px;align-items:center}
+.brand{font-weight:900;font-size:19px}.badge{font-size:11px;background:#fff;color:#173f31;padding:3px 7px;border-radius:999px}
+.card{background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 3px 14px rgba(0,0,0,.06)}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.stat b{display:block;font-size:27px}.muted{color:#6b7e76}
+.nav{display:flex;gap:8px;overflow:auto;margin-bottom:14px}.btn{border:0;border-radius:11px;padding:10px 13px;font-weight:800;cursor:pointer;white-space:nowrap}
+.primary{background:#173f31;color:#fff}.secondary{background:#e6efeb;color:#173f31}.danger{background:#fee7e7;color:#8b1e1e}
+.row{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.field{margin-bottom:12px}.field label{display:block;font-weight:800;margin-bottom:6px}
+input,select,textarea{width:100%;border:1px solid #cdd9d4;border-radius:11px;padding:11px;background:#fff}textarea{min-height:80px}
+.login{min-height:100vh;display:grid;place-items:center;padding:20px}.login .card{width:min(430px,100%)}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:9px;border-bottom:1px solid #e7ece9;font-size:14px}
+.msg{padding:10px;border-radius:10px;margin-bottom:10px}.error{background:#fee7e7;color:#8b1e1e}.ok{background:#e3f6e9;color:#185b31}
+.small{font-size:12px}.section-title{margin:18px 0 8px}
+@media(max-width:720px){.grid{grid-template-columns:repeat(2,1fr)}.row{grid-template-columns:1fr}.hide-mobile{display:none}}
 </style>
 </head>
 <body>
-
-<section id="loginView" class="login-wrap">
-  <div class="login">
-    <div class="logo">IPQC</div>
-    <h2 data-i18n="loginTitle">智慧品質管理系統</h2>
-    <p class="muted" data-i18n="loginSub">主管與IPQC可直接用手機登入操作</p>
-    <div class="field"><label data-i18n="account">帳號</label><input id="loginAccount" autocomplete="username"></div>
-    <div class="field"><label data-i18n="password">密碼</label><input id="loginPassword" type="password" autocomplete="current-password"></div>
-    <button class="btn btn-primary" id="loginBtn" data-i18n="login">登入</button>
-    <div class="notice" style="margin-top:12px">
-      <b data-i18n="demoAccounts">測試帳號</b><br>
-      老闆：admin / 1234<br>主管：manager / 1234<br>IPQC：ipqc / 1234
-    </div>
+<section id="loginPage" class="login">
+  <div class="card">
+    <h1>IPQC Smart Factory</h1>
+    <p class="muted">V2.0 雲端試用版</p>
+    <div id="loginMsg"></div>
+    <div class="field"><label>Email</label><input id="email" type="email" autocomplete="username"></div>
+    <div class="field"><label>密碼</label><input id="password" type="password" autocomplete="current-password"></div>
+    <button id="loginBtn" class="btn primary" style="width:100%">登入</button>
   </div>
 </section>
 
-<section id="appView" class="hidden">
-<header>
-  <div class="head">
-    <div><div class="brand">IPQC Smart Factory</div><div class="sub">V1.2 網頁 PWA 版</div></div>
-    <div class="actions">
-      <span id="rolePill" class="role-pill"></span>
-      <select id="langSelect" class="mini" aria-label="language"><option value="zh">中文</option><option value="vi">Tiếng Việt</option></select>
-      <button id="logoutBtn" class="mini" data-i18n="logout">登出</button>
-    </div>
+<section id="appPage" class="hidden">
+<header><div class="head"><div><div class="brand">IPQC Smart Factory <span class="badge">V2.0 試用版</span></div><div id="userEmail" class="small"></div></div><button id="logoutBtn" class="btn secondary">登出</button></div></header>
+<main class="wrap">
+  <div class="nav">
+    <button class="btn primary" data-page="dashboard">Dashboard</button>
+    <button class="btn secondary" data-page="newInspection">新增巡檢</button>
+    <button class="btn secondary" data-page="records">巡檢紀錄</button>
+    <button class="btn secondary" data-page="reliability">信賴度</button>
+    <button class="btn secondary" data-page="parts">料號管理</button>
+    <button class="btn secondary" data-page="employees">人員管理</button>
   </div>
-</header>
 
-<main>
-  <section id="page-dashboard" class="page">
-    <div class="card">
-      <h2><span data-i18n="welcome">歡迎</span>，<span id="welcomeName"></span></h2>
-      <div class="muted" id="todayText"></div>
-    </div>
+  <section id="dashboard" class="page">
     <div class="grid">
-      <div class="stat"><span data-i18n="todayInspections">今日巡檢</span><b id="statToday">0</b></div>
-      <div class="stat"><span data-i18n="todayNg">今日NG</span><b id="statNg">0</b></div>
-      <div class="stat"><span data-i18n="pendingReliability">待信賴度</span><b id="statPending">0</b></div>
-      <div class="stat"><span data-i18n="todayYield">今日良率</span><b id="statYield">—</b></div>
+      <div class="card stat"><span class="muted">今日巡檢</span><b id="statTotal">0</b></div>
+      <div class="card stat"><span class="muted">今日 NG</span><b id="statNg">0</b></div>
+      <div class="card stat"><span class="muted">今日良率</span><b id="statYield">0%</b></div>
+      <div class="card stat"><span class="muted">待信賴度</span><b id="statPending">0</b></div>
     </div>
-    <div class="card">
-      <h3 data-i18n="quickAction">快速操作</h3>
-      <button class="btn btn-primary" onclick="goPage('inspection')" data-i18n="startInspection">開始巡檢</button>
-    </div>
-    <div class="card">
-      <h3 data-i18n="recentRecords">最近巡檢</h3>
-      <div id="recentList"></div>
-    </div>
+    <div class="card"><h2>最近巡檢</h2><div id="recentTable"></div></div>
   </section>
 
-  <section id="page-inspection" class="page hidden">
+  <section id="newInspection" class="page hidden">
     <div class="card">
-      <h2 data-i18n="newInspection">新增巡檢</h2>
+      <h2>新增巡檢</h2><div id="formMsg"></div>
       <div class="row">
-        <div class="field"><label data-i18n="date">日期</label><input id="fDate" type="date"></div>
-        <div class="field"><label data-i18n="time">時間</label><input id="fTime" type="time"></div>
+        <div class="field"><label>日期</label><input id="inspectionDate" type="date"></div>
+        <div class="field"><label>時間</label><input id="inspectionTime" type="time"></div>
+        <div class="field"><label>料號</label><input id="partNumber" list="partList" placeholder="輸入或搜尋料號"><datalist id="partList"></datalist></div>
+        <div class="field"><label>機台</label><input id="machine"></div>
+        <div class="field"><label>操作員</label><input id="operatorName" list="employeeList"></div>
+        <div class="field"><label>巡檢員</label><input id="inspectorName" list="employeeList"></div>
+        <div class="field"><label>品檢人員</label><input id="qualityInspectorName" list="employeeList"></div>
       </div>
-      <div class="field">
-        <label data-i18n="partNo">料號</label>
-        <input id="fPart" list="partNoList" autocomplete="off" data-i18n-placeholder="partSearchPlaceholder" placeholder="輸入料號或關鍵字搜尋">
-        <datalist id="partNoList"></datalist>
-        <div class="muted small" data-i18n="partSearchHint">輸入部分文字即可搜尋已使用過的料號。</div>
-      </div>
-      <div class="row">
-        <div class="field">
-          <label data-i18n="operator">作業人員</label>
-          <input id="fOperator" list="operatorList" autocomplete="off">
-          <datalist id="operatorList"></datalist>
-        </div>
-        <div class="field">
-          <label data-i18n="inspector">巡檢人員</label>
-          <input id="fInspector" list="inspectorList" autocomplete="off">
-          <datalist id="inspectorList"></datalist>
-        </div>
-      </div>
-      <div class="row">
-        <div class="field">
-          <label data-i18n="qualityInspector">品檢人員</label>
-          <input id="fQualityInspector" list="qualityInspectorList" autocomplete="off">
-          <datalist id="qualityInspectorList"></datalist>
-        </div>
-        <div class="field"><label data-i18n="machine">機台／班別</label><input id="fMachine"></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h3 data-i18n="printingA">印刷 A</h3>
+      <datalist id="employeeList"></datalist>
+      <h3 class="section-title">印刷 A</h3>
       <div class="row"><div class="field"><label>OK</label><input id="aOk" type="number" min="0" value="0"></div><div class="field"><label>NG</label><input id="aNg" type="number" min="0" value="0"></div></div>
-      <h3 data-i18n="printingB">印刷 B</h3>
+      <h3 class="section-title">印刷 B</h3>
       <div class="row"><div class="field"><label>OK</label><input id="bOk" type="number" min="0" value="0"></div><div class="field"><label>NG</label><input id="bNg" type="number" min="0" value="0"></div></div>
-      <h3 data-i18n="packing">包裝</h3>
+      <h3 class="section-title">包裝</h3>
       <div class="row"><div class="field"><label>OK</label><input id="pOk" type="number" min="0" value="0"></div><div class="field"><label>NG</label><input id="pNg" type="number" min="0" value="0"></div></div>
-      <div class="field"><label data-i18n="ngReason">NG原因</label>
-        <select id="fNgReason"><option value="">—</option><option>漏印</option><option>偏位</option><option>重影</option><option>刮傷</option><option>溢墨</option><option>包裝異常</option><option>其他</option></select>
+      <div class="field"><label>NG 原因</label><input id="ngReason"></div>
+      <div class="field"><label>備註</label><textarea id="notes"></textarea></div>
+      <button id="saveInspectionBtn" class="btn primary">儲存巡檢</button>
+    </div>
+  </section>
+
+  <section id="records" class="page hidden"><div class="card"><h2>巡檢紀錄</h2><div id="recordsTable"></div></div></section>
+
+  <section id="reliability" class="page hidden">
+    <div class="card">
+      <h2>信賴度測試</h2><div id="relMsg"></div>
+      <div class="row">
+        <div class="field"><label>對應巡檢</label><select id="relInspection"></select></div>
+        <div class="field"><label>測試人員</label><input id="relTester" list="employeeList"></div>
+        <div class="field"><label>99% 酒精</label><select id="relAlcohol"><option value="pending">待測</option><option value="ok">OK</option><option value="ng">NG</option><option value="skip">Skip</option></select></div>
+        <div class="field"><label>3M600</label><select id="relTape"><option value="pending">待測</option><option value="ok">OK</option><option value="ng">NG</option><option value="skip">Skip</option></select></div>
+        <div class="field"><label>測試日期</label><input id="relDate" type="date"></div>
       </div>
-      <div class="field"><label data-i18n="note">備註</label><textarea id="fNote"></textarea></div>
-      <button class="btn btn-primary" id="saveInspectionBtn" data-i18n="saveInspection">儲存巡檢</button>
+      <div class="field"><label>備註</label><textarea id="relNotes"></textarea></div>
+      <button id="saveReliabilityBtn" class="btn primary">儲存信賴度測試</button>
+      <div id="reliabilityTable" style="margin-top:14px"></div>
     </div>
   </section>
 
-  <section id="page-records" class="page hidden">
-    <div class="card">
-      <h2 data-i18n="inspectionRecords">巡檢紀錄</h2>
-      <div class="field"><input id="searchInput" data-i18n-placeholder="searchPart" placeholder="搜尋料號或人員"></div>
-      <div id="recordsList"></div>
-    </div>
-  </section>
+  <section id="parts" class="page hidden"><div class="card"><h2>料號管理</h2>
+    <div class="row"><div class="field"><label>料號</label><input id="newPartCode"></div><div class="field"><label>關鍵字</label><input id="newPartKeywords"></div></div>
+    <button id="addPartBtn" class="btn primary">新增料號</button><div id="partsTable" style="margin-top:14px"></div>
+  </div></section>
 
-  <section id="page-reliability" class="page hidden">
-    <div class="card">
-      <h2 data-i18n="reliability">信賴度測試</h2>
-      <p class="muted" data-i18n="reliabilitySub">完成烘烤後補登99%酒精與3M600測試</p>
-      <div id="reliabilityList"></div>
-    </div>
-  </section>
-
-  <section id="page-settings" class="page hidden">
-    <div class="card">
-      <h2 data-i18n="systemInfo">系統資訊</h2>
-      <p><b data-i18n="currentUser">目前使用者：</b><span id="settingsUser"></span></p>
-      <p><b data-i18n="dataMode">資料模式：</b><span data-i18n="localDemo">本機原型模式</span></p>
-      <div class="notice" data-i18n="cloudNotice">這一版可直接測試手機操作；要讓所有主管看到同一份即時資料，部署時需接上雲端資料庫。</div>
-      <button id="installBtn" class="btn btn-secondary" style="margin-top:12px" data-i18n="installPhone">安裝到手機主畫面</button>
-    </div>
-    <div class="card">
-      <h2 data-i18n="partManagement">料號管理</h2>
-      <p class="muted" data-i18n="partManagementHint">可先建立常用料號；巡檢時輸入關鍵字即可快速搜尋。</p>
-      <div class="field"><label data-i18n="partName">料號／品名</label><input id="newPartNo" placeholder="例如：410下蓋"></div>
-      <div class="field"><label data-i18n="partKeywords">搜尋關鍵字</label><input id="newPartKeywords" placeholder="例如：410 下蓋 黑色"></div>
-      <button id="addPartBtn" class="btn btn-primary" data-i18n="addPart">新增料號</button>
-      <div id="partMasterList" style="margin-top:10px"></div>
-    </div>
-  </section>
+  <section id="employees" class="page hidden"><div class="card"><h2>人員管理</h2>
+    <div class="row"><div class="field"><label>姓名</label><input id="newEmployeeName"></div><div class="field"><label>角色</label><select id="newEmployeeRole"><option value="operator">作業員</option><option value="inspector">巡檢員</option><option value="quality">品檢</option><option value="manager">主管</option><option value="owner">老闆</option></select></div></div>
+    <button id="addEmployeeBtn" class="btn primary">新增人員</button><div id="employeesTable" style="margin-top:14px"></div>
+  </div></section>
 </main>
-
-<nav class="tabs">
-  <button class="tab active" data-page="dashboard"><span>🏠</span><i data-i18n="home">首頁</i></button>
-  <button class="tab" data-page="inspection"><span>📝</span><i data-i18n="inspect">巡檢</i></button>
-  <button class="tab" data-page="records"><span>📁</span><i data-i18n="records">紀錄</i></button>
-  <button class="tab" data-page="reliability"><span>🧪</span><i data-i18n="reliabilityShort">信賴度</i></button>
-  <button class="tab" data-page="settings"><span>⚙️</span><i data-i18n="settings">設定</i></button>
-</nav>
 </section>
 
-<div id="updateBanner" class="update-banner hidden">
-  <div><b data-i18n="newVersion">發現新版本</b><div class="small" data-i18n="updateHint">點擊後立即載入最新版。</div></div>
-  <button id="updateNowBtn" data-i18n="updateNow">立即更新</button>
-</div>
-<div id="reliabilityModal" class="modal-mask hidden">
-  <div class="modal">
-    <h3 data-i18n="editReliability">補登信賴度測試</h3>
-    <div id="modalRecordInfo" class="notice"></div>
-    <div class="field"><label data-i18n="alcohol99">99%酒精</label><select id="mAlcohol"><option value="pending">待測</option><option value="ok">OK</option><option value="ng">NG</option><option value="skip">略過</option></select></div>
-    <div class="field"><label>3M600</label><select id="mTape"><option value="pending">待測</option><option value="ok">OK</option><option value="ng">NG</option><option value="skip">略過</option></select></div>
-    <div class="field"><label data-i18n="tester">測試人員</label><input id="mTester"></div>
-    <div class="field"><label data-i18n="note">備註</label><textarea id="mNote"></textarea></div>
-    <div class="modal-actions"><button class="btn btn-secondary" id="modalCancel" data-i18n="cancel">取消</button><button class="btn btn-primary" id="modalSave" data-i18n="save">儲存</button></div>
-  </div>
-</div>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const USERS=[
- {account:'admin',password:'1234',name:'莊承賢',role:'admin'},
- {account:'manager',password:'1234',name:'主管',role:'manager'},
- {account:'ipqc',password:'1234',name:'IPQC',role:'ipqc'}
-];
-const I18N={
- zh:{loginTitle:'智慧品質管理系統',loginSub:'主管與IPQC可直接用手機登入操作',account:'帳號',password:'密碼',login:'登入',demoAccounts:'測試帳號',logout:'登出',welcome:'歡迎',todayInspections:'今日巡檢',todayNg:'今日NG',pendingReliability:'待信賴度',todayYield:'今日良率',quickAction:'快速操作',startInspection:'開始巡檢',recentRecords:'最近巡檢',newInspection:'新增巡檢',date:'日期',time:'時間',partNo:'料號',operator:'作業人員',inspector:'巡檢人員',qualityInspector:'品檢人員',machine:'機台／班別',partSearchPlaceholder:'輸入料號或關鍵字搜尋',partSearchHint:'輸入部分文字即可搜尋已使用過或已建立的料號。',partManagement:'料號管理',partManagementHint:'可先建立常用料號；巡檢時輸入關鍵字即可快速搜尋。',partName:'料號／品名',partKeywords:'搜尋關鍵字',addPart:'新增料號',partAdded:'料號已新增',partExists:'此料號已存在',newVersion:'發現新版本',updateHint:'點擊後立即載入最新版。',updateNow:'立即更新',printingA:'印刷 A',printingB:'印刷 B',packing:'包裝',ngReason:'NG原因',note:'備註',saveInspection:'儲存巡檢',inspectionRecords:'巡檢紀錄',searchPart:'搜尋料號或人員',reliability:'信賴度測試',reliabilitySub:'完成烘烤後補登99%酒精與3M600測試',systemInfo:'系統資訊',currentUser:'目前使用者：',dataMode:'資料模式：',localDemo:'本機原型模式',cloudNotice:'這一版可直接測試手機操作；要讓所有主管看到同一份即時資料，部署時需接上雲端資料庫。',installPhone:'安裝到手機主畫面',home:'首頁',inspect:'巡檢',records:'紀錄',reliabilityShort:'信賴度',settings:'設定',editReliability:'補登信賴度測試',alcohol99:'99%酒精',tester:'測試人員',cancel:'取消',save:'儲存',delete:'刪除',noData:'尚無資料',yield:'良率',total:'總數',status:'狀態',pending:'待測',normal:'正常',hasNg:'有NG',saved:'巡檢資料已儲存',deleted:'資料已刪除',confirmDelete:'確定刪除這筆巡檢資料？',loginFail:'帳號或密碼錯誤',requiredPart:'請輸入料號',reliabilitySaved:'信賴度測試已儲存'},
- vi:{loginTitle:'Hệ thống quản lý chất lượng thông minh',loginSub:'Quản lý và IPQC có thể đăng nhập trực tiếp bằng điện thoại',account:'Tài khoản',password:'Mật khẩu',login:'Đăng nhập',demoAccounts:'Tài khoản thử nghiệm',logout:'Đăng xuất',welcome:'Xin chào',todayInspections:'Kiểm tra hôm nay',todayNg:'NG hôm nay',pendingReliability:'Chờ thử độ tin cậy',todayYield:'Tỷ lệ đạt hôm nay',quickAction:'Thao tác nhanh',startInspection:'Bắt đầu kiểm tra',recentRecords:'Kiểm tra gần đây',newInspection:'Thêm kiểm tra',date:'Ngày',time:'Giờ',partNo:'Mã sản phẩm',operator:'Nhân viên thao tác',inspector:'Nhân viên tuần tra',qualityInspector:'Nhân viên kiểm phẩm',machine:'Máy / Ca',partSearchPlaceholder:'Nhập mã hoặc từ khóa để tìm',partSearchHint:'Nhập một phần nội dung để tìm mã đã dùng hoặc đã tạo.',partManagement:'Quản lý mã sản phẩm',partManagementHint:'Có thể tạo trước mã thường dùng; khi kiểm tra chỉ cần nhập từ khóa.',partName:'Mã / Tên sản phẩm',partKeywords:'Từ khóa tìm kiếm',addPart:'Thêm mã sản phẩm',partAdded:'Đã thêm mã sản phẩm',partExists:'Mã sản phẩm đã tồn tại',newVersion:'Có phiên bản mới',updateHint:'Nhấn để tải phiên bản mới nhất.',updateNow:'Cập nhật ngay',printingA:'In A',printingB:'In B',packing:'Đóng gói',ngReason:'Nguyên nhân NG',note:'Ghi chú',saveInspection:'Lưu kiểm tra',inspectionRecords:'Lịch sử kiểm tra',searchPart:'Tìm mã sản phẩm hoặc nhân viên',reliability:'Kiểm tra độ tin cậy',reliabilitySub:'Bổ sung kết quả cồn 99% và 3M600 sau khi sấy',systemInfo:'Thông tin hệ thống',currentUser:'Người dùng hiện tại:',dataMode:'Chế độ dữ liệu:',localDemo:'Chế độ nguyên mẫu cục bộ',cloudNotice:'Phiên bản này dùng để thử thao tác trên điện thoại. Để mọi quản lý thấy cùng dữ liệu theo thời gian thực, cần kết nối cơ sở dữ liệu đám mây khi triển khai.',installPhone:'Cài vào màn hình chính',home:'Trang chủ',inspect:'Kiểm tra',records:'Lịch sử',reliabilityShort:'Độ tin cậy',settings:'Cài đặt',editReliability:'Bổ sung kiểm tra độ tin cậy',alcohol99:'Cồn 99%',tester:'Người kiểm tra',cancel:'Hủy',save:'Lưu',delete:'Xóa',noData:'Chưa có dữ liệu',yield:'Tỷ lệ đạt',total:'Tổng',status:'Trạng thái',pending:'Chờ thử',normal:'Bình thường',hasNg:'Có NG',saved:'Đã lưu dữ liệu kiểm tra',deleted:'Đã xóa dữ liệu',confirmDelete:'Xác nhận xóa dữ liệu kiểm tra này?',loginFail:'Sai tài khoản hoặc mật khẩu',requiredPart:'Vui lòng nhập mã sản phẩm',reliabilitySaved:'Đã lưu kiểm tra độ tin cậy'}
-};
-const KEY='ipqc_v1_records', SESSION='ipqc_v1_session', LANG='ipqc_v1_lang', PEOPLE='ipqc_v1_people', PARTS='ipqc_v1_parts';
-let lang=localStorage.getItem(LANG)||'zh', user=null, editingId=null, deferredPrompt=null;
+const SUPABASE_URL="https://huhenjkybvzkqczkvmkh.supabase.co";
+const SUPABASE_KEY="sb_publishable_cFXdFQJi9cAiBDNXMcHEYw_yYKMKP5D";
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const $=id=>document.getElementById(id);
-const records=()=>JSON.parse(localStorage.getItem(KEY)||'[]');
-const saveRecords=v=>localStorage.setItem(KEY,JSON.stringify(v));
-const people=()=>JSON.parse(localStorage.getItem(PEOPLE)||'{"operators":[],"inspectors":[],"qualityInspectors":[]}');
-const savePeople=v=>localStorage.setItem(PEOPLE,JSON.stringify(v));
-const partMaster=()=>JSON.parse(localStorage.getItem(PARTS)||'[]');
-const savePartMaster=v=>localStorage.setItem(PARTS,JSON.stringify(v));
-function uniqueValues(values){return [...new Set(values.map(x=>String(x||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'zh-Hant'))}
-function rememberPeople(r){
- const p=people();
- p.operators=uniqueValues([...p.operators,r.operator]);
- p.inspectors=uniqueValues([...p.inspectors,r.inspector]);
- p.qualityInspectors=uniqueValues([...p.qualityInspectors,r.qualityInspector]);
- savePeople(p);
-}
-function rebuildRememberedData(){
- const all=records(),p=people();
- p.operators=uniqueValues([...p.operators,...all.map(r=>r.operator)]);
- p.inspectors=uniqueValues([...p.inspectors,...all.map(r=>r.inspector)]);
- p.qualityInspectors=uniqueValues([...p.qualityInspectors,...all.map(r=>r.qualityInspector)]);
- savePeople(p);
- const pm=partMaster(), known=uniqueValues([...pm.map(x=>x.part),...all.map(r=>r.part)]);
- known.forEach(part=>{if(!pm.some(x=>x.part===part))pm.push({part,keywords:part})});
- savePartMaster(pm);
-}
-function renderDatalists(){
- rebuildRememberedData();
- const p=people();
- $('operatorList').innerHTML=p.operators.map(x=>`<option value="${esc(x)}"></option>`).join('');
- $('inspectorList').innerHTML=p.inspectors.map(x=>`<option value="${esc(x)}"></option>`).join('');
- $('qualityInspectorList').innerHTML=p.qualityInspectors.map(x=>`<option value="${esc(x)}"></option>`).join('');
- $('partNoList').innerHTML=partMaster().map(x=>`<option value="${esc(x.part)}">${esc(x.keywords||'')}</option>`).join('');
-}
-function addPart(){
- const part=$('newPartNo').value.trim(),keywords=$('newPartKeywords').value.trim();
- if(!part)return;
- const pm=partMaster();
- if(pm.some(x=>x.part.toLowerCase()===part.toLowerCase())){alert(t('partExists'));return}
- pm.push({part,keywords:keywords||part});savePartMaster(pm);
- $('newPartNo').value='';$('newPartKeywords').value='';renderDatalists();renderPartMaster();alert(t('partAdded'));
-}
-function renderPartMaster(){
- if(!$('partMasterList'))return;
- const pm=partMaster();
- $('partMasterList').innerHTML=pm.length?pm.map((x,i)=>`<div class="record"><div class="record-top"><div><b>${esc(x.part)}</b><div class="muted">${esc(x.keywords||'')}</div></div><button class="btn-danger" style="min-height:34px;border-radius:8px" onclick="deletePart(${i})">${t('delete')}</button></div></div>`).join(''):`<div class="muted">${t('noData')}</div>`;
-}
-function deletePart(i){const pm=partMaster();pm.splice(i,1);savePartMaster(pm);renderDatalists();renderPartMaster()}
-const t=k=>I18N[lang][k]||k;
-function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
-function applyLanguage(){
- document.documentElement.lang=lang==='vi'?'vi':'zh-Hant';
- document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));
- document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>el.placeholder=t(el.dataset.i18nPlaceholder));
- $('langSelect').value=lang; renderAll();
-}
-function roleName(r){return lang==='vi'?({admin:'Chủ doanh nghiệp',manager:'Quản lý',ipqc:'IPQC'}[r]):({admin:'老闆',manager:'主管',ipqc:'IPQC'}[r])}
-function showApp(){
- $('loginView').classList.add('hidden'); $('appView').classList.remove('hidden');
- $('welcomeName').textContent=user.name; $('rolePill').textContent=roleName(user.role); $('settingsUser').textContent=`${user.name}（${roleName(user.role)}）`;
- applyLanguage(); setDateTime(); goPage('dashboard');
-}
-function login(){
- const a=$('loginAccount').value.trim(),p=$('loginPassword').value;
- const found=USERS.find(x=>x.account===a&&x.password===p);
- if(!found){alert(t('loginFail'));return}
- user=found; sessionStorage.setItem(SESSION,JSON.stringify(user)); showApp();
-}
-function logout(){sessionStorage.removeItem(SESSION);location.reload()}
-function setDateTime(){const d=new Date();$('fDate').value=d.toISOString().slice(0,10);$('fTime').value=d.toTimeString().slice(0,5);$('fInspector').value=user?.name||'';const p=people();if(!$('fQualityInspector').value&&p.qualityInspectors.length===1)$('fQualityInspector').value=p.qualityInspectors[0]}
-function goPage(name){
- document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
- $('page-'+name).classList.remove('hidden');
- document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.page===name));
- renderAll(); window.scrollTo({top:0,behavior:'smooth'});
-}
-function calc(r){const ok=+r.aOk + +r.bOk + +r.pOk, ng=+r.aNg + +r.bNg + +r.pNg;return {ok,ng,total:ok+ng,yield:ok+ng?ok/(ok+ng)*100:0}}
-function saveInspection(){
- if(!$('fPart').value.trim()){alert(t('requiredPart'));return}
- const r={id:crypto.randomUUID?crypto.randomUUID():Date.now().toString(),date:$('fDate').value,time:$('fTime').value,part:$('fPart').value.trim(),operator:$('fOperator').value.trim(),inspector:$('fInspector').value.trim(),qualityInspector:$('fQualityInspector').value.trim(),machine:$('fMachine').value.trim(),aOk:+$('aOk').value||0,aNg:+$('aNg').value||0,bOk:+$('bOk').value||0,bNg:+$('bNg').value||0,pOk:+$('pOk').value||0,pNg:+$('pNg').value||0,ngReason:$('fNgReason').value,note:$('fNote').value.trim(),alcohol:'pending',tape:'pending',tester:'',reliabilityNote:'',createdBy:user.account,createdAt:new Date().toISOString()};
- const all=records();all.unshift(r);saveRecords(all);rememberPeople(r);
- const pm=partMaster();if(!pm.some(x=>x.part.toLowerCase()===r.part.toLowerCase())){pm.push({part:r.part,keywords:r.part});savePartMaster(pm)}
- renderDatalists();alert(t('saved'));['fPart','fMachine','fNote'].forEach(id=>$(id).value='');['aOk','aNg','bOk','bNg','pOk','pNg'].forEach(id=>$(id).value=0);$('fNgReason').value='';setDateTime();goPage('dashboard');
-}
-function statusBadge(r){const c=calc(r);return c.ng?`<span class="badge ng">${t('hasNg')} ${c.ng}</span>`:`<span class="badge ok">${t('normal')}</span>`}
-function recordHtml(r,compact=false){
- const c=calc(r),pending=r.alcohol==='pending'||r.tape==='pending';
- return `<div class="record"><div class="record-top"><div><b>${esc(r.part)}</b><div class="muted">${esc(r.date)} ${esc(r.time)}・${esc(r.inspector||'-')}${r.qualityInspector?`・${t('qualityInspector')}：${esc(r.qualityInspector)}`:''}</div></div>${statusBadge(r)}</div><div class="small" style="margin-top:7px">${t('total')} ${c.total}｜OK ${c.ok}｜NG ${c.ng}｜${t('yield')} ${c.total?c.yield.toFixed(2):'—'}%</div>${pending?`<div style="margin-top:7px"><span class="badge warn">${t('pendingReliability')}</span></div>`:''}${compact?'':`<div class="record-actions"><button class="btn-secondary" onclick="openReliability('${r.id}')">${t('reliabilityShort')}</button>${user.role!=='ipqc'?`<button class="btn-danger" onclick="deleteRecord('${r.id}')">${t('delete')}</button>`:''}</div>`}</div>`;
-}
-function renderDashboard(){
- const all=records(),today=new Date().toISOString().slice(0,10),tod=all.filter(r=>r.date===today);
- const sums=tod.reduce((a,r)=>{const c=calc(r);a.ok+=c.ok;a.ng+=c.ng;return a},{ok:0,ng:0});
- $('todayText').textContent=new Date().toLocaleDateString(lang==='vi'?'vi-VN':'zh-TW',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
- $('statToday').textContent=tod.length;$('statNg').textContent=sums.ng;$('statPending').textContent=all.filter(r=>r.alcohol==='pending'||r.tape==='pending').length;$('statYield').textContent=sums.ok+sums.ng?`${(sums.ok/(sums.ok+sums.ng)*100).toFixed(2)}%`:'—';
- $('recentList').innerHTML=all.slice(0,5).map(r=>recordHtml(r,true)).join('')||`<div class="muted">${t('noData')}</div>`;
-}
-function renderRecords(){
- const q=($('searchInput')?.value||'').toLowerCase();const list=records().filter(r=>[r.part,r.operator,r.inspector,r.qualityInspector,r.machine].join(' ').toLowerCase().includes(q));
- $('recordsList').innerHTML=list.map(r=>recordHtml(r)).join('')||`<div class="muted">${t('noData')}</div>`;
-}
-function renderReliability(){
- const list=records().filter(r=>r.alcohol==='pending'||r.tape==='pending'||r.alcohol==='ng'||r.tape==='ng');
- $('reliabilityList').innerHTML=list.map(r=>recordHtml(r)).join('')||`<div class="muted">${t('noData')}</div>`;
-}
-function renderAll(){if(!$('appView').classList.contains('hidden')){renderDatalists();renderDashboard();renderRecords();renderReliability();renderPartMaster()}}
-function deleteRecord(id){if(!confirm(t('confirmDelete')))return;saveRecords(records().filter(r=>r.id!==id));alert(t('deleted'));renderAll()}
-function openReliability(id){
- const r=records().find(x=>x.id===id);if(!r)return;editingId=id;$('modalRecordInfo').innerHTML=`<b>${esc(r.part)}</b><br>${esc(r.date)} ${esc(r.time)}`;$('mAlcohol').value=r.alcohol||'pending';$('mTape').value=r.tape||'pending';$('mTester').value=r.tester||user.name;$('mNote').value=r.reliabilityNote||'';$('reliabilityModal').classList.remove('hidden');
-}
-function saveReliability(){
- const all=records(),r=all.find(x=>x.id===editingId);if(!r)return;r.alcohol=$('mAlcohol').value;r.tape=$('mTape').value;r.tester=$('mTester').value.trim();r.reliabilityNote=$('mNote').value.trim();r.reliabilityAt=new Date().toISOString();saveRecords(all);$('reliabilityModal').classList.add('hidden');alert(t('reliabilitySaved'));renderAll();
-}
-$('loginBtn').onclick=login;$('addPartBtn').onclick=addPart;$('logoutBtn').onclick=logout;$('saveInspectionBtn').onclick=saveInspection;$('searchInput').oninput=renderRecords;$('langSelect').onchange=e=>{lang=e.target.value;localStorage.setItem(LANG,lang);applyLanguage()};$('modalCancel').onclick=()=>$('reliabilityModal').classList.add('hidden');$('modalSave').onclick=saveReliability;
-document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>goPage(b.dataset.page));
-window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e});
-$('installBtn').onclick=async()=>{if(deferredPrompt){deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null}else alert(lang==='vi'?'iPhone: dùng Safari → Chia sẻ → Thêm vào Màn hình chính':'iPhone：請用 Safari → 分享 → 加入主畫面')};
-if('serviceWorker' in navigator){
- window.addEventListener('load', async ()=>{
-   try{
-     const reg = await navigator.serviceWorker.register('./sw.js');
-     if(reg.waiting) showUpdate(reg.waiting);
-     reg.addEventListener('updatefound',()=>{
-       const nw=reg.installing;
-       if(!nw)return;
-       nw.addEventListener('statechange',()=>{
-         if(nw.state==='installed' && navigator.serviceWorker.controller) showUpdate(nw);
-       });
-     });
-     setInterval(()=>reg.update(),60*60*1000);
-   }catch(e){}
- });
-}
-let waitingWorker=null;
-function showUpdate(worker){waitingWorker=worker;$('updateBanner').classList.remove('hidden')}
-$('updateNowBtn').onclick=()=>{
- if(waitingWorker) waitingWorker.postMessage({type:'SKIP_WAITING'});
+let inspections=[],parts=[],employees=[],reliability=[];
+
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function n(v){return Number(v)||0}
+function showMsg(el,text,type='error'){el.innerHTML=`<div class="msg ${type}">${esc(text)}</div>`}
+function setDefaults(){const d=new Date();const iso=d.toISOString().slice(0,10);$('inspectionDate').value=iso;$('relDate').value=iso;$('inspectionTime').value=d.toTimeString().slice(0,5)}
+
+$('loginBtn').onclick=async()=>{
+  $('loginBtn').disabled=true;
+  const {data,error}=await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});
+  $('loginBtn').disabled=false;
+  if(error)return showMsg($('loginMsg'),error.message);
+  await enterApp(data.user);
 };
-navigator.serviceWorker?.addEventListener('controllerchange',()=>location.reload());
-const saved=sessionStorage.getItem(SESSION);if(saved){user=JSON.parse(saved);showApp()}else applyLanguage();
+$('logoutBtn').onclick=async()=>{await sb.auth.signOut();location.reload()};
+
+document.querySelectorAll('.nav button').forEach(btn=>btn.onclick=()=>{
+  document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
+  $(btn.dataset.page).classList.remove('hidden');
+  document.querySelectorAll('.nav button').forEach(b=>b.className='btn secondary');
+  btn.className='btn primary';
+});
+
+async function enterApp(user){
+  $('loginPage').classList.add('hidden');$('appPage').classList.remove('hidden');$('userEmail').textContent=user.email||'';
+  setDefaults();await loadAll();subscribeRealtime();
+}
+
+async function loadAll(){
+  const [a,b,c,d]=await Promise.all([
+    sb.from('inspections').select('*').order('created_at',{ascending:false}).limit(500),
+    sb.from('part_numbers').select('*').eq('active',true).order('code'),
+    sb.from('employees').select('*').eq('active',true).order('name'),
+    sb.from('reliability_tests').select('*').order('created_at',{ascending:false})
+  ]);
+  const err=a.error||b.error||c.error||d.error;
+  if(err){alert(err.message);return}
+  inspections=a.data||[];parts=b.data||[];employees=c.data||[];reliability=d.data||[];
+  renderAll();
+}
+
+function renderAll(){
+  $('partList').innerHTML=parts.map(x=>`<option value="${esc(x.code)}">${esc(x.keywords||'')}</option>`).join('');
+  $('employeeList').innerHTML=employees.map(x=>`<option value="${esc(x.name)}"></option>`).join('');
+  const today=new Date().toISOString().slice(0,10);
+  const rows=inspections.filter(x=>x.inspection_date===today);
+  let ok=0,ng=0;
+  rows.forEach(x=>{ok+=n(x.printing_a_ok)+n(x.printing_b_ok)+n(x.packing_ok);ng+=n(x.printing_a_ng)+n(x.printing_b_ng)+n(x.packing_ng)});
+  $('statTotal').textContent=rows.length;$('statNg').textContent=ng;$('statYield').textContent=(ok+ng?ok/(ok+ng)*100:0).toFixed(1)+'%';
+  $('statPending').textContent=reliability.filter(x=>x.alcohol_result==='pending'||x.tape_3m600_result==='pending').length;
+  $('recentTable').innerHTML=inspectionTable(inspections.slice(0,8));$('recordsTable').innerHTML=inspectionTable(inspections);
+  $('partsTable').innerHTML=`<table><tr><th>料號</th><th>關鍵字</th></tr>${parts.map(x=>`<tr><td>${esc(x.code)}</td><td>${esc(x.keywords||'')}</td></tr>`).join('')}</table>`;
+  $('employeesTable').innerHTML=`<table><tr><th>姓名</th><th>角色</th></tr>${employees.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.role)}</td></tr>`).join('')}</table>`;
+  $('relInspection').innerHTML='<option value="">請選擇</option>'+inspections.map(x=>`<option value="${esc(x.id)}">${esc(x.inspection_date)} ${esc((x.inspection_time||'').slice(0,5))}｜${esc(x.part_number_code)}</option>`).join('');
+  $('reliabilityTable').innerHTML=`<table><tr><th>料號</th><th>酒精</th><th>3M600</th><th>測試人員</th></tr>${reliability.map(x=>`<tr><td>${esc(x.part_number_code)}</td><td>${esc(x.alcohol_result)}</td><td>${esc(x.tape_3m600_result)}</td><td>${esc(x.tester_name||'')}</td></tr>`).join('')}</table>`;
+}
+function inspectionTable(rows){
+  return `<table><tr><th>日期時間</th><th>料號</th><th>OK</th><th>NG</th><th class="hide-mobile">品檢</th></tr>${rows.map(x=>{const ok=n(x.printing_a_ok)+n(x.printing_b_ok)+n(x.packing_ok),ng=n(x.printing_a_ng)+n(x.printing_b_ng)+n(x.packing_ng);return `<tr><td>${esc(x.inspection_date)} ${esc((x.inspection_time||'').slice(0,5))}</td><td>${esc(x.part_number_code)}</td><td>${ok}</td><td>${ng}</td><td class="hide-mobile">${esc(x.quality_inspector_name||'')}</td></tr>`}).join('')}</table>`;
+}
+
+$('saveInspectionBtn').onclick=async()=>{
+  const part=$('partNumber').value.trim();if(!part)return showMsg($('formMsg'),'請輸入料號');
+  const payload={
+    inspection_date:$('inspectionDate').value,inspection_time:$('inspectionTime').value,part_number_code:part,
+    operator_name:$('operatorName').value.trim(),inspector_name:$('inspectorName').value.trim(),quality_inspector_name:$('qualityInspectorName').value.trim(),machine:$('machine').value.trim(),
+    printing_a_status:'check',printing_a_ok:n($('aOk').value),printing_a_ng:n($('aNg').value),
+    printing_b_status:'check',printing_b_ok:n($('bOk').value),printing_b_ng:n($('bNg').value),
+    packing_status:'check',packing_ok:n($('pOk').value),packing_ng:n($('pNg').value),
+    ng_reason:$('ngReason').value.trim(),notes:$('notes').value.trim()
+  };
+  const {error}=await sb.from('inspections').insert(payload);
+  if(error)return showMsg($('formMsg'),error.message);
+  showMsg($('formMsg'),'巡檢已儲存到雲端','ok');await loadAll();
+};
+
+$('addPartBtn').onclick=async()=>{
+  const code=$('newPartCode').value.trim();if(!code)return;
+  const {error}=await sb.from('part_numbers').insert({code,keywords:$('newPartKeywords').value.trim()});
+  if(error)return alert(error.message);
+  $('newPartCode').value='';$('newPartKeywords').value='';await loadAll();
+};
+
+$('addEmployeeBtn').onclick=async()=>{
+  const name=$('newEmployeeName').value.trim();if(!name)return;
+  const {error}=await sb.from('employees').insert({name,role:$('newEmployeeRole').value});
+  if(error)return alert(error.message);
+  $('newEmployeeName').value='';await loadAll();
+};
+
+$('saveReliabilityBtn').onclick=async()=>{
+  const inspectionId=$('relInspection').value;
+  if(!inspectionId)return showMsg($('relMsg'),'請先選擇巡檢紀錄');
+  const row=inspections.find(x=>x.id===inspectionId);
+  const payload={inspection_id:inspectionId,part_number_code:row?.part_number_code||'',alcohol_result:$('relAlcohol').value,tape_3m600_result:$('relTape').value,tester_name:$('relTester').value.trim(),test_date:$('relDate').value||null,notes:$('relNotes').value.trim()};
+  const {error}=await sb.from('reliability_tests').insert(payload);
+  if(error)return showMsg($('relMsg'),error.message);
+  showMsg($('relMsg'),'信賴度測試已儲存','ok');await loadAll();
+};
+
+let subscribed=false;
+function subscribeRealtime(){
+  if(subscribed)return;subscribed=true;
+  sb.channel('ipqc-v20').on('postgres_changes',{event:'*',schema:'public',table:'inspections'},loadAll)
+    .on('postgres_changes',{event:'*',schema:'public',table:'part_numbers'},loadAll)
+    .on('postgres_changes',{event:'*',schema:'public',table:'employees'},loadAll)
+    .on('postgres_changes',{event:'*',schema:'public',table:'reliability_tests'},loadAll).subscribe();
+}
+(async()=>{const {data}=await sb.auth.getSession();if(data.session)await enterApp(data.session.user)})();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js');
 </script>
 </body>
 </html>

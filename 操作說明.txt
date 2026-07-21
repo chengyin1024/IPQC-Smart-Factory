@@ -1,0 +1,38 @@
+IPQC Smart Factory V2.0 可直接試用版
+
+本版已直接連接你的 Supabase，不需要修改任何檔案。
+
+上傳方式：
+1. 解壓縮 ZIP。
+2. GitHub Repository → Add file → Upload files。
+3. 把解壓縮後全部檔案拖入並覆蓋舊檔。
+4. 按 Commit changes。
+5. 等待約 1～3 分鐘。
+6. 開啟：
+   https://chengyin1024.github.io/IPQC-Smart-Factory/
+
+登入：
+使用你在 Supabase Authentication 建立的 Email 與密碼。
+
+測試同步：
+1. 電腦新增人員、料號與巡檢。
+2. 手機開同一網址登入。
+3. 查看是否出現相同資料。
+4. 手機新增巡檢，再回電腦查看。
+
+目前可用：
+- 登入
+- Dashboard
+- 人員管理
+- 料號管理
+- 新增巡檢
+- 巡檢紀錄
+- 99% 酒精
+- 3M600
+- 雲端共用資料
+
+目前尚未加入：
+- NG 照片
+- 編輯與刪除
+- Excel/PDF
+- 細部角色權限
