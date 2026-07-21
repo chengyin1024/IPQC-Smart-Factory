@@ -1,0 +1,19 @@
+IPQC Smart Factory｜GitHub Pages 簡易上傳版
+
+請把本資料夾內所有檔案上傳到 GitHub Repository。
+
+上傳完成後：
+1. 進入 Repository。
+2. 點 Settings。
+3. 左側點 Pages。
+4. Source 選 Deploy from a branch。
+5. Branch 選 main。
+6. Folder 選 /(root)。
+7. 點 Save。
+8. 等候約 1～3 分鐘。
+
+固定網址：
+https://chengyin1024.github.io/IPQC-Smart-Factory/
+
+如果你的 Repository 名稱不是 IPQC-Smart-Factory，
+網址最後一段會改成你實際的 Repository 名稱。
