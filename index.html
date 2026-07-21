@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#173f31">
 <link rel="manifest" href="./manifest.json">
-<title>IPQC Smart Factory V2.1</title>
+<title>IPQC Smart Factory V2.2</title>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI","Noto Sans TC",sans-serif;background:#f3f6f5;color:#183028}
 button,input,select,textarea{font:inherit}.hidden{display:none!important}.wrap{max-width:1050px;margin:auto;padding:15px}
@@ -28,16 +28,16 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:9px;bord
 <section id="loginPage" class="login">
   <div class="card">
     <h1>IPQC Smart Factory</h1>
-    <p class="muted">V2.1 記住登入版</p>
+    <p class="muted">V2.2 三角色帳號版</p><p class="small muted">老闆 chengyin｜主管 3F｜員工 3F1</p>
     <div id="loginMsg"></div>
-    <div class="field"><label>Email</label><input id="email" type="email" autocomplete="username"></div>
+    <div class="field"><label>帳號</label><input id="account" autocomplete="username" placeholder="請輸入公司帳號"></div>
     <div class="field"><label>密碼</label><input id="password" type="password" autocomplete="current-password"></div>
     <button id="loginBtn" class="btn primary" style="width:100%">登入</button>
   </div>
 </section>
 
 <section id="appPage" class="hidden">
-<header><div class="head"><div><div class="brand">IPQC Smart Factory <span class="badge">V2.1 記住登入版</span></div><div id="userEmail" class="small"></div></div><button id="logoutBtn" class="btn secondary">登出</button></div></header>
+<header><div class="head"><div><div class="brand">IPQC Smart Factory <span class="badge">V2.2 三角色帳號版</span></div><div id="userEmail" class="small"></div></div><button id="logoutBtn" class="btn secondary">登出</button></div></header>
 <main class="wrap">
   <div class="nav">
     <button class="btn primary" data-page="dashboard">Dashboard</button>
@@ -133,14 +133,45 @@ function n(v){return Number(v)||0}
 function showMsg(el,text,type='error'){el.innerHTML=`<div class="msg ${type}">${esc(text)}</div>`}
 function setDefaults(){const d=new Date();const iso=d.toISOString().slice(0,10);$('inspectionDate').value=iso;$('relDate').value=iso;$('inspectionTime').value=d.toTimeString().slice(0,5)}
 
+const ACCOUNT_MAP={
+  'chengyin':{email:'chengyin@ipqc.local',role:'owner',label:'老闆'},
+  '3f':{email:'3f@ipqc.local',role:'manager',label:'主管'},
+  '3f1':{email:'3f1@ipqc.local',role:'employee',label:'員工'}
+};
+function currentAccount(){
+  try{return JSON.parse(localStorage.getItem('ipqc_account')||'null')}catch{return null}
+}
+function applyRole(role){
+  const rules={
+    owner:['dashboard','newInspection','records','reliability','parts','employees'],
+    manager:['dashboard','newInspection','records','reliability','parts','employees'],
+    employee:['newInspection','records']
+  };
+  document.querySelectorAll('.nav button').forEach(btn=>{
+    btn.classList.toggle('hidden',!rules[role].includes(btn.dataset.page));
+  });
+  if(role==='employee'){
+    document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
+    $('newInspection').classList.remove('hidden');
+    document.querySelectorAll('.nav button').forEach(b=>b.className='btn secondary');
+    const first=document.querySelector('[data-page="newInspection"]');
+    if(first)first.className='btn primary';
+  }
+}
 $('loginBtn').onclick=async()=>{
+  const account=$('account').value.trim().toLowerCase();
+  const cfg=ACCOUNT_MAP[account];
+  if(!cfg)return showMsg($('loginMsg'),'帳號不存在');
+  if($('password').value!=='0000')return showMsg($('loginMsg'),'密碼錯誤');
   $('loginBtn').disabled=true;
-  const {data,error}=await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});
+  // Supabase 密碼至少使用較長字串；畫面上仍只需輸入 0000。
+  const {data,error}=await sb.auth.signInWithPassword({email:cfg.email,password:'ipqc-0000'});
   $('loginBtn').disabled=false;
-  if(error)return showMsg($('loginMsg'),error.message);
+  if(error)return showMsg($('loginMsg'),'帳號尚未在 Supabase 建立，或密碼設定不正確');
+  localStorage.setItem('ipqc_account',JSON.stringify({account,role:cfg.role,label:cfg.label}));
   await enterApp(data.user);
 };
-$('logoutBtn').onclick=async()=>{await sb.auth.signOut();location.reload()};
+$('logoutBtn').onclick=async()=>{localStorage.removeItem('ipqc_account');await sb.auth.signOut();location.reload()};
 
 document.querySelectorAll('.nav button').forEach(btn=>btn.onclick=()=>{
   document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
@@ -150,7 +181,17 @@ document.querySelectorAll('.nav button').forEach(btn=>btn.onclick=()=>{
 });
 
 async function enterApp(user){
-  $('loginPage').classList.add('hidden');$('appPage').classList.remove('hidden');$('userEmail').textContent=user.email||'';
+  $('loginPage').classList.add('hidden');$('appPage').classList.remove('hidden');
+  let acct=currentAccount();
+  if(!acct){
+    const found=Object.entries(ACCOUNT_MAP).find(([,v])=>v.email===user.email);
+    if(found){
+      acct={account:found[0],role:found[1].role,label:found[1].label};
+      localStorage.setItem('ipqc_account',JSON.stringify(acct));
+    }
+  }
+  $('userEmail').textContent=acct?`${acct.account}（${acct.label}）`:(user.email||'');
+  applyRole(acct?.role||'employee');
   setDefaults();await loadAll();subscribeRealtime();
 }
 
