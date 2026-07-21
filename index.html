@@ -1,417 +1,69 @@
-<!doctype html>
-<html lang="zh-Hant">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#173f31">
-<title>IPQC Smart Factory V3.3</title>
-<style>
-:root{--p:#173f31;--p2:#255d49;--bg:#f2f6f4;--line:#d8e2de;--ok:#16733b;--ng:#b42318;--warn:#9a6700}
-*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI","Noto Sans TC",sans-serif;background:var(--bg);color:#17332a}
-button,input,select,textarea{font:inherit}.hidden{display:none!important}
-.login{min-height:100vh;display:grid;place-items:center;padding:20px}.login-card{width:min(430px,100%);background:#fff;border-radius:20px;padding:24px;box-shadow:0 12px 40px #0002}
-h1,h2,h3{margin-top:0}.muted{color:#6d7f78}.small{font-size:12px}
-.field{margin-bottom:12px}.field label{display:block;font-weight:800;margin-bottom:6px}
-input,select,textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff}textarea{min-height:90px}
-.btn{border:0;border-radius:12px;padding:11px 14px;font-weight:850;cursor:pointer}.btn:disabled{opacity:.55}
-.primary{background:var(--p);color:#fff}.secondary{background:#e7efec;color:var(--p)}.danger{background:#fee7e7;color:#8b1e1e}.ghost{background:#fff;border:1px solid var(--line)}
-header{position:sticky;top:0;z-index:30;background:var(--p);color:#fff;padding:12px}
-.head{max-width:1150px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:10px}
-.brand{font-weight:900}.badge{font-size:11px;background:#fff;color:var(--p);padding:3px 7px;border-radius:999px}
-.wrap{max-width:1150px;margin:auto;padding:14px}
-.nav{display:flex;gap:8px;overflow:auto;margin-bottom:14px}.nav .btn{white-space:nowrap}
-.card{background:#fff;border-radius:17px;padding:16px;margin-bottom:14px;box-shadow:0 3px 14px #0000000f}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.row{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.stat b{display:block;font-size:28px;margin-top:4px}.oktxt{color:var(--ok)}.ngtxt{color:var(--ng)}
-.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:650px}th,td{text-align:left;padding:10px;border-bottom:1px solid #e8eeeb;font-size:14px}
-.msg{padding:11px;border-radius:11px;margin-bottom:12px}.msg.ok{background:#e4f6e9;color:#155d30}.msg.err{background:#fee7e7;color:#8b1e1e}
-.process{border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}.process h3{margin-bottom:10px}
-.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.photo-box{border:1px dashed #aebdb7;border-radius:14px;padding:10px}
-.photo-box img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;margin-top:8px;background:#eef2f0}
-.actions{display:flex;gap:8px;flex-wrap:wrap}.role-owner,.role-supervisor{display:none}
-body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,body[data-role="supervisor"] .role-supervisor{display:initial}
-.lang-switch{position:absolute;top:14px;right:14px}.head-actions{display:flex;gap:8px;align-items:center}.pill{display:inline-block;padding:3px 8px;border-radius:999px;font-size:12px;font-weight:800}.pill.ok{background:#e5f6ea;color:#176335}.pill.ng{background:#fee8e8;color:#9c231b}.pill.pending{background:#fff3d6;color:#855b00}
+-- IPQC Smart Factory V4.0 資料庫更新
+-- 用途：新增「生產單」主架構，並把巡檢／信賴度連到生產單
+-- 執行方式：Supabase → SQL Editor → New query → 貼上全部 → Run
 
-.group-list{display:flex;flex-direction:column;gap:10px}
-.group-card{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff}
-.group-summary{width:100%;display:grid;grid-template-columns:1.5fr .8fr .8fr .8fr auto;gap:10px;align-items:center;padding:13px 14px;border:0;background:#f8fbfa;text-align:left;cursor:pointer}
-.group-summary:hover{background:#eef5f2}
-.group-part{font-weight:900;font-size:16px}
-.group-meta{font-size:12px;color:#6d7f78}
-.group-arrow{font-size:18px;transition:transform .2s}
-.group-card.open .group-arrow{transform:rotate(90deg)}
-.group-detail{display:none;padding:0 12px 12px}
-.group-card.open .group-detail{display:block}
-.group-label{display:none;color:#6d7f78;font-size:11px}
-@media(max-width:760px){
- .group-summary{grid-template-columns:1fr auto;padding:12px}
- .group-summary .group-stat{display:grid;grid-template-columns:60px 1fr;gap:6px}
- .group-label{display:inline}
- .group-summary .group-count,.group-summary .group-ok,.group-summary .group-ng{grid-column:1/-1}
-}
+create extension if not exists pgcrypto;
 
-@media(max-width:760px){.grid{grid-template-columns:repeat(2,1fr)}.row,.row3,.photo-grid{grid-template-columns:1fr}.hide-mobile{display:none}.wrap{padding:10px}.card{padding:14px}}
-</style>
-</head>
-<body>
-<section id="loginPage" class="login">
-  <div class="login-card" style="position:relative">
-    <button id="langBtnLogin" class="btn ghost lang-switch" type="button">VI</button>
-    <h1>IPQC Smart Factory</h1>
-    <p class="muted">V3.3 試用版</p>
-    <div id="loginMsg"></div>
-    <div class="field"><label>公司帳號</label><input id="account" autocomplete="username" placeholder="請輸入帳號"></div>
-    <div class="field"><label>密碼</label><input id="password" type="password" autocomplete="current-password"></div>
-    <label style="display:flex;gap:8px;align-items:center;margin:8px 0 14px"><input id="remember" type="checkbox" style="width:auto">記住登入</label>
-    <button id="loginBtn" class="btn primary" style="width:100%">登入</button>
-    <p class="small muted" style="margin-top:14px">老闆：chengyin｜主管：3F｜員工：3F1</p>
-  </div>
-</section>
+create table if not exists public.production_orders (
+  id uuid primary key default gen_random_uuid(),
+  production_no text not null unique,
+  part_number_code text not null,
+  machine text,
+  operator_name text,
+  planned_qty integer,
+  status text not null default 'active'
+    check (status in ('active','paused','completed')),
+  started_at timestamptz not null default now(),
+  paused_at timestamptz,
+  resumed_at timestamptz,
+  completed_at timestamptz,
+  notes text,
+  created_by text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
 
-<section id="appPage" class="hidden">
-<header><div class="head"><div><div class="brand">IPQC Smart Factory <span class="badge">V3</span></div><div id="userInfo" class="small"></div></div><div class="head-actions"><button id="langBtnHeader" class="btn secondary" type="button">VI</button><button id="logoutBtn" class="btn secondary">登出</button></div></div></header>
-<main class="wrap">
-  <div class="nav">
-    <button class="btn primary" data-page="dashboard">Dashboard</button>
-    <button class="btn secondary" data-page="newInspection">IPQC／信賴度</button>
-    <button class="btn secondary" data-page="records">巡檢紀錄</button>
-    <button class="btn secondary role-supervisor" data-page="parts">料號管理</button>
-    <button class="btn secondary role-supervisor" data-page="employees">人員管理</button>
-  </div>
+alter table public.inspections
+  add column if not exists production_id uuid references public.production_orders(id) on delete set null;
 
-  <section id="dashboard" class="page">
-    <div class="grid">
-      <div class="card stat"><span class="muted">今日巡檢</span><b id="statTotal">0</b></div>
-      <div class="card stat"><span class="muted">今日 OK</span><b id="statOk" class="oktxt">0</b></div>
-      <div class="card stat"><span class="muted">今日 NG</span><b id="statNg" class="ngtxt">0</b></div>
-      <div class="card stat"><span class="muted">今日良率</span><b id="statYield">0%</b></div>
-    </div>
-    <div class="card"><h2>最近巡檢（依料號收合）</h2><div id="recentTable" class="table-wrap"></div></div>
-  </section>
+alter table public.reliability_tests
+  add column if not exists production_id uuid references public.production_orders(id) on delete set null;
 
-  <section id="newInspection" class="page hidden">
-    <div class="card">
-      <h2>新增 IPQC 巡檢</h2><div id="formMsg"></div>
-      <div class="row">
-        <div class="field"><label>日期</label><input id="inspectionDate" type="date"></div>
-        <div class="field"><label>時間</label><input id="inspectionTime" type="time"></div>
-        <div class="field"><label>料號 *</label><input id="partNumber" list="partList" placeholder="輸入或搜尋料號"><datalist id="partList"></datalist></div>
-        <div class="field"><label>機台</label><input id="machine" placeholder="例如：印刷 1 號機"></div>
-        <div class="field"><label>作業人員</label><input id="operatorName" list="employeeList" placeholder="輸入姓名，之後會自動儲存"></div>
-        <div class="field"><label>巡檢人員</label><input id="inspectorName" list="employeeList" placeholder="輸入姓名，之後會自動儲存"></div>
-        <div class="field"><label>品檢人員</label><input id="qualityInspectorName" list="employeeList" placeholder="輸入姓名，之後會自動儲存"></div>
-      </div><datalist id="employeeList"></datalist>
+create index if not exists idx_production_orders_status
+  on public.production_orders(status);
 
-      <div class="process"><h3>印刷 A</h3><div class="row"><div class="field"><label>OK 數量</label><input id="aOk" type="number" min="0" value="0"></div><div class="field"><label>NG 數量</label><input id="aNg" type="number" min="0" value="0"></div></div></div>
-      <div class="process"><h3>印刷 B</h3><div class="row"><div class="field"><label>OK 數量</label><input id="bOk" type="number" min="0" value="0"></div><div class="field"><label>NG 數量</label><input id="bNg" type="number" min="0" value="0"></div></div></div>
-      <div class="process"><h3>包裝</h3><div class="row"><div class="field"><label>OK 數量</label><input id="pOk" type="number" min="0" value="0"></div><div class="field"><label>NG 數量</label><input id="pNg" type="number" min="0" value="0"></div></div></div>
+create index if not exists idx_production_orders_part
+  on public.production_orders(part_number_code);
 
-      <div class="row">
-        <div class="field"><label>NG 原因</label><select id="ngReason"><option value="">無</option><option>漏印</option><option>偏位</option><option>重影</option><option>刮傷</option><option>溢墨</option><option>色差</option><option>異物</option><option>包裝異常</option><option>其他</option></select></div>
-        <div class="field"><label>備註／處理方式</label><textarea id="notes"></textarea></div>
-      </div>
+create index if not exists idx_inspections_production_id
+  on public.inspections(production_id);
 
-      <h3>拍照留存</h3>
-      <div class="photo-grid">
-        <div class="photo-box"><b>首件照片</b><input id="firstPhoto" type="file" accept="image/*" capture="environment"><img id="firstPreview" class="hidden"></div>
-        <div class="photo-box"><b>NG 照片</b><input id="ngPhoto" type="file" accept="image/*" capture="environment"><img id="ngPreview" class="hidden"><div class="small muted">有 NG 時必須拍照</div></div>
-        <div class="photo-box"><b>其他照片</b><input id="otherPhoto" type="file" accept="image/*" capture="environment"><img id="otherPreview" class="hidden"></div>
-      </div>
-      <div style="margin-top:14px"><button id="saveInspectionBtn" class="btn primary">儲存巡檢</button></div>
-    </div>
+create index if not exists idx_reliability_production_id
+  on public.reliability_tests(production_id);
 
-    <div class="card"><h2>信賴度測試</h2><p class="muted">可在同一頁完成 IPQC 巡檢與信賴度測試。</p></div>
-<div class="card">
-      <h2>信賴度測試</h2><div id="relMsg"></div>
-<div class="card"><h2>信賴度紀錄</h2><div id="reliabilityTable" class="table-wrap"></div>
-  </section>
+alter table public.production_orders enable row level security;
 
-  <section id="records" class="page hidden">
-    <div class="card"><h2>巡檢紀錄</h2><div class="row"><div class="field"><label>搜尋料號／人員</label><input id="recordSearch" placeholder="輸入關鍵字"></div><div class="field"><label>日期</label><input id="recordDate" type="date"></div></div><div id="recordsTable" class="table-wrap"></div></div>
-  </section>
+drop policy if exists "production_orders_select_all" on public.production_orders;
+drop policy if exists "production_orders_insert_all" on public.production_orders;
+drop policy if exists "production_orders_update_all" on public.production_orders;
+drop policy if exists "production_orders_delete_all" on public.production_orders;
 
+create policy "production_orders_select_all"
+on public.production_orders for select
+using (true);
 
-  <section id="parts" class="page hidden">
-    <div class="card"><h2>料號管理</h2><div class="row"><div class="field"><label>料號 *</label><input id="newPartCode"></div><div class="field"><label>品名／關鍵字</label><input id="newPartKeywords"></div></div><button id="addPartBtn" class="btn primary">新增料號</button></div>
-    <div class="card"><div id="partsTable" class="table-wrap"></div></div>
-  </section>
+create policy "production_orders_insert_all"
+on public.production_orders for insert
+with check (true);
 
-  <section id="employees" class="page hidden">
-    <div class="card"><h2>人員管理</h2><div class="row"><div class="field"><label>姓名 *</label><input id="newEmployeeName"></div><div class="field"><label>職務</label><select id="newEmployeeRole"><option>作業員</option><option>巡檢員</option><option>品檢員</option><option>主管</option></select></div></div><button id="addEmployeeBtn" class="btn primary">新增人員</button></div>
-    <div class="card"><div id="employeesTable" class="table-wrap"></div></div>
-  </section>
-</main>
-</section>
+create policy "production_orders_update_all"
+on public.production_orders for update
+using (true)
+with check (true);
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-const SUPABASE_URL="https://huhenjkybvzkqczkvmkh.supabase.co";
-const SUPABASE_KEY="sb_publishable_cFXdFQJi9cAiBDNXMcHEYw_yYKMKP5D";
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-const ACCOUNTS={chengyin:{password:"0000",role:"owner",name:"老闆"}, "3F":{password:"0000",role:"supervisor",name:"主管"}, "3F1":{password:"0000",role:"worker",name:"員工"}};
-const $=id=>document.getElementById(id);
-let currentUser=null,inspections=[],parts=[],employees=[],reliability=[],photos=[];
+create policy "production_orders_delete_all"
+on public.production_orders for delete
+using (true);
 
-let currentLang=localStorage.getItem("ipqc_v3_lang")||"zh";
-const originalText=new WeakMap();
-const VI={
-"V3 試用版":"Bản dùng thử V3","公司帳號":"Tài khoản công ty","請輸入帳號":"Vui lòng nhập tài khoản",
-"密碼":"Mật khẩu","記住登入":"Ghi nhớ đăng nhập","登入":"Đăng nhập",
-"老闆：chengyin｜主管：3F｜員工：3F1":"Chủ: chengyin｜Quản lý: 3F｜Nhân viên: 3F1",
-"登出":"Đăng xuất","新增巡檢":"Thêm kiểm tra","IPQC／信賴度":"IPQC / Độ tin cậy","巡檢紀錄":"Lịch sử kiểm tra","信賴度":"Độ tin cậy",
-"料號管理":"Quản lý mã hàng","人員管理":"Quản lý nhân viên","今日巡檢":"Kiểm tra hôm nay",
-"今日 OK":"OK hôm nay","今日 NG":"NG hôm nay","今日良率":"Tỷ lệ đạt hôm nay","最近巡檢":"Kiểm tra gần đây","最近巡檢（依料號收合）":"Kiểm tra gần đây (gộp theo mã hàng)",
-"新增 IPQC 巡檢":"Thêm kiểm tra IPQC","日期":"Ngày","時間":"Thời gian","料號 *":"Mã hàng *",
-"輸入或搜尋料號":"Nhập hoặc tìm mã hàng","機台":"Máy","例如：印刷 1 號機":"Ví dụ: Máy in số 1",
-"作業人員":"Nhân viên thao tác","巡檢人員":"Nhân viên kiểm tra","品檢人員":"Nhân viên QC",
-"輸入姓名，之後會自動儲存":"Nhập tên, hệ thống sẽ tự động lưu","印刷 A":"In A","印刷 B":"In B","包裝":"Đóng gói",
-"OK 數量":"Số lượng OK","NG 數量":"Số lượng NG","NG 原因":"Nguyên nhân NG","無":"Không",
-"漏印":"Thiếu nét","偏位":"Lệch vị trí","重影":"Bóng đôi","刮傷":"Trầy xước","溢墨":"Tràn mực",
-"色差":"Sai màu","異物":"Dị vật","包裝異常":"Lỗi đóng gói","其他":"Khác","備註／處理方式":"Ghi chú / cách xử lý",
-"拍照留存":"Lưu ảnh","首件照片":"Ảnh sản phẩm đầu tiên","NG 照片":"Ảnh NG","有 NG 時必須拍照":"Có NG phải chụp ảnh",
-"其他照片":"Ảnh khác","儲存巡檢":"Lưu kiểm tra","搜尋料號／人員":"Tìm mã hàng / nhân viên",
-"輸入關鍵字":"Nhập từ khóa","信賴度測試":"Kiểm tra độ tin cậy","可在同一頁完成 IPQC 巡檢與信賴度測試。":"Có thể hoàn thành kiểm tra IPQC và độ tin cậy trên cùng một trang.","對應巡檢 *":"Kiểm tra tương ứng *",
-"測試日期":"Ngày kiểm tra","99% 酒精":"Cồn 99%","待測":"Chờ kiểm tra","略過":"Bỏ qua","測試人員":"Người kiểm tra",
-"備註":"Ghi chú","信賴度照片":"Ảnh kiểm tra độ tin cậy","儲存信賴度測試":"Lưu kiểm tra độ tin cậy",
-"信賴度紀錄":"Lịch sử độ tin cậy","料號":"Mã hàng","品名／關鍵字":"Tên hàng / từ khóa","新增料號":"Thêm mã hàng",
-"人員管理":"Quản lý nhân viên","姓名 *":"Tên *","職務":"Chức vụ","作業員":"Công nhân","巡檢員":"Nhân viên kiểm tra",
-"品檢員":"Nhân viên QC","主管":"Quản lý","新增人員":"Thêm nhân viên","日期時間":"Ngày giờ","人員":"Nhân viên",
-"照片":"Ảnh","查看":"Xem","請選擇":"Vui lòng chọn","酒精":"Cồn","姓名":"Tên","筆數":"Số lần","合計 OK":"Tổng OK","合計 NG":"Tổng NG","最新巡檢":"Kiểm tra mới nhất","點擊展開巡檢紀錄":"Bấm để mở lịch sử kiểm tra","沒有符合的巡檢紀錄":"Không có lịch sử kiểm tra phù hợp",
-"帳號或密碼錯誤":"Sai tài khoản hoặc mật khẩu","資料讀取失敗：":"Đọc dữ liệu thất bại: ",
-"請填寫料號":"Vui lòng nhập mã hàng","有 NG 時必須拍攝 NG 照片":"Có NG phải chụp ảnh NG",
-"巡檢與照片已儲存":"Đã lưu kiểm tra và ảnh","儲存失敗":"Lưu thất bại",
-"請選擇巡檢紀錄":"Vui lòng chọn lịch sử kiểm tra","信賴度測試已儲存":"Đã lưu kiểm tra độ tin cậy",
-"請輸入料號":"Vui lòng nhập mã hàng","請輸入姓名":"Vui lòng nhập tên"
-};
-function t(text){return currentLang==="vi"?(VI[text]||text):text}
-function applyLanguage(){
- document.documentElement.lang=currentLang==="vi"?"vi":"zh-Hant";
- document.querySelectorAll("body *").forEach(el=>{
-   for(const node of el.childNodes){
-     if(node.nodeType===Node.TEXT_NODE&&node.nodeValue.trim()){
-       if(!originalText.has(node)) originalText.set(node,node.nodeValue);
-       const raw=originalText.get(node),trim=raw.trim();
-       node.nodeValue=raw.replace(trim,t(trim));
-     }
-   }
-   if(["INPUT","TEXTAREA"].includes(el.tagName)&&el.hasAttribute("placeholder")){
-     if(!el.dataset.originalPlaceholder)el.dataset.originalPlaceholder=el.getAttribute("placeholder");
-     el.setAttribute("placeholder",t(el.dataset.originalPlaceholder));
-   }
- });
- ["langBtnLogin","langBtnHeader"].forEach(id=>{if($(id))$(id).textContent=currentLang==="zh"?"VI":"中文"});
- if(currentUser&&$("userInfo")) $("userInfo").textContent=`${t(currentUser.name)}｜${currentUser.account}`;
-}
-function toggleLanguage(){
- currentLang=currentLang==="zh"?"vi":"zh";
- localStorage.setItem("ipqc_v3_lang",currentLang);
- applyLanguage();
- renderAll();
-}
-
-function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function num(v){return Number(v)||0}
-function msg(el,text,ok=false){el.innerHTML=`<div class="msg ${ok?'ok':'err'}">${esc(text)}</div>`}
-function today(){return new Date().toISOString().slice(0,10)}
-function setDefaults(){const d=new Date();$("inspectionDate").value=today();$("relDate").value=today();$("inspectionTime").value=d.toTimeString().slice(0,5)}
-function canManage(){return currentUser?.role==="owner"||currentUser?.role==="supervisor"}
-
-$("loginBtn").onclick=()=>{
- const a=$("account").value.trim(),p=$("password").value,found=ACCOUNTS[a];
- if(!found||found.password!==p)return msg($("loginMsg"),t("帳號或密碼錯誤"));
- currentUser={account:a,role:found.role,name:found.name};
- if($("remember").checked)localStorage.setItem("ipqc_v3_login",JSON.stringify(currentUser));
- enterApp();
-};
-$("logoutBtn").onclick=()=>{localStorage.removeItem("ipqc_v3_login");location.reload()};
-
-async function enterApp(){
- document.body.dataset.role=currentUser.role;
- $("loginPage").classList.add("hidden");$("appPage").classList.remove("hidden");
- $("userInfo").textContent=`${currentUser.name}｜${currentUser.account}`;
- setDefaults();await loadAll();applyLanguage();
-}
-document.querySelectorAll(".nav button").forEach(btn=>btn.onclick=()=>{
- if(btn.classList.contains("role-supervisor")&&!canManage())return;
- document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));$(btn.dataset.page).classList.remove("hidden");
- document.querySelectorAll(".nav button").forEach(x=>{x.classList.remove("primary");x.classList.add("secondary")});
- btn.classList.add("primary");btn.classList.remove("secondary");
-});
-
-async function loadAll(){
- const [a,b,c,d,e]=await Promise.all([
-  sb.from("inspections").select("*").order("created_at",{ascending:false}).limit(500),
-  sb.from("part_numbers").select("*").eq("active",true).order("code"),
-  sb.from("employees").select("*").eq("active",true).order("name"),
-  sb.from("reliability_tests").select("*").order("created_at",{ascending:false}).limit(500),
-  sb.from("inspection_photos").select("*").order("created_at",{ascending:false}).limit(1000)
- ]);
- const errors=[a.error,b.error,c.error,d.error].filter(Boolean);
- if(errors.length)return alert(t("資料讀取失敗：")+errors[0].message);
- inspections=a.data||[];parts=b.data||[];employees=c.data||[];reliability=d.data||[];
- photos=e.error?[]:(e.data||[]);
- renderAll();
-}
-
-function totals(r){return {ok:num(r.printing_a_ok)+num(r.printing_b_ok)+num(r.packing_ok),ng:num(r.printing_a_ng)+num(r.printing_b_ng)+num(r.packing_ng)}}
-function photoLinks(parentType,parentId){
- const ps=photos.filter(p=>p.parent_type===parentType&&String(p.parent_id)===String(parentId));
- return ps.length?ps.map(p=>`<a href="${esc(p.public_url)}" target="_blank">${t("查看")}${esc(t(p.photo_type))}</a>`).join("｜"):"-";
-}
-function resultPill(v){const c=v==="OK"?"ok":v==="NG"?"ng":"pending";return `<span class="pill ${c}">${esc(v==="pending"?t("待測"):(v||t("待測")))}</span>`}
-function inspectionTable(rows){
- return `<table><tr><th>${t("日期時間")}</th><th>${t("料號")}</th><th>OK</th><th>NG</th><th class="hide-mobile">${t("人員")}</th><th>${t("照片")}</th></tr>${rows.map(r=>{const tt=totals(r);return `<tr><td>${esc(r.inspection_date)} ${esc((r.inspection_time||"").slice(0,5))}</td><td>${esc(r.part_number_code)}</td><td>${tt.ok}</td><td class="${tt.ng?'ngtxt':''}">${tt.ng}</td><td class="hide-mobile">${esc(r.operator_name||"-")}／${esc(r.quality_inspector_name||"-")}</td><td>${photoLinks("inspection",r.id)}</td></tr>`}).join("")}</table>`;
-}
-
-function groupedInspectionCards(rows,scope="records"){
- if(!rows.length)return `<div class="muted" style="padding:18px 4px">${t("沒有符合的巡檢紀錄")}</div>`;
- const groups={};
- rows.forEach(r=>{
-   const key=r.part_number_code||"(未填料號)";
-   if(!groups[key])groups[key]=[];
-   groups[key].push(r);
- });
- const sorted=Object.entries(groups).sort((a,b)=>{
-   const at=a[1][0]?.created_at||`${a[1][0]?.inspection_date||""} ${a[1][0]?.inspection_time||""}`;
-   const bt=b[1][0]?.created_at||`${b[1][0]?.inspection_date||""} ${b[1][0]?.inspection_time||""}`;
-   return String(bt).localeCompare(String(at));
- });
- const html=`<div class="group-list">${sorted.map(([part,items],idx)=>{
-   let ok=0,ng=0;
-   items.forEach(r=>{const tt=totals(r);ok+=tt.ok;ng+=tt.ng});
-   const latest=items[0];
-   return `<div class="group-card" data-group-scope="${scope}" data-group-index="${idx}">
-     <button class="group-summary" type="button" aria-expanded="false">
-       <div>
-         <div class="group-part">${esc(part)}</div>
-         <div class="group-meta">${t("最新巡檢")}：${esc(latest.inspection_date)} ${esc((latest.inspection_time||"").slice(0,5))}｜${t("點擊展開巡檢紀錄")}</div>
-       </div>
-       <div class="group-stat group-count"><span class="group-label">${t("筆數")}</span><b>${items.length}</b> ${t("筆數")}</div>
-       <div class="group-stat group-ok"><span class="group-label">${t("合計 OK")}</span><b class="oktxt">${ok}</b></div>
-       <div class="group-stat group-ng"><span class="group-label">${t("合計 NG")}</span><b class="${ng?'ngtxt':''}">${ng}</b></div>
-       <div class="group-arrow">▶</div>
-     </button>
-     <div class="group-detail">${inspectionTable(items)}</div>
-   </div>`;
- }).join("")}</div>`;
- setTimeout(()=>{
-   document.querySelectorAll(`[data-group-scope="${scope}"] .group-summary`).forEach(btn=>{
-     if(btn.dataset.bound==="1")return;
-     btn.dataset.bound="1";
-     btn.addEventListener("click",()=>{
-       const card=btn.closest(".group-card");
-       const isOpen=card.classList.toggle("open");
-       btn.setAttribute("aria-expanded",String(isOpen));
-     });
-   });
- },0);
- return html;
-}
-function renderPartOptions(query=""){
- const q=String(query||"").trim().toLowerCase();
- const rows=parts.filter(x=>!q||String(x.code||"").toLowerCase().includes(q)||String(x.keywords||"").toLowerCase().includes(q));
- $("partList").innerHTML=rows.map(x=>`<option value="${esc(x.code)}">${esc(x.keywords||"")}</option>`).join("");
-}
-function renderEmployeeOptions(query=""){
- const q=String(query||"").trim().toLowerCase();
- const rows=employees.filter(x=>!q||String(x.name||"").toLowerCase().includes(q));
- $("employeeList").innerHTML=rows.map(x=>`<option value="${esc(x.name)}">${esc(x.role||"")}</option>`).join("");
-}
-function renderAll(){
- renderPartOptions($("partNumber")?.value||"");
- renderEmployeeOptions("");
- const rows=inspections.filter(x=>x.inspection_date===today());let ok=0,ng=0;rows.forEach(x=>{const t=totals(x);ok+=t.ok;ng+=t.ng});
- $("statTotal").textContent=rows.length;$("statOk").textContent=ok;$("statNg").textContent=ng;$("statYield").textContent=(ok+ng?ok/(ok+ng)*100:0).toFixed(1)+"%";
- $("recentTable").innerHTML=groupedInspectionCards(inspections.slice(0,30),"recent");renderRecords();
- $("partsTable").innerHTML=`<table><tr><th>${t("料號")}</th><th>${t("品名／關鍵字")}</th></tr>${parts.map(x=>`<tr><td>${esc(x.code)}</td><td>${esc(x.keywords||"")}</td></tr>`).join("")}</table>`;
- $("employeesTable").innerHTML=`<table><tr><th>${t("姓名")}</th><th>${t("職務")}</th></tr>${employees.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(t(x.role||""))}</td></tr>`).join("")}</table>`;
- $("relInspection").innerHTML=`<option value="">${t("請選擇")}</option>`+inspections.map(x=>`<option value="${esc(x.id)}">${esc(x.inspection_date)} ${esc((x.inspection_time||"").slice(0,5))}｜${esc(x.part_number_code)}</option>`).join("");
- $("reliabilityTable").innerHTML=`<table><tr><th>${t("日期")}</th><th>${t("料號")}</th><th>${t("酒精")}</th><th>3M600</th><th>${t("測試人員")}</th><th>${t("照片")}</th></tr>${reliability.map(x=>`<tr><td>${esc(x.test_date||"")}</td><td>${esc(x.part_number_code||"")}</td><td>${resultPill(x.alcohol_result)}</td><td>${resultPill(x.tape_3m600_result)}</td><td>${esc(x.tester_name||"")}</td><td>${photoLinks("reliability",x.id)}</td></tr>`).join("")}</table>`;
- applyLanguage();
-}
-function renderRecords(){
- const q=$("recordSearch").value.trim().toLowerCase(),d=$("recordDate").value;
- const rows=inspections.filter(x=>(!d||x.inspection_date===d)&&(!q||[x.part_number_code,x.operator_name,x.inspector_name,x.quality_inspector_name,x.machine].some(v=>String(v||"").toLowerCase().includes(q))));
- $("recordsTable").innerHTML=groupedInspectionCards(rows,"records");
-}
-$("recordSearch").oninput=renderRecords;$("recordDate").onchange=renderRecords;
-$("partNumber").addEventListener("input",e=>renderPartOptions(e.target.value));
-["operatorName","inspectorName","qualityInspectorName","relTester"].forEach(id=>{
- $(id).addEventListener("input",e=>renderEmployeeOptions(e.target.value));
- $(id).addEventListener("focus",e=>renderEmployeeOptions(e.target.value));
-});
-
-function setupPreview(inputId,imgId){$(inputId).onchange=()=>{const f=$(inputId).files[0];if(!f)return;$(imgId).src=URL.createObjectURL(f);$(imgId).classList.remove("hidden")}}
-setupPreview("firstPhoto","firstPreview");setupPreview("ngPhoto","ngPreview");setupPreview("otherPhoto","otherPreview");setupPreview("relPhoto","relPreview");
-
-async function uploadPhoto(file,parentType,parentId,photoType){
- if(!file)return;
- const ext=(file.name.split(".").pop()||"jpg").toLowerCase();
- const path=`${parentType}/${parentId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
- const {error}=await sb.storage.from("ipqc-photos").upload(path,file,{cacheControl:"3600",upsert:false});
- if(error)throw error;
- const {data}=sb.storage.from("ipqc-photos").getPublicUrl(path);
- const {error:dbErr}=await sb.from("inspection_photos").insert({parent_type:parentType,parent_id:String(parentId),photo_type:photoType,storage_path:path,public_url:data.publicUrl});
- if(dbErr)throw dbErr;
-}
-
-async function ensurePartNumber(code){
- const clean=String(code||"").trim();if(!clean)return;
- if(parts.some(x=>String(x.code||"").toLowerCase()===clean.toLowerCase()))return;
- const {error}=await sb.from("part_numbers").insert({code:clean,keywords:""});
- if(error&&error.code!=="23505")throw error;
-}
-async function ensureEmployee(name,role){
- const clean=String(name||"").trim();if(!clean)return;
- if(employees.some(x=>String(x.name||"").toLowerCase()===clean.toLowerCase()))return;
- const {error}=await sb.from("employees").insert({name:clean,role:role||"作業員"});
- if(error&&error.code!=="23505")throw error;
-}
-$("saveInspectionBtn").onclick=async()=>{
- const btn=$("saveInspectionBtn"),part=$("partNumber").value.trim();if(!part)return msg($("formMsg"),t("請填寫料號"));
- const totalNg=num($("aNg").value)+num($("bNg").value)+num($("pNg").value);
- if(totalNg>0&&!$("ngPhoto").files[0])return msg($("formMsg"),t("有 NG 時必須拍攝 NG 照片"));
- const payload={inspection_date:$("inspectionDate").value,inspection_time:$("inspectionTime").value,part_number_code:part,operator_name:$("operatorName").value.trim(),inspector_name:$("inspectorName").value.trim(),quality_inspector_name:$("qualityInspectorName").value.trim(),machine:$("machine").value.trim(),printing_a_status:"check",printing_a_ok:num($("aOk").value),printing_a_ng:num($("aNg").value),printing_b_status:"check",printing_b_ok:num($("bOk").value),printing_b_ng:num($("bNg").value),packing_status:"check",packing_ok:num($("pOk").value),packing_ng:num($("pNg").value),ng_reason:$("ngReason").value,notes:$("notes").value.trim()};
- btn.disabled=true;
- try{
-  const {data,error}=await sb.from("inspections").insert(payload).select().single();if(error)throw error;
-  await uploadPhoto($("firstPhoto").files[0],"inspection",data.id,"首件");
-  await uploadPhoto($("ngPhoto").files[0],"inspection",data.id,"NG");
-  await uploadPhoto($("otherPhoto").files[0],"inspection",data.id,"其他");
-  await Promise.all([
-   ensurePartNumber(part),
-   ensureEmployee(payload.operator_name,"作業員"),
-   ensureEmployee(payload.inspector_name,"巡檢員"),
-   ensureEmployee(payload.quality_inspector_name,"品檢員")
-  ]);
-  msg($("formMsg"),t("巡檢與照片已儲存"),true);resetInspection();await loadAll();
- }catch(e){msg($("formMsg"),e.message||t("儲存失敗"))}finally{btn.disabled=false}
-};
-function resetInspection(){
- ["aOk","aNg","bOk","bNg","pOk","pNg"].forEach(id=>$(id).value=0);$("ngReason").value="";$("notes").value="";
- ["firstPhoto","ngPhoto","otherPhoto"].forEach(id=>$(id).value="");["firstPreview","ngPreview","otherPreview"].forEach(id=>$(id).classList.add("hidden"));
- setDefaults();
-}
-
-$("saveReliabilityBtn").onclick=async()=>{
- const inspectionId=$("relInspection").value;if(!inspectionId)return msg($("relMsg"),t("請選擇巡檢紀錄"));
- const row=inspections.find(x=>String(x.id)===String(inspectionId)),btn=$("saveReliabilityBtn");btn.disabled=true;
- try{
-  const {data,error}=await sb.from("reliability_tests").insert({inspection_id:inspectionId,part_number_code:row?.part_number_code||"",alcohol_result:$("relAlcohol").value,tape_3m600_result:$("relTape").value,tester_name:$("relTester").value.trim(),test_date:$("relDate").value||null,notes:$("relNotes").value.trim()}).select().single();if(error)throw error;
-  await uploadPhoto($("relPhoto").files[0],"reliability",data.id,"信賴度");
-  await ensureEmployee($("relTester").value.trim(),"品檢員");
-  msg($("relMsg"),t("信賴度測試已儲存"),true);$("relPhoto").value="";$("relPreview").classList.add("hidden");await loadAll();
- }catch(e){msg($("relMsg"),e.message||t("儲存失敗"))}finally{btn.disabled=false}
-};
-
-$("addPartBtn").onclick=async()=>{if(!canManage())return;const code=$("newPartCode").value.trim();if(!code)return alert(t("請輸入料號"));const {error}=await sb.from("part_numbers").insert({code,keywords:$("newPartKeywords").value.trim()});if(error)return alert(error.message);$("newPartCode").value="";$("newPartKeywords").value="";await loadAll()};
-$("addEmployeeBtn").onclick=async()=>{if(!canManage())return;const name=$("newEmployeeName").value.trim();if(!name)return alert(t("請輸入姓名"));const {error}=await sb.from("employees").insert({name,role:$("newEmployeeRole").value});if(error)return alert(error.message);$("newEmployeeName").value="";await loadAll()};
-
-$("langBtnLogin").onclick=toggleLanguage;
-$("langBtnHeader").onclick=toggleLanguage;
-applyLanguage();
-
-(async()=>{try{const saved=JSON.parse(localStorage.getItem("ipqc_v3_login")||"null");if(saved&&ACCOUNTS[saved.account]){currentUser=saved;await enterApp()}}catch(e){}})();
-</script>
-</body>
-</html>
+-- 舊資料不會刪除。
+-- 舊巡檢因為沒有 production_id，仍會出現在巡檢紀錄中，顯示為原料號分類。
