@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#173f31">
-<title>IPQC Smart Factory V3</title>
+<title>IPQC Smart Factory V3.1</title>
 <style>
 :root{--p:#173f31;--p2:#255d49;--bg:#f2f6f4;--line:#d8e2de;--ok:#16733b;--ng:#b42318;--warn:#9a6700}
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI","Noto Sans TC",sans-serif;background:var(--bg);color:#17332a}
@@ -30,15 +30,16 @@ header{position:sticky;top:0;z-index:30;background:var(--p);color:#fff;padding:1
 .photo-box img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;margin-top:8px;background:#eef2f0}
 .actions{display:flex;gap:8px;flex-wrap:wrap}.role-owner,.role-supervisor{display:none}
 body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,body[data-role="supervisor"] .role-supervisor{display:initial}
-.pill{display:inline-block;padding:3px 8px;border-radius:999px;font-size:12px;font-weight:800}.pill.ok{background:#e5f6ea;color:#176335}.pill.ng{background:#fee8e8;color:#9c231b}.pill.pending{background:#fff3d6;color:#855b00}
+.lang-switch{position:absolute;top:14px;right:14px}.head-actions{display:flex;gap:8px;align-items:center}.pill{display:inline-block;padding:3px 8px;border-radius:999px;font-size:12px;font-weight:800}.pill.ok{background:#e5f6ea;color:#176335}.pill.ng{background:#fee8e8;color:#9c231b}.pill.pending{background:#fff3d6;color:#855b00}
 @media(max-width:760px){.grid{grid-template-columns:repeat(2,1fr)}.row,.row3,.photo-grid{grid-template-columns:1fr}.hide-mobile{display:none}.wrap{padding:10px}.card{padding:14px}}
 </style>
 </head>
 <body>
 <section id="loginPage" class="login">
-  <div class="login-card">
+  <div class="login-card" style="position:relative">
+    <button id="langBtnLogin" class="btn ghost lang-switch" type="button">VI</button>
     <h1>IPQC Smart Factory</h1>
-    <p class="muted">V3 試用版</p>
+    <p class="muted">V3.1 試用版</p>
     <div id="loginMsg"></div>
     <div class="field"><label>公司帳號</label><input id="account" autocomplete="username" placeholder="請輸入帳號"></div>
     <div class="field"><label>密碼</label><input id="password" type="password" autocomplete="current-password"></div>
@@ -49,7 +50,7 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
 </section>
 
 <section id="appPage" class="hidden">
-<header><div class="head"><div><div class="brand">IPQC Smart Factory <span class="badge">V3</span></div><div id="userInfo" class="small"></div></div><button id="logoutBtn" class="btn secondary">登出</button></div></header>
+<header><div class="head"><div><div class="brand">IPQC Smart Factory <span class="badge">V3</span></div><div id="userInfo" class="small"></div></div><div class="head-actions"><button id="langBtnHeader" class="btn secondary" type="button">VI</button><button id="logoutBtn" class="btn secondary">登出</button></div></div></header>
 <main class="wrap">
   <div class="nav">
     <button class="btn primary" data-page="dashboard">Dashboard</button>
@@ -78,9 +79,9 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
         <div class="field"><label>時間</label><input id="inspectionTime" type="time"></div>
         <div class="field"><label>料號 *</label><input id="partNumber" list="partList" placeholder="輸入或搜尋料號"><datalist id="partList"></datalist></div>
         <div class="field"><label>機台</label><input id="machine" placeholder="例如：印刷 1 號機"></div>
-        <div class="field"><label>作業人員</label><input id="operatorName" list="employeeList"></div>
-        <div class="field"><label>巡檢人員</label><input id="inspectorName" list="employeeList"></div>
-        <div class="field"><label>品檢人員</label><input id="qualityInspectorName" list="employeeList"></div>
+        <div class="field"><label>作業人員</label><input id="operatorName" list="employeeList" placeholder="輸入姓名，之後會自動儲存"></div>
+        <div class="field"><label>巡檢人員</label><input id="inspectorName" list="employeeList" placeholder="輸入姓名，之後會自動儲存"></div>
+        <div class="field"><label>品檢人員</label><input id="qualityInspectorName" list="employeeList" placeholder="輸入姓名，之後會自動儲存"></div>
       </div><datalist id="employeeList"></datalist>
 
       <div class="process"><h3>印刷 A</h3><div class="row"><div class="field"><label>OK 數量</label><input id="aOk" type="number" min="0" value="0"></div><div class="field"><label>NG 數量</label><input id="aNg" type="number" min="0" value="0"></div></div></div>
@@ -114,7 +115,7 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
         <div class="field"><label>測試日期</label><input id="relDate" type="date"></div>
         <div class="field"><label>99% 酒精</label><select id="relAlcohol"><option value="pending">待測</option><option value="OK">OK</option><option value="NG">NG</option><option value="SKIP">略過</option></select></div>
         <div class="field"><label>3M 600</label><select id="relTape"><option value="pending">待測</option><option value="OK">OK</option><option value="NG">NG</option><option value="SKIP">略過</option></select></div>
-        <div class="field"><label>測試人員</label><input id="relTester" list="employeeList"></div>
+        <div class="field"><label>測試人員</label><input id="relTester" list="employeeList" placeholder="輸入姓名，之後會自動儲存"></div>
         <div class="field"><label>備註</label><textarea id="relNotes"></textarea></div>
       </div>
       <div class="photo-box" style="max-width:360px"><b>信賴度照片</b><input id="relPhoto" type="file" accept="image/*" capture="environment"><img id="relPreview" class="hidden"></div>
@@ -144,6 +145,63 @@ const ACCOUNTS={chengyin:{password:"0000",role:"owner",name:"老闆"}, "3F":{pas
 const $=id=>document.getElementById(id);
 let currentUser=null,inspections=[],parts=[],employees=[],reliability=[],photos=[];
 
+let currentLang=localStorage.getItem("ipqc_v3_lang")||"zh";
+const originalText=new WeakMap();
+const VI={
+"V3 試用版":"Bản dùng thử V3","公司帳號":"Tài khoản công ty","請輸入帳號":"Vui lòng nhập tài khoản",
+"密碼":"Mật khẩu","記住登入":"Ghi nhớ đăng nhập","登入":"Đăng nhập",
+"老闆：chengyin｜主管：3F｜員工：3F1":"Chủ: chengyin｜Quản lý: 3F｜Nhân viên: 3F1",
+"登出":"Đăng xuất","新增巡檢":"Thêm kiểm tra","巡檢紀錄":"Lịch sử kiểm tra","信賴度":"Độ tin cậy",
+"料號管理":"Quản lý mã hàng","人員管理":"Quản lý nhân viên","今日巡檢":"Kiểm tra hôm nay",
+"今日 OK":"OK hôm nay","今日 NG":"NG hôm nay","今日良率":"Tỷ lệ đạt hôm nay","最近巡檢":"Kiểm tra gần đây",
+"新增 IPQC 巡檢":"Thêm kiểm tra IPQC","日期":"Ngày","時間":"Thời gian","料號 *":"Mã hàng *",
+"輸入或搜尋料號":"Nhập hoặc tìm mã hàng","機台":"Máy","例如：印刷 1 號機":"Ví dụ: Máy in số 1",
+"作業人員":"Nhân viên thao tác","巡檢人員":"Nhân viên kiểm tra","品檢人員":"Nhân viên QC",
+"輸入姓名，之後會自動儲存":"Nhập tên, hệ thống sẽ tự động lưu","印刷 A":"In A","印刷 B":"In B","包裝":"Đóng gói",
+"OK 數量":"Số lượng OK","NG 數量":"Số lượng NG","NG 原因":"Nguyên nhân NG","無":"Không",
+"漏印":"Thiếu nét","偏位":"Lệch vị trí","重影":"Bóng đôi","刮傷":"Trầy xước","溢墨":"Tràn mực",
+"色差":"Sai màu","異物":"Dị vật","包裝異常":"Lỗi đóng gói","其他":"Khác","備註／處理方式":"Ghi chú / cách xử lý",
+"拍照留存":"Lưu ảnh","首件照片":"Ảnh sản phẩm đầu tiên","NG 照片":"Ảnh NG","有 NG 時必須拍照":"Có NG phải chụp ảnh",
+"其他照片":"Ảnh khác","儲存巡檢":"Lưu kiểm tra","搜尋料號／人員":"Tìm mã hàng / nhân viên",
+"輸入關鍵字":"Nhập từ khóa","信賴度測試":"Kiểm tra độ tin cậy","對應巡檢 *":"Kiểm tra tương ứng *",
+"測試日期":"Ngày kiểm tra","99% 酒精":"Cồn 99%","待測":"Chờ kiểm tra","略過":"Bỏ qua","測試人員":"Người kiểm tra",
+"備註":"Ghi chú","信賴度照片":"Ảnh kiểm tra độ tin cậy","儲存信賴度測試":"Lưu kiểm tra độ tin cậy",
+"信賴度紀錄":"Lịch sử độ tin cậy","料號":"Mã hàng","品名／關鍵字":"Tên hàng / từ khóa","新增料號":"Thêm mã hàng",
+"人員管理":"Quản lý nhân viên","姓名 *":"Tên *","職務":"Chức vụ","作業員":"Công nhân","巡檢員":"Nhân viên kiểm tra",
+"品檢員":"Nhân viên QC","主管":"Quản lý","新增人員":"Thêm nhân viên","日期時間":"Ngày giờ","人員":"Nhân viên",
+"照片":"Ảnh","查看":"Xem","請選擇":"Vui lòng chọn","酒精":"Cồn","姓名":"Tên",
+"帳號或密碼錯誤":"Sai tài khoản hoặc mật khẩu","資料讀取失敗：":"Đọc dữ liệu thất bại: ",
+"請填寫料號":"Vui lòng nhập mã hàng","有 NG 時必須拍攝 NG 照片":"Có NG phải chụp ảnh NG",
+"巡檢與照片已儲存":"Đã lưu kiểm tra và ảnh","儲存失敗":"Lưu thất bại",
+"請選擇巡檢紀錄":"Vui lòng chọn lịch sử kiểm tra","信賴度測試已儲存":"Đã lưu kiểm tra độ tin cậy",
+"請輸入料號":"Vui lòng nhập mã hàng","請輸入姓名":"Vui lòng nhập tên"
+};
+function t(text){return currentLang==="vi"?(VI[text]||text):text}
+function applyLanguage(){
+ document.documentElement.lang=currentLang==="vi"?"vi":"zh-Hant";
+ document.querySelectorAll("body *").forEach(el=>{
+   for(const node of el.childNodes){
+     if(node.nodeType===Node.TEXT_NODE&&node.nodeValue.trim()){
+       if(!originalText.has(node)) originalText.set(node,node.nodeValue);
+       const raw=originalText.get(node),trim=raw.trim();
+       node.nodeValue=raw.replace(trim,t(trim));
+     }
+   }
+   if(["INPUT","TEXTAREA"].includes(el.tagName)&&el.hasAttribute("placeholder")){
+     if(!el.dataset.originalPlaceholder)el.dataset.originalPlaceholder=el.getAttribute("placeholder");
+     el.setAttribute("placeholder",t(el.dataset.originalPlaceholder));
+   }
+ });
+ ["langBtnLogin","langBtnHeader"].forEach(id=>{if($(id))$(id).textContent=currentLang==="zh"?"VI":"中文"});
+ if(currentUser&&$("userInfo")) $("userInfo").textContent=`${t(currentUser.name)}｜${currentUser.account}`;
+}
+function toggleLanguage(){
+ currentLang=currentLang==="zh"?"vi":"zh";
+ localStorage.setItem("ipqc_v3_lang",currentLang);
+ applyLanguage();
+ renderAll();
+}
+
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function num(v){return Number(v)||0}
 function msg(el,text,ok=false){el.innerHTML=`<div class="msg ${ok?'ok':'err'}">${esc(text)}</div>`}
@@ -153,7 +211,7 @@ function canManage(){return currentUser?.role==="owner"||currentUser?.role==="su
 
 $("loginBtn").onclick=()=>{
  const a=$("account").value.trim(),p=$("password").value,found=ACCOUNTS[a];
- if(!found||found.password!==p)return msg($("loginMsg"),"帳號或密碼錯誤");
+ if(!found||found.password!==p)return msg($("loginMsg"),t("帳號或密碼錯誤"));
  currentUser={account:a,role:found.role,name:found.name};
  if($("remember").checked)localStorage.setItem("ipqc_v3_login",JSON.stringify(currentUser));
  enterApp();
@@ -164,7 +222,7 @@ async function enterApp(){
  document.body.dataset.role=currentUser.role;
  $("loginPage").classList.add("hidden");$("appPage").classList.remove("hidden");
  $("userInfo").textContent=`${currentUser.name}｜${currentUser.account}`;
- setDefaults();await loadAll();
+ setDefaults();await loadAll();applyLanguage();
 }
 document.querySelectorAll(".nav button").forEach(btn=>btn.onclick=()=>{
  if(btn.classList.contains("role-supervisor")&&!canManage())return;
@@ -182,7 +240,7 @@ async function loadAll(){
   sb.from("inspection_photos").select("*").order("created_at",{ascending:false}).limit(1000)
  ]);
  const errors=[a.error,b.error,c.error,d.error].filter(Boolean);
- if(errors.length)return alert("資料讀取失敗："+errors[0].message);
+ if(errors.length)return alert(t("資料讀取失敗：")+errors[0].message);
  inspections=a.data||[];parts=b.data||[];employees=c.data||[];reliability=d.data||[];
  photos=e.error?[]:(e.data||[]);
  renderAll();
@@ -191,22 +249,33 @@ async function loadAll(){
 function totals(r){return {ok:num(r.printing_a_ok)+num(r.printing_b_ok)+num(r.packing_ok),ng:num(r.printing_a_ng)+num(r.printing_b_ng)+num(r.packing_ng)}}
 function photoLinks(parentType,parentId){
  const ps=photos.filter(p=>p.parent_type===parentType&&String(p.parent_id)===String(parentId));
- return ps.length?ps.map(p=>`<a href="${esc(p.public_url)}" target="_blank">查看${esc(p.photo_type)}</a>`).join("｜"):"-";
+ return ps.length?ps.map(p=>`<a href="${esc(p.public_url)}" target="_blank">${t("查看")}${esc(t(p.photo_type))}</a>`).join("｜"):"-";
 }
-function resultPill(v){const c=v==="OK"?"ok":v==="NG"?"ng":"pending";return `<span class="pill ${c}">${esc(v||"pending")}</span>`}
+function resultPill(v){const c=v==="OK"?"ok":v==="NG"?"ng":"pending";return `<span class="pill ${c}">${esc(v==="pending"?t("待測"):(v||t("待測")))}</span>`}
 function inspectionTable(rows){
- return `<table><tr><th>日期時間</th><th>料號</th><th>OK</th><th>NG</th><th class="hide-mobile">人員</th><th>照片</th></tr>${rows.map(r=>{const t=totals(r);return `<tr><td>${esc(r.inspection_date)} ${esc((r.inspection_time||"").slice(0,5))}</td><td>${esc(r.part_number_code)}</td><td>${t.ok}</td><td class="${t.ng?'ngtxt':''}">${t.ng}</td><td class="hide-mobile">${esc(r.operator_name||"-")}／${esc(r.quality_inspector_name||"-")}</td><td>${photoLinks("inspection",r.id)}</td></tr>`}).join("")}</table>`;
+ return `<table><tr><th>${t("日期時間")}</th><th>${t("料號")}</th><th>OK</th><th>NG</th><th class="hide-mobile">${t("人員")}</th><th>${t("照片")}</th></tr>${rows.map(r=>{const tt=totals(r);return `<tr><td>${esc(r.inspection_date)} ${esc((r.inspection_time||"").slice(0,5))}</td><td>${esc(r.part_number_code)}</td><td>${tt.ok}</td><td class="${tt.ng?'ngtxt':''}">${tt.ng}</td><td class="hide-mobile">${esc(r.operator_name||"-")}／${esc(r.quality_inspector_name||"-")}</td><td>${photoLinks("inspection",r.id)}</td></tr>`}).join("")}</table>`;
+}
+function renderPartOptions(query=""){
+ const q=String(query||"").trim().toLowerCase();
+ const rows=parts.filter(x=>!q||String(x.code||"").toLowerCase().includes(q)||String(x.keywords||"").toLowerCase().includes(q));
+ $("partList").innerHTML=rows.map(x=>`<option value="${esc(x.code)}">${esc(x.keywords||"")}</option>`).join("");
+}
+function renderEmployeeOptions(query=""){
+ const q=String(query||"").trim().toLowerCase();
+ const rows=employees.filter(x=>!q||String(x.name||"").toLowerCase().includes(q));
+ $("employeeList").innerHTML=rows.map(x=>`<option value="${esc(x.name)}">${esc(x.role||"")}</option>`).join("");
 }
 function renderAll(){
- $("partList").innerHTML=parts.map(x=>`<option value="${esc(x.code)}">${esc(x.keywords||"")}</option>`).join("");
- $("employeeList").innerHTML=employees.map(x=>`<option value="${esc(x.name)}"></option>`).join("");
+ renderPartOptions($("partNumber")?.value||"");
+ renderEmployeeOptions("");
  const rows=inspections.filter(x=>x.inspection_date===today());let ok=0,ng=0;rows.forEach(x=>{const t=totals(x);ok+=t.ok;ng+=t.ng});
  $("statTotal").textContent=rows.length;$("statOk").textContent=ok;$("statNg").textContent=ng;$("statYield").textContent=(ok+ng?ok/(ok+ng)*100:0).toFixed(1)+"%";
  $("recentTable").innerHTML=inspectionTable(inspections.slice(0,8));renderRecords();
- $("partsTable").innerHTML=`<table><tr><th>料號</th><th>品名／關鍵字</th></tr>${parts.map(x=>`<tr><td>${esc(x.code)}</td><td>${esc(x.keywords||"")}</td></tr>`).join("")}</table>`;
- $("employeesTable").innerHTML=`<table><tr><th>姓名</th><th>職務</th></tr>${employees.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.role||"")}</td></tr>`).join("")}</table>`;
- $("relInspection").innerHTML='<option value="">請選擇</option>'+inspections.map(x=>`<option value="${esc(x.id)}">${esc(x.inspection_date)} ${esc((x.inspection_time||"").slice(0,5))}｜${esc(x.part_number_code)}</option>`).join("");
- $("reliabilityTable").innerHTML=`<table><tr><th>日期</th><th>料號</th><th>酒精</th><th>3M600</th><th>測試人員</th><th>照片</th></tr>${reliability.map(x=>`<tr><td>${esc(x.test_date||"")}</td><td>${esc(x.part_number_code||"")}</td><td>${resultPill(x.alcohol_result)}</td><td>${resultPill(x.tape_3m600_result)}</td><td>${esc(x.tester_name||"")}</td><td>${photoLinks("reliability",x.id)}</td></tr>`).join("")}</table>`;
+ $("partsTable").innerHTML=`<table><tr><th>${t("料號")}</th><th>${t("品名／關鍵字")}</th></tr>${parts.map(x=>`<tr><td>${esc(x.code)}</td><td>${esc(x.keywords||"")}</td></tr>`).join("")}</table>`;
+ $("employeesTable").innerHTML=`<table><tr><th>${t("姓名")}</th><th>${t("職務")}</th></tr>${employees.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(t(x.role||""))}</td></tr>`).join("")}</table>`;
+ $("relInspection").innerHTML=`<option value="">${t("請選擇")}</option>`+inspections.map(x=>`<option value="${esc(x.id)}">${esc(x.inspection_date)} ${esc((x.inspection_time||"").slice(0,5))}｜${esc(x.part_number_code)}</option>`).join("");
+ $("reliabilityTable").innerHTML=`<table><tr><th>${t("日期")}</th><th>${t("料號")}</th><th>${t("酒精")}</th><th>3M600</th><th>${t("測試人員")}</th><th>${t("照片")}</th></tr>${reliability.map(x=>`<tr><td>${esc(x.test_date||"")}</td><td>${esc(x.part_number_code||"")}</td><td>${resultPill(x.alcohol_result)}</td><td>${resultPill(x.tape_3m600_result)}</td><td>${esc(x.tester_name||"")}</td><td>${photoLinks("reliability",x.id)}</td></tr>`).join("")}</table>`;
+ applyLanguage();
 }
 function renderRecords(){
  const q=$("recordSearch").value.trim().toLowerCase(),d=$("recordDate").value;
@@ -214,6 +283,11 @@ function renderRecords(){
  $("recordsTable").innerHTML=inspectionTable(rows);
 }
 $("recordSearch").oninput=renderRecords;$("recordDate").onchange=renderRecords;
+$("partNumber").addEventListener("input",e=>renderPartOptions(e.target.value));
+["operatorName","inspectorName","qualityInspectorName","relTester"].forEach(id=>{
+ $(id).addEventListener("input",e=>renderEmployeeOptions(e.target.value));
+ $(id).addEventListener("focus",e=>renderEmployeeOptions(e.target.value));
+});
 
 function setupPreview(inputId,imgId){$(inputId).onchange=()=>{const f=$(inputId).files[0];if(!f)return;$(imgId).src=URL.createObjectURL(f);$(imgId).classList.remove("hidden")}}
 setupPreview("firstPhoto","firstPreview");setupPreview("ngPhoto","ngPreview");setupPreview("otherPhoto","otherPreview");setupPreview("relPhoto","relPreview");
@@ -229,10 +303,22 @@ async function uploadPhoto(file,parentType,parentId,photoType){
  if(dbErr)throw dbErr;
 }
 
+async function ensurePartNumber(code){
+ const clean=String(code||"").trim();if(!clean)return;
+ if(parts.some(x=>String(x.code||"").toLowerCase()===clean.toLowerCase()))return;
+ const {error}=await sb.from("part_numbers").insert({code:clean,keywords:""});
+ if(error&&error.code!=="23505")throw error;
+}
+async function ensureEmployee(name,role){
+ const clean=String(name||"").trim();if(!clean)return;
+ if(employees.some(x=>String(x.name||"").toLowerCase()===clean.toLowerCase()))return;
+ const {error}=await sb.from("employees").insert({name:clean,role:role||"作業員"});
+ if(error&&error.code!=="23505")throw error;
+}
 $("saveInspectionBtn").onclick=async()=>{
- const btn=$("saveInspectionBtn"),part=$("partNumber").value.trim();if(!part)return msg($("formMsg"),"請填寫料號");
+ const btn=$("saveInspectionBtn"),part=$("partNumber").value.trim();if(!part)return msg($("formMsg"),t("請填寫料號"));
  const totalNg=num($("aNg").value)+num($("bNg").value)+num($("pNg").value);
- if(totalNg>0&&!$("ngPhoto").files[0])return msg($("formMsg"),"有 NG 時必須拍攝 NG 照片");
+ if(totalNg>0&&!$("ngPhoto").files[0])return msg($("formMsg"),t("有 NG 時必須拍攝 NG 照片"));
  const payload={inspection_date:$("inspectionDate").value,inspection_time:$("inspectionTime").value,part_number_code:part,operator_name:$("operatorName").value.trim(),inspector_name:$("inspectorName").value.trim(),quality_inspector_name:$("qualityInspectorName").value.trim(),machine:$("machine").value.trim(),printing_a_status:"check",printing_a_ok:num($("aOk").value),printing_a_ng:num($("aNg").value),printing_b_status:"check",printing_b_ok:num($("bOk").value),printing_b_ng:num($("bNg").value),packing_status:"check",packing_ok:num($("pOk").value),packing_ng:num($("pNg").value),ng_reason:$("ngReason").value,notes:$("notes").value.trim()};
  btn.disabled=true;
  try{
@@ -240,8 +326,14 @@ $("saveInspectionBtn").onclick=async()=>{
   await uploadPhoto($("firstPhoto").files[0],"inspection",data.id,"首件");
   await uploadPhoto($("ngPhoto").files[0],"inspection",data.id,"NG");
   await uploadPhoto($("otherPhoto").files[0],"inspection",data.id,"其他");
-  msg($("formMsg"),"巡檢與照片已儲存",true);resetInspection();await loadAll();
- }catch(e){msg($("formMsg"),e.message||"儲存失敗")}finally{btn.disabled=false}
+  await Promise.all([
+   ensurePartNumber(part),
+   ensureEmployee(payload.operator_name,"作業員"),
+   ensureEmployee(payload.inspector_name,"巡檢員"),
+   ensureEmployee(payload.quality_inspector_name,"品檢員")
+  ]);
+  msg($("formMsg"),t("巡檢與照片已儲存"),true);resetInspection();await loadAll();
+ }catch(e){msg($("formMsg"),e.message||t("儲存失敗"))}finally{btn.disabled=false}
 };
 function resetInspection(){
  ["aOk","aNg","bOk","bNg","pOk","pNg"].forEach(id=>$(id).value=0);$("ngReason").value="";$("notes").value="";
@@ -250,17 +342,22 @@ function resetInspection(){
 }
 
 $("saveReliabilityBtn").onclick=async()=>{
- const inspectionId=$("relInspection").value;if(!inspectionId)return msg($("relMsg"),"請選擇巡檢紀錄");
+ const inspectionId=$("relInspection").value;if(!inspectionId)return msg($("relMsg"),t("請選擇巡檢紀錄"));
  const row=inspections.find(x=>String(x.id)===String(inspectionId)),btn=$("saveReliabilityBtn");btn.disabled=true;
  try{
   const {data,error}=await sb.from("reliability_tests").insert({inspection_id:inspectionId,part_number_code:row?.part_number_code||"",alcohol_result:$("relAlcohol").value,tape_3m600_result:$("relTape").value,tester_name:$("relTester").value.trim(),test_date:$("relDate").value||null,notes:$("relNotes").value.trim()}).select().single();if(error)throw error;
   await uploadPhoto($("relPhoto").files[0],"reliability",data.id,"信賴度");
-  msg($("relMsg"),"信賴度測試已儲存",true);$("relPhoto").value="";$("relPreview").classList.add("hidden");await loadAll();
- }catch(e){msg($("relMsg"),e.message||"儲存失敗")}finally{btn.disabled=false}
+  await ensureEmployee($("relTester").value.trim(),"品檢員");
+  msg($("relMsg"),t("信賴度測試已儲存"),true);$("relPhoto").value="";$("relPreview").classList.add("hidden");await loadAll();
+ }catch(e){msg($("relMsg"),e.message||t("儲存失敗"))}finally{btn.disabled=false}
 };
 
-$("addPartBtn").onclick=async()=>{if(!canManage())return;const code=$("newPartCode").value.trim();if(!code)return alert("請輸入料號");const {error}=await sb.from("part_numbers").insert({code,keywords:$("newPartKeywords").value.trim()});if(error)return alert(error.message);$("newPartCode").value="";$("newPartKeywords").value="";await loadAll()};
-$("addEmployeeBtn").onclick=async()=>{if(!canManage())return;const name=$("newEmployeeName").value.trim();if(!name)return alert("請輸入姓名");const {error}=await sb.from("employees").insert({name,role:$("newEmployeeRole").value});if(error)return alert(error.message);$("newEmployeeName").value="";await loadAll()};
+$("addPartBtn").onclick=async()=>{if(!canManage())return;const code=$("newPartCode").value.trim();if(!code)return alert(t("請輸入料號"));const {error}=await sb.from("part_numbers").insert({code,keywords:$("newPartKeywords").value.trim()});if(error)return alert(error.message);$("newPartCode").value="";$("newPartKeywords").value="";await loadAll()};
+$("addEmployeeBtn").onclick=async()=>{if(!canManage())return;const name=$("newEmployeeName").value.trim();if(!name)return alert(t("請輸入姓名"));const {error}=await sb.from("employees").insert({name,role:$("newEmployeeRole").value});if(error)return alert(error.message);$("newEmployeeName").value="";await loadAll()};
+
+$("langBtnLogin").onclick=toggleLanguage;
+$("langBtnHeader").onclick=toggleLanguage;
+applyLanguage();
 
 (async()=>{try{const saved=JSON.parse(localStorage.getItem("ipqc_v3_login")||"null");if(saved&&ACCOUNTS[saved.account]){currentUser=saved;await enterApp()}}catch(e){}})();
 </script>
