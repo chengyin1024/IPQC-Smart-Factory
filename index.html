@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#173f31">
-<title>IPQC Smart Factory V3.2</title>
+<title>IPQC Smart Factory V3.3</title>
 <style>
 :root{--p:#173f31;--p2:#255d49;--bg:#f2f6f4;--line:#d8e2de;--ok:#16733b;--ng:#b42318;--warn:#9a6700}
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI","Noto Sans TC",sans-serif;background:var(--bg);color:#17332a}
@@ -58,7 +58,7 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
   <div class="login-card" style="position:relative">
     <button id="langBtnLogin" class="btn ghost lang-switch" type="button">VI</button>
     <h1>IPQC Smart Factory</h1>
-    <p class="muted">V3.2 試用版</p>
+    <p class="muted">V3.3 試用版</p>
     <div id="loginMsg"></div>
     <div class="field"><label>公司帳號</label><input id="account" autocomplete="username" placeholder="請輸入帳號"></div>
     <div class="field"><label>密碼</label><input id="password" type="password" autocomplete="current-password"></div>
@@ -73,9 +73,8 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
 <main class="wrap">
   <div class="nav">
     <button class="btn primary" data-page="dashboard">Dashboard</button>
-    <button class="btn secondary" data-page="newInspection">新增巡檢</button>
+    <button class="btn secondary" data-page="newInspection">IPQC／信賴度</button>
     <button class="btn secondary" data-page="records">巡檢紀錄</button>
-    <button class="btn secondary" data-page="reliability">信賴度</button>
     <button class="btn secondary role-supervisor" data-page="parts">料號管理</button>
     <button class="btn secondary role-supervisor" data-page="employees">人員管理</button>
   </div>
@@ -87,7 +86,7 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
       <div class="card stat"><span class="muted">今日 NG</span><b id="statNg" class="ngtxt">0</b></div>
       <div class="card stat"><span class="muted">今日良率</span><b id="statYield">0%</b></div>
     </div>
-    <div class="card"><h2>最近巡檢</h2><div id="recentTable" class="table-wrap"></div></div>
+    <div class="card"><h2>最近巡檢（依料號收合）</h2><div id="recentTable" class="table-wrap"></div></div>
   </section>
 
   <section id="newInspection" class="page hidden">
@@ -120,28 +119,17 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
       </div>
       <div style="margin-top:14px"><button id="saveInspectionBtn" class="btn primary">儲存巡檢</button></div>
     </div>
+
+    <div class="card"><h2>信賴度測試</h2><p class="muted">可在同一頁完成 IPQC 巡檢與信賴度測試。</p></div>
+<div class="card">
+      <h2>信賴度測試</h2><div id="relMsg"></div>
+<div class="card"><h2>信賴度紀錄</h2><div id="reliabilityTable" class="table-wrap"></div>
   </section>
 
   <section id="records" class="page hidden">
     <div class="card"><h2>巡檢紀錄</h2><div class="row"><div class="field"><label>搜尋料號／人員</label><input id="recordSearch" placeholder="輸入關鍵字"></div><div class="field"><label>日期</label><input id="recordDate" type="date"></div></div><div id="recordsTable" class="table-wrap"></div></div>
   </section>
 
-  <section id="reliability" class="page hidden">
-    <div class="card">
-      <h2>信賴度測試</h2><div id="relMsg"></div>
-      <div class="row">
-        <div class="field"><label>對應巡檢 *</label><select id="relInspection"></select></div>
-        <div class="field"><label>測試日期</label><input id="relDate" type="date"></div>
-        <div class="field"><label>99% 酒精</label><select id="relAlcohol"><option value="pending">待測</option><option value="OK">OK</option><option value="NG">NG</option><option value="SKIP">略過</option></select></div>
-        <div class="field"><label>3M 600</label><select id="relTape"><option value="pending">待測</option><option value="OK">OK</option><option value="NG">NG</option><option value="SKIP">略過</option></select></div>
-        <div class="field"><label>測試人員</label><input id="relTester" list="employeeList" placeholder="輸入姓名，之後會自動儲存"></div>
-        <div class="field"><label>備註</label><textarea id="relNotes"></textarea></div>
-      </div>
-      <div class="photo-box" style="max-width:360px"><b>信賴度照片</b><input id="relPhoto" type="file" accept="image/*" capture="environment"><img id="relPreview" class="hidden"></div>
-      <button id="saveReliabilityBtn" class="btn primary" style="margin-top:12px">儲存信賴度測試</button>
-    </div>
-    <div class="card"><h2>信賴度紀錄</h2><div id="reliabilityTable" class="table-wrap"></div></div>
-  </section>
 
   <section id="parts" class="page hidden">
     <div class="card"><h2>料號管理</h2><div class="row"><div class="field"><label>料號 *</label><input id="newPartCode"></div><div class="field"><label>品名／關鍵字</label><input id="newPartKeywords"></div></div><button id="addPartBtn" class="btn primary">新增料號</button></div>
@@ -170,9 +158,9 @@ const VI={
 "V3 試用版":"Bản dùng thử V3","公司帳號":"Tài khoản công ty","請輸入帳號":"Vui lòng nhập tài khoản",
 "密碼":"Mật khẩu","記住登入":"Ghi nhớ đăng nhập","登入":"Đăng nhập",
 "老闆：chengyin｜主管：3F｜員工：3F1":"Chủ: chengyin｜Quản lý: 3F｜Nhân viên: 3F1",
-"登出":"Đăng xuất","新增巡檢":"Thêm kiểm tra","巡檢紀錄":"Lịch sử kiểm tra","信賴度":"Độ tin cậy",
+"登出":"Đăng xuất","新增巡檢":"Thêm kiểm tra","IPQC／信賴度":"IPQC / Độ tin cậy","巡檢紀錄":"Lịch sử kiểm tra","信賴度":"Độ tin cậy",
 "料號管理":"Quản lý mã hàng","人員管理":"Quản lý nhân viên","今日巡檢":"Kiểm tra hôm nay",
-"今日 OK":"OK hôm nay","今日 NG":"NG hôm nay","今日良率":"Tỷ lệ đạt hôm nay","最近巡檢":"Kiểm tra gần đây",
+"今日 OK":"OK hôm nay","今日 NG":"NG hôm nay","今日良率":"Tỷ lệ đạt hôm nay","最近巡檢":"Kiểm tra gần đây","最近巡檢（依料號收合）":"Kiểm tra gần đây (gộp theo mã hàng)",
 "新增 IPQC 巡檢":"Thêm kiểm tra IPQC","日期":"Ngày","時間":"Thời gian","料號 *":"Mã hàng *",
 "輸入或搜尋料號":"Nhập hoặc tìm mã hàng","機台":"Máy","例如：印刷 1 號機":"Ví dụ: Máy in số 1",
 "作業人員":"Nhân viên thao tác","巡檢人員":"Nhân viên kiểm tra","品檢人員":"Nhân viên QC",
@@ -182,7 +170,7 @@ const VI={
 "色差":"Sai màu","異物":"Dị vật","包裝異常":"Lỗi đóng gói","其他":"Khác","備註／處理方式":"Ghi chú / cách xử lý",
 "拍照留存":"Lưu ảnh","首件照片":"Ảnh sản phẩm đầu tiên","NG 照片":"Ảnh NG","有 NG 時必須拍照":"Có NG phải chụp ảnh",
 "其他照片":"Ảnh khác","儲存巡檢":"Lưu kiểm tra","搜尋料號／人員":"Tìm mã hàng / nhân viên",
-"輸入關鍵字":"Nhập từ khóa","信賴度測試":"Kiểm tra độ tin cậy","對應巡檢 *":"Kiểm tra tương ứng *",
+"輸入關鍵字":"Nhập từ khóa","信賴度測試":"Kiểm tra độ tin cậy","可在同一頁完成 IPQC 巡檢與信賴度測試。":"Có thể hoàn thành kiểm tra IPQC và độ tin cậy trên cùng một trang.","對應巡檢 *":"Kiểm tra tương ứng *",
 "測試日期":"Ngày kiểm tra","99% 酒精":"Cồn 99%","待測":"Chờ kiểm tra","略過":"Bỏ qua","測試人員":"Người kiểm tra",
 "備註":"Ghi chú","信賴度照片":"Ảnh kiểm tra độ tin cậy","儲存信賴度測試":"Lưu kiểm tra độ tin cậy",
 "信賴度紀錄":"Lịch sử độ tin cậy","料號":"Mã hàng","品名／關鍵字":"Tên hàng / từ khóa","新增料號":"Thêm mã hàng",
@@ -274,6 +262,51 @@ function resultPill(v){const c=v==="OK"?"ok":v==="NG"?"ng":"pending";return `<sp
 function inspectionTable(rows){
  return `<table><tr><th>${t("日期時間")}</th><th>${t("料號")}</th><th>OK</th><th>NG</th><th class="hide-mobile">${t("人員")}</th><th>${t("照片")}</th></tr>${rows.map(r=>{const tt=totals(r);return `<tr><td>${esc(r.inspection_date)} ${esc((r.inspection_time||"").slice(0,5))}</td><td>${esc(r.part_number_code)}</td><td>${tt.ok}</td><td class="${tt.ng?'ngtxt':''}">${tt.ng}</td><td class="hide-mobile">${esc(r.operator_name||"-")}／${esc(r.quality_inspector_name||"-")}</td><td>${photoLinks("inspection",r.id)}</td></tr>`}).join("")}</table>`;
 }
+
+function groupedInspectionCards(rows,scope="records"){
+ if(!rows.length)return `<div class="muted" style="padding:18px 4px">${t("沒有符合的巡檢紀錄")}</div>`;
+ const groups={};
+ rows.forEach(r=>{
+   const key=r.part_number_code||"(未填料號)";
+   if(!groups[key])groups[key]=[];
+   groups[key].push(r);
+ });
+ const sorted=Object.entries(groups).sort((a,b)=>{
+   const at=a[1][0]?.created_at||`${a[1][0]?.inspection_date||""} ${a[1][0]?.inspection_time||""}`;
+   const bt=b[1][0]?.created_at||`${b[1][0]?.inspection_date||""} ${b[1][0]?.inspection_time||""}`;
+   return String(bt).localeCompare(String(at));
+ });
+ const html=`<div class="group-list">${sorted.map(([part,items],idx)=>{
+   let ok=0,ng=0;
+   items.forEach(r=>{const tt=totals(r);ok+=tt.ok;ng+=tt.ng});
+   const latest=items[0];
+   return `<div class="group-card" data-group-scope="${scope}" data-group-index="${idx}">
+     <button class="group-summary" type="button" aria-expanded="false">
+       <div>
+         <div class="group-part">${esc(part)}</div>
+         <div class="group-meta">${t("最新巡檢")}：${esc(latest.inspection_date)} ${esc((latest.inspection_time||"").slice(0,5))}｜${t("點擊展開巡檢紀錄")}</div>
+       </div>
+       <div class="group-stat group-count"><span class="group-label">${t("筆數")}</span><b>${items.length}</b> ${t("筆數")}</div>
+       <div class="group-stat group-ok"><span class="group-label">${t("合計 OK")}</span><b class="oktxt">${ok}</b></div>
+       <div class="group-stat group-ng"><span class="group-label">${t("合計 NG")}</span><b class="${ng?'ngtxt':''}">${ng}</b></div>
+       <div class="group-arrow">▶</div>
+     </button>
+     <div class="group-detail">${inspectionTable(items)}</div>
+   </div>`;
+ }).join("")}</div>`;
+ setTimeout(()=>{
+   document.querySelectorAll(`[data-group-scope="${scope}"] .group-summary`).forEach(btn=>{
+     if(btn.dataset.bound==="1")return;
+     btn.dataset.bound="1";
+     btn.addEventListener("click",()=>{
+       const card=btn.closest(".group-card");
+       const isOpen=card.classList.toggle("open");
+       btn.setAttribute("aria-expanded",String(isOpen));
+     });
+   });
+ },0);
+ return html;
+}
 function renderPartOptions(query=""){
  const q=String(query||"").trim().toLowerCase();
  const rows=parts.filter(x=>!q||String(x.code||"").toLowerCase().includes(q)||String(x.keywords||"").toLowerCase().includes(q));
@@ -289,7 +322,7 @@ function renderAll(){
  renderEmployeeOptions("");
  const rows=inspections.filter(x=>x.inspection_date===today());let ok=0,ng=0;rows.forEach(x=>{const t=totals(x);ok+=t.ok;ng+=t.ng});
  $("statTotal").textContent=rows.length;$("statOk").textContent=ok;$("statNg").textContent=ng;$("statYield").textContent=(ok+ng?ok/(ok+ng)*100:0).toFixed(1)+"%";
- $("recentTable").innerHTML=inspectionTable(inspections.slice(0,8));renderRecords();
+ $("recentTable").innerHTML=groupedInspectionCards(inspections.slice(0,30),"recent");renderRecords();
  $("partsTable").innerHTML=`<table><tr><th>${t("料號")}</th><th>${t("品名／關鍵字")}</th></tr>${parts.map(x=>`<tr><td>${esc(x.code)}</td><td>${esc(x.keywords||"")}</td></tr>`).join("")}</table>`;
  $("employeesTable").innerHTML=`<table><tr><th>${t("姓名")}</th><th>${t("職務")}</th></tr>${employees.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(t(x.role||""))}</td></tr>`).join("")}</table>`;
  $("relInspection").innerHTML=`<option value="">${t("請選擇")}</option>`+inspections.map(x=>`<option value="${esc(x.id)}">${esc(x.inspection_date)} ${esc((x.inspection_time||"").slice(0,5))}｜${esc(x.part_number_code)}</option>`).join("");
@@ -299,46 +332,7 @@ function renderAll(){
 function renderRecords(){
  const q=$("recordSearch").value.trim().toLowerCase(),d=$("recordDate").value;
  const rows=inspections.filter(x=>(!d||x.inspection_date===d)&&(!q||[x.part_number_code,x.operator_name,x.inspector_name,x.quality_inspector_name,x.machine].some(v=>String(v||"").toLowerCase().includes(q))));
- if(!rows.length){
-   $("recordsTable").innerHTML=`<div class="muted" style="padding:18px 4px">${t("沒有符合的巡檢紀錄")}</div>`;
-   return;
- }
- const groups={};
- rows.forEach(r=>{
-   const key=r.part_number_code||"(未填料號)";
-   if(!groups[key])groups[key]=[];
-   groups[key].push(r);
- });
- const sorted=Object.entries(groups).sort((a,b)=>{
-   const at=a[1][0]?.created_at||`${a[1][0]?.inspection_date||""} ${a[1][0]?.inspection_time||""}`;
-   const bt=b[1][0]?.created_at||`${b[1][0]?.inspection_date||""} ${b[1][0]?.inspection_time||""}`;
-   return String(bt).localeCompare(String(at));
- });
- $("recordsTable").innerHTML=`<div class="group-list">${sorted.map(([part,items],idx)=>{
-   let ok=0,ng=0;
-   items.forEach(r=>{const tt=totals(r);ok+=tt.ok;ng+=tt.ng});
-   const latest=items[0];
-   return `<div class="group-card" data-group-index="${idx}">
-     <button class="group-summary" type="button" aria-expanded="false">
-       <div>
-         <div class="group-part">${esc(part)}</div>
-         <div class="group-meta">${t("最新巡檢")}：${esc(latest.inspection_date)} ${esc((latest.inspection_time||"").slice(0,5))}｜${t("點擊展開巡檢紀錄")}</div>
-       </div>
-       <div class="group-stat group-count"><span class="group-label">${t("筆數")}</span><b>${items.length}</b> ${t("筆數")}</div>
-       <div class="group-stat group-ok"><span class="group-label">${t("合計 OK")}</span><b class="oktxt">${ok}</b></div>
-       <div class="group-stat group-ng"><span class="group-label">${t("合計 NG")}</span><b class="${ng?'ngtxt':''}">${ng}</b></div>
-       <div class="group-arrow">▶</div>
-     </button>
-     <div class="group-detail">${inspectionTable(items)}</div>
-   </div>`;
- }).join("")}</div>`;
- document.querySelectorAll("#recordsTable .group-summary").forEach(btn=>{
-   btn.addEventListener("click",()=>{
-     const card=btn.closest(".group-card");
-     const isOpen=card.classList.toggle("open");
-     btn.setAttribute("aria-expanded",String(isOpen));
-   });
- });
+ $("recordsTable").innerHTML=groupedInspectionCards(rows,"records");
 }
 $("recordSearch").oninput=renderRecords;$("recordDate").onchange=renderRecords;
 $("partNumber").addEventListener("input",e=>renderPartOptions(e.target.value));
