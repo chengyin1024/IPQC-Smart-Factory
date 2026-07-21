@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#173f31">
-<title>IPQC Smart Factory V3.1</title>
+<title>IPQC Smart Factory V3.2</title>
 <style>
 :root{--p:#173f31;--p2:#255d49;--bg:#f2f6f4;--line:#d8e2de;--ok:#16733b;--ng:#b42318;--warn:#9a6700}
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI","Noto Sans TC",sans-serif;background:var(--bg);color:#17332a}
@@ -31,6 +31,25 @@ header{position:sticky;top:0;z-index:30;background:var(--p);color:#fff;padding:1
 .actions{display:flex;gap:8px;flex-wrap:wrap}.role-owner,.role-supervisor{display:none}
 body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,body[data-role="supervisor"] .role-supervisor{display:initial}
 .lang-switch{position:absolute;top:14px;right:14px}.head-actions{display:flex;gap:8px;align-items:center}.pill{display:inline-block;padding:3px 8px;border-radius:999px;font-size:12px;font-weight:800}.pill.ok{background:#e5f6ea;color:#176335}.pill.ng{background:#fee8e8;color:#9c231b}.pill.pending{background:#fff3d6;color:#855b00}
+
+.group-list{display:flex;flex-direction:column;gap:10px}
+.group-card{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff}
+.group-summary{width:100%;display:grid;grid-template-columns:1.5fr .8fr .8fr .8fr auto;gap:10px;align-items:center;padding:13px 14px;border:0;background:#f8fbfa;text-align:left;cursor:pointer}
+.group-summary:hover{background:#eef5f2}
+.group-part{font-weight:900;font-size:16px}
+.group-meta{font-size:12px;color:#6d7f78}
+.group-arrow{font-size:18px;transition:transform .2s}
+.group-card.open .group-arrow{transform:rotate(90deg)}
+.group-detail{display:none;padding:0 12px 12px}
+.group-card.open .group-detail{display:block}
+.group-label{display:none;color:#6d7f78;font-size:11px}
+@media(max-width:760px){
+ .group-summary{grid-template-columns:1fr auto;padding:12px}
+ .group-summary .group-stat{display:grid;grid-template-columns:60px 1fr;gap:6px}
+ .group-label{display:inline}
+ .group-summary .group-count,.group-summary .group-ok,.group-summary .group-ng{grid-column:1/-1}
+}
+
 @media(max-width:760px){.grid{grid-template-columns:repeat(2,1fr)}.row,.row3,.photo-grid{grid-template-columns:1fr}.hide-mobile{display:none}.wrap{padding:10px}.card{padding:14px}}
 </style>
 </head>
@@ -39,7 +58,7 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
   <div class="login-card" style="position:relative">
     <button id="langBtnLogin" class="btn ghost lang-switch" type="button">VI</button>
     <h1>IPQC Smart Factory</h1>
-    <p class="muted">V3.1 試用版</p>
+    <p class="muted">V3.2 試用版</p>
     <div id="loginMsg"></div>
     <div class="field"><label>公司帳號</label><input id="account" autocomplete="username" placeholder="請輸入帳號"></div>
     <div class="field"><label>密碼</label><input id="password" type="password" autocomplete="current-password"></div>
@@ -169,7 +188,7 @@ const VI={
 "信賴度紀錄":"Lịch sử độ tin cậy","料號":"Mã hàng","品名／關鍵字":"Tên hàng / từ khóa","新增料號":"Thêm mã hàng",
 "人員管理":"Quản lý nhân viên","姓名 *":"Tên *","職務":"Chức vụ","作業員":"Công nhân","巡檢員":"Nhân viên kiểm tra",
 "品檢員":"Nhân viên QC","主管":"Quản lý","新增人員":"Thêm nhân viên","日期時間":"Ngày giờ","人員":"Nhân viên",
-"照片":"Ảnh","查看":"Xem","請選擇":"Vui lòng chọn","酒精":"Cồn","姓名":"Tên",
+"照片":"Ảnh","查看":"Xem","請選擇":"Vui lòng chọn","酒精":"Cồn","姓名":"Tên","筆數":"Số lần","合計 OK":"Tổng OK","合計 NG":"Tổng NG","最新巡檢":"Kiểm tra mới nhất","點擊展開巡檢紀錄":"Bấm để mở lịch sử kiểm tra","沒有符合的巡檢紀錄":"Không có lịch sử kiểm tra phù hợp",
 "帳號或密碼錯誤":"Sai tài khoản hoặc mật khẩu","資料讀取失敗：":"Đọc dữ liệu thất bại: ",
 "請填寫料號":"Vui lòng nhập mã hàng","有 NG 時必須拍攝 NG 照片":"Có NG phải chụp ảnh NG",
 "巡檢與照片已儲存":"Đã lưu kiểm tra và ảnh","儲存失敗":"Lưu thất bại",
@@ -280,7 +299,46 @@ function renderAll(){
 function renderRecords(){
  const q=$("recordSearch").value.trim().toLowerCase(),d=$("recordDate").value;
  const rows=inspections.filter(x=>(!d||x.inspection_date===d)&&(!q||[x.part_number_code,x.operator_name,x.inspector_name,x.quality_inspector_name,x.machine].some(v=>String(v||"").toLowerCase().includes(q))));
- $("recordsTable").innerHTML=inspectionTable(rows);
+ if(!rows.length){
+   $("recordsTable").innerHTML=`<div class="muted" style="padding:18px 4px">${t("沒有符合的巡檢紀錄")}</div>`;
+   return;
+ }
+ const groups={};
+ rows.forEach(r=>{
+   const key=r.part_number_code||"(未填料號)";
+   if(!groups[key])groups[key]=[];
+   groups[key].push(r);
+ });
+ const sorted=Object.entries(groups).sort((a,b)=>{
+   const at=a[1][0]?.created_at||`${a[1][0]?.inspection_date||""} ${a[1][0]?.inspection_time||""}`;
+   const bt=b[1][0]?.created_at||`${b[1][0]?.inspection_date||""} ${b[1][0]?.inspection_time||""}`;
+   return String(bt).localeCompare(String(at));
+ });
+ $("recordsTable").innerHTML=`<div class="group-list">${sorted.map(([part,items],idx)=>{
+   let ok=0,ng=0;
+   items.forEach(r=>{const tt=totals(r);ok+=tt.ok;ng+=tt.ng});
+   const latest=items[0];
+   return `<div class="group-card" data-group-index="${idx}">
+     <button class="group-summary" type="button" aria-expanded="false">
+       <div>
+         <div class="group-part">${esc(part)}</div>
+         <div class="group-meta">${t("最新巡檢")}：${esc(latest.inspection_date)} ${esc((latest.inspection_time||"").slice(0,5))}｜${t("點擊展開巡檢紀錄")}</div>
+       </div>
+       <div class="group-stat group-count"><span class="group-label">${t("筆數")}</span><b>${items.length}</b> ${t("筆數")}</div>
+       <div class="group-stat group-ok"><span class="group-label">${t("合計 OK")}</span><b class="oktxt">${ok}</b></div>
+       <div class="group-stat group-ng"><span class="group-label">${t("合計 NG")}</span><b class="${ng?'ngtxt':''}">${ng}</b></div>
+       <div class="group-arrow">▶</div>
+     </button>
+     <div class="group-detail">${inspectionTable(items)}</div>
+   </div>`;
+ }).join("")}</div>`;
+ document.querySelectorAll("#recordsTable .group-summary").forEach(btn=>{
+   btn.addEventListener("click",()=>{
+     const card=btn.closest(".group-card");
+     const isOpen=card.classList.toggle("open");
+     btn.setAttribute("aria-expanded",String(isOpen));
+   });
+ });
 }
 $("recordSearch").oninput=renderRecords;$("recordDate").onchange=renderRecords;
 $("partNumber").addEventListener("input",e=>renderPartOptions(e.target.value));
