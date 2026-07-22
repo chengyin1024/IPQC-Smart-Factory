@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#173f31">
-<title>IPQC Smart Factory V4.1</title>
+<title>IPQC Smart Factory V4.1.1</title>
 <style>
 :root{--p:#173f31;--p2:#255d49;--bg:#f2f6f4;--line:#d8e2de;--ok:#16733b;--ng:#b42318;--warn:#9a6700;--pause:#8a5b00}
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI","Noto Sans TC",sans-serif;background:var(--bg);color:#17332a}
@@ -27,20 +27,20 @@ header{position:sticky;top:0;z-index:30;background:var(--p);color:#fff;padding:1
 .actions{display:flex;gap:8px;flex-wrap:wrap}.role-owner,.role-supervisor{display:none}
 body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,body[data-role="supervisor"] .role-supervisor{display:initial}
 .pill{display:inline-block;padding:4px 9px;border-radius:999px;font-size:12px;font-weight:850}.pill.ok{background:#e5f6ea;color:#176335}.pill.ng{background:#fee8e8;color:#9c231b}.pill.pending{background:#fff3d6;color:#855b00}.pill.pause{background:#eee7dc;color:#74501b}.pill.done{background:#e8ecea;color:#4d5c56}
-.production-list{display:grid;gap:12px}.production-card{border:1px solid var(--line);border-radius:16px;padding:14px;background:#fff}.production-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.production-no{font-weight:900;font-size:17px}.production-part{font-size:22px;font-weight:900;margin:5px 0}.meta{font-size:13px;color:#66766f;line-height:1.7}
+.production-list{display:grid;gap:12px}.production-card{border:1px solid var(--line);border-radius:16px;padding:14px;background:#fff}.production-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.production-head-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}.delete-top{background:#fff5f5!important;color:#a51f1f!important;border:1px solid #efbcbc!important;padding:7px 11px!important}.delete-top:hover{background:#fee2e2!important}.production-no{font-weight:900;font-size:17px}.production-part{font-size:22px;font-weight:900;margin:5px 0}.meta{font-size:13px;color:#66766f;line-height:1.7}
 .process{border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}.process h3{margin-bottom:10px}
 .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.photo-box{border:1px dashed #aebdb7;border-radius:14px;padding:10px}.photo-box img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;margin-top:8px;background:#eef2f0}
 .result-buttons{display:flex;gap:8px;flex-wrap:wrap}.result-btn{min-width:92px;border:1px solid var(--line);background:#fff;color:#17332a}.result-btn.active-ok{background:var(--ok);color:#fff}.result-btn.active-ng{background:var(--ng);color:#fff}
 .group-card{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:10px}.group-summary{width:100%;display:flex;justify-content:space-between;gap:10px;align-items:center;padding:13px;border:0;background:#f8fbfa;text-align:left}.group-detail{display:none;padding:12px}.group-card.open .group-detail{display:block}
 .table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:700px}th,td{text-align:left;padding:10px;border-bottom:1px solid #e8eeeb;font-size:14px}
-.setup-banner{background:#fff3d6;border:1px solid #ebcf88;border-radius:14px;padding:13px;margin-bottom:14px;color:#6b4b00}
-@media(max-width:760px){.grid{grid-template-columns:repeat(2,1fr)}.row,.row3,.photo-grid{grid-template-columns:1fr}.wrap{padding:10px}.card{padding:14px}.production-head{display:block}.production-head .pill{margin-top:8px}.nav{padding-bottom:3px}}
+.delete-cell{white-space:nowrap}.setup-banner{background:#fff3d6;border:1px solid #ebcf88;border-radius:14px;padding:13px;margin-bottom:14px;color:#6b4b00}
+@media(max-width:760px){.grid{grid-template-columns:repeat(2,1fr)}.row,.row3,.photo-grid{grid-template-columns:1fr}.wrap{padding:10px}.card{padding:14px}.production-head{display:flex}.production-head-actions{max-width:55%;gap:6px}.production-head-actions .btn{padding:7px 9px}.production-head .pill{margin-top:0}.nav{padding-bottom:3px}}
 </style>
 </head>
 <body>
 <section id="loginPage" class="login">
  <div class="login-card">
-  <h1>IPQC Smart Factory</h1><p class="muted">V4.1 正式安裝版</p>
+  <h1>IPQC Smart Factory</h1><p class="muted">V4.1.2 安全按鈕版</p>
   <div id="loginMsg"></div>
   <div class="field"><label>公司帳號</label><input id="account" autocomplete="username"></div>
   <div class="field"><label>密碼</label><input id="password" type="password" autocomplete="current-password"></div>
@@ -51,7 +51,7 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
 </section>
 
 <section id="appPage" class="hidden">
-<header><div class="head"><div><div class="brand">IPQC Smart Factory <span class="badge">V4.1</span></div><div id="userInfo" class="small"></div></div><button id="logoutBtn" class="btn secondary">登出</button></div></header>
+<header><div class="head"><div><div class="brand">IPQC Smart Factory <span class="badge">V4.1.1</span></div><div id="userInfo" class="small"></div></div><button id="logoutBtn" class="btn secondary">登出</button></div></header>
 <main class="wrap">
  <div id="setupBanner" class="setup-banner hidden">資料庫尚未完成 V4.1 安裝。請先在 Supabase 執行更新包內的「install.sql」，再重新整理。</div>
  <div class="nav">
@@ -149,15 +149,36 @@ const $=id=>document.getElementById(id);
 let currentUser=null, productions=[], inspections=[], reliability=[], parts=[], employees=[], photos=[], v4Ready=true;
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const num=v=>Number(v)||0;
-const today=()=>new Date().toISOString().slice(0,10);
-const nowParts=()=>{const d=new Date();return {date:d.toISOString().slice(0,10),time:d.toTimeString().slice(0,5),text:d.toLocaleString("zh-TW",{hour12:false})}};
+const localDate=d=>{d=d||new Date();const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),day=String(d.getDate()).padStart(2,"0");return `${y}-${m}-${day}`};
+const today=()=>localDate(new Date());
+const nowParts=()=>{const d=new Date();return {date:localDate(d),time:d.toTimeString().slice(0,5),text:d.toLocaleString("zh-TW",{hour12:false})}};
 const msg=(el,text,ok=false)=>el.innerHTML=`<div class="msg ${ok?'ok':'err'}">${esc(text)}</div>`;
 const canManage=()=>currentUser?.role==="owner"||currentUser?.role==="supervisor";
+const isOwner=()=>currentUser?.role==="owner";
 function totals(r){return {ok:num(r.printing_a_ok)+num(r.printing_b_ok)+num(r.packing_ok),ng:num(r.printing_a_ng)+num(r.printing_b_ng)+num(r.packing_ng)}}
 function productionTotals(pid){let ok=0,ng=0;inspections.filter(x=>String(x.production_id)===String(pid)).forEach(x=>{const t=totals(x);ok+=t.ok;ng+=t.ng});return {ok,ng,yield:ok+ng?ok/(ok+ng)*100:0}}
 function statusPill(s){if(s==="active")return '<span class="pill ok">🟢 生產中</span>';if(s==="paused")return '<span class="pill pause">🟡 暫停</span>';return '<span class="pill done">⚫ 已完成</span>'}
-function relFor(pid){return reliability.find(x=>String(x.production_id)===String(pid))}
-function relPill(pid){const r=relFor(pid);if(!r)return '<span class="pill pending">🟡 待測</span>';if(r.alcohol_result==="NG"||r.tape_3m600_result==="NG")return '<span class="pill ng">🔴 NG</span>';return '<span class="pill ok">🟢 已完成</span>'}
+function relRecordsFor(pid){return reliability.filter(x=>String(x.production_id)===String(pid)).sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0))}
+function relFor(pid){return relRecordsFor(pid)[0]||null}
+function requiredReliabilitySlot(p,now=new Date()){
+ const started=new Date(p.started_at||p.created_at||now), slots=[];
+ const startDay=new Date(started.getFullYear(),started.getMonth(),started.getDate());
+ const nowDay=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+ for(let d=new Date(startDay);d<=nowDay;d.setDate(d.getDate()+1)){
+  for(const hour of [7,13]){const s=new Date(d.getFullYear(),d.getMonth(),d.getDate(),hour,0,0,0);if(s>=started&&s<=now)slots.push(s)}
+ }
+ // 建立生產後首件立即需要測；之後每天 07:00、13:00 再重新待測。
+ slots.push(started);
+ return new Date(Math.max(...slots.map(x=>x.getTime())));
+}
+function reliabilityState(p){
+ const latest=relFor(p.id),required=requiredReliabilitySlot(p),latestAt=latest?new Date(latest.created_at||`${latest.test_date||today()}T00:00:00`):null;
+ const pending=p.status!=="completed"&&(!latestAt||latestAt<required);
+ return {latest,required,latestAt,pending};
+}
+function slotLabel(d){return `${localDate(d)} ${String(d.getHours()).padStart(2,"0")}:00`}
+function relPill(pid){const p=productions.find(x=>String(x.id)===String(pid));if(!p)return '<span class="pill pending">🟡 待測</span>';const s=reliabilityState(p);if(s.pending)return `<span class="pill pending">🟡 待測（${esc(slotLabel(s.required))}）</span>`;if(s.latest?.alcohol_result==="NG"||s.latest?.tape_3m600_result==="NG")return '<span class="pill ng">🔴 NG</span>';return '<span class="pill ok">🟢 已完成</span>'}
+function canDeleteProduction(p){return isOwner()||(currentUser?.role==="supervisor"&&p.status!=="completed")}
 function photoLinks(type,id){const ps=photos.filter(p=>p.parent_type===type&&String(p.parent_id)===String(id));return ps.length?ps.map(p=>`<a href="${esc(p.public_url)}" target="_blank">查看照片</a>`).join("｜"):"-"}
 function showPage(id){document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));$(id).classList.remove("hidden");document.querySelectorAll(".nav button").forEach(x=>{x.classList.remove("primary");x.classList.add("secondary")});const b=document.querySelector(`[data-page="${id}"]`);if(b){b.classList.add("primary");b.classList.remove("secondary")}if(id==="inspection")$("inspectionDateTime").value=nowParts().text}
 document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{if(b.classList.contains("role-supervisor")&&!canManage())return;showPage(b.dataset.page)});
@@ -178,7 +199,8 @@ async function loadAll(){
 }
 function renderProductionCard(p,actions=true){
  const t=productionTotals(p.id), count=inspections.filter(x=>String(x.production_id)===String(p.id)).length;
- return `<div class="production-card"><div class="production-head"><div><div class="production-no">${esc(p.production_no)}</div><div class="production-part">${esc(p.part_number_code)}</div></div>${statusPill(p.status)}</div><div class="meta">機台：${esc(p.machine||"-")}｜作業員：${esc(p.operator_name||"-")}<br>開始：${esc((p.started_at||"").replace("T"," ").slice(0,16))}｜巡檢：${count} 次<br>OK ${t.ok}｜NG ${t.ng}｜良率 ${t.yield.toFixed(1)}%｜信賴度 ${relPill(p.id)}</div>${actions?`<div class="actions" style="margin-top:10px">${p.status==="active"?`<button class="btn warning" onclick="changeProduction('${p.id}','paused')">暫停生產</button>`:""}${p.status==="paused"?`<button class="btn secondary" onclick="changeProduction('${p.id}','active')">恢復生產</button>`:""}${p.status!=="completed"?`<button class="btn danger" onclick="completeProduction('${p.id}')">完成生產</button>`:""}<button class="btn ghost" onclick="startInspectionFor('${p.id}')">新增巡檢</button>${!relFor(p.id)?`<button class="btn ghost" onclick="startReliability('${p.id}')">做信賴度</button>`:""}</div>`:""}</div>`
+ const deleteBtn=canDeleteProduction(p)?`<button class="btn delete-top" onclick="deleteProduction('${p.id}')" title="刪除生產單">🗑 刪除</button>`:"";
+ return `<div class="production-card"><div class="production-head"><div><div class="production-no">${esc(p.production_no)}</div><div class="production-part">${esc(p.part_number_code)}</div></div><div class="production-head-actions">${statusPill(p.status)}${deleteBtn}</div></div><div class="meta">機台：${esc(p.machine||"-")}｜作業員：${esc(p.operator_name||"-")}<br>開始：${esc((p.started_at||"").replace("T"," ").slice(0,16))}｜巡檢：${count} 次<br>OK ${t.ok}｜NG ${t.ng}｜良率 ${t.yield.toFixed(1)}%｜信賴度 ${relPill(p.id)}</div>${actions?`<div class="actions" style="margin-top:10px">${p.status==="active"?`<button class="btn warning" onclick="changeProduction('${p.id}','paused')">暫停生產</button>`:""}${p.status==="paused"?`<button class="btn secondary" onclick="changeProduction('${p.id}','active')">恢復生產</button>`:""}${p.status!=="completed"?`<button class="btn danger" onclick="completeProduction('${p.id}')">完成生產</button>`:""}<button class="btn ghost" onclick="startInspectionFor('${p.id}')">新增巡檢</button>${p.status!=="completed"&&reliabilityState(p).pending?`<button class="btn ghost" onclick="startReliability('${p.id}')">做信賴度</button>`:""}</div>`:""}</div>`
 }
 function renderAll(){
  $("partList").innerHTML=parts.map(x=>`<option value="${esc(x.code)}">${esc(x.keywords||"")}</option>`).join("");
@@ -190,13 +212,13 @@ function renderAll(){
  const activeSelectable=productions.filter(x=>x.status==="active");
  $("inspectionProduction").innerHTML='<option value="">請選擇</option>'+activeSelectable.map(x=>`<option value="${esc(x.id)}">${esc(x.production_no)}｜${esc(x.part_number_code)}｜${esc(x.machine||"")}</option>`).join("");
  const todayRows=inspections.filter(x=>x.inspection_date===today());let ok=0,ng=0;todayRows.forEach(x=>{const t=totals(x);ok+=t.ok;ng+=t.ng});
- $("statActive").textContent=active.length;$("statInspections").textContent=todayRows.length;$("statPendingRel").textContent=active.filter(x=>!relFor(x.id)).length;$("statYield").textContent=(ok+ng?ok/(ok+ng)*100:0).toFixed(1)+"%";
- const pending=active.filter(x=>!relFor(x.id));
+ $("statActive").textContent=active.length;$("statInspections").textContent=todayRows.length;$("statPendingRel").textContent=active.filter(x=>reliabilityState(x).pending).length;$("statYield").textContent=(ok+ng?ok/(ok+ng)*100:0).toFixed(1)+"%";
+ const pending=active.filter(x=>reliabilityState(x).pending);
  $("todoList").innerHTML=`<div class="meta">🧪 待信賴度：<b>${pending.length}</b> 件<br>🔴 今日 NG：<b>${ng}</b> 件<br>📝 今日巡檢：<b>${todayRows.length}</b> 次</div>`;
- $("pendingReliability").innerHTML=pending.length?pending.map(p=>`<div class="production-card"><div class="production-no">${esc(p.production_no)}</div><div class="production-part">${esc(p.part_number_code)}</div><div class="meta">開始：${esc((p.started_at||"").replace("T"," ").slice(0,16))}｜機台：${esc(p.machine||"-")}</div><button class="btn primary" style="margin-top:10px" onclick="startReliability('${p.id}')">開始測試</button></div>`).join(""):'<div class="muted">目前沒有待測項目</div>';
+ $("pendingReliability").innerHTML=pending.length?pending.map(p=>`<div class="production-card"><div class="production-no">${esc(p.production_no)}</div><div class="production-part">${esc(p.part_number_code)}</div><div class="meta">開始：${esc((p.started_at||"").replace("T"," ").slice(0,16))}｜機台：${esc(p.machine||"-")}<br>應測時段：${esc(slotLabel(reliabilityState(p).required))}</div><button class="btn primary" style="margin-top:10px" onclick="startReliability('${p.id}')">開始測試</button></div>`).join(""):'<div class="muted">目前沒有待測項目</div>';
  renderRecords();renderReliabilityRecords();
- $("partsTable").innerHTML=`<table><tr><th>料號</th><th>品名／關鍵字</th></tr>${parts.map(x=>`<tr><td>${esc(x.code)}</td><td>${esc(x.keywords||"")}</td></tr>`).join("")}</table>`;
- $("employeesTable").innerHTML=`<table><tr><th>姓名</th><th>職務</th></tr>${employees.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.role||"")}</td></tr>`).join("")}</table>`;
+ $("partsTable").innerHTML=`<table><tr><th>料號</th><th>品名／關鍵字</th><th>操作</th></tr>${parts.map(x=>`<tr><td>${esc(x.code)}</td><td>${esc(x.keywords||"")}</td><td class="delete-cell">${canManage()?`<button class="btn danger" onclick="deletePart('${x.id}')">刪除</button>`:"-"}</td></tr>`).join("")}</table>`;
+ $("employeesTable").innerHTML=`<table><tr><th>姓名</th><th>職務</th><th>操作</th></tr>${employees.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.role||"")}</td><td class="delete-cell">${canManage()?`<button class="btn danger" onclick="deleteEmployee('${x.id}')">刪除</button>`:"-"}</td></tr>`).join("")}</table>`;
 }
 async function createProductionNo(){const d=today().replaceAll("-","");const same=productions.filter(x=>String(x.production_no||"").startsWith("P"+d));const n=String(same.length+1).padStart(3,"0");return `P${d}-${n}`}
 $("createProductionBtn").onclick=async()=>{
@@ -230,19 +252,35 @@ $("saveReliabilityBtn").onclick=async()=>{
  const {data,error}=await sb.from("reliability_tests").insert(payload).select().single();if(error)return msg($("relMsg"),error.message);
  try{await uploadPhoto($("relPhoto").files[0],"reliability",data.id,"信賴度");await ensureEmployee(payload.tester_name,"品檢員");msg($("relMsg"),"信賴度測試已完成",true);$("reliabilityFormCard").classList.add("hidden");await loadAll()}catch(e){msg($("relMsg"),e.message)}
 }
+async function deleteStoredPhotos(parentType,parentIds){
+ const ids=(Array.isArray(parentIds)?parentIds:[parentIds]).map(String),targets=photos.filter(x=>x.parent_type===parentType&&ids.includes(String(x.parent_id)));
+ const paths=targets.map(x=>x.storage_path).filter(Boolean);if(paths.length)await sb.storage.from("ipqc-photos").remove(paths);
+ if(ids.length)await sb.from("inspection_photos").delete().eq("parent_type",parentType).in("parent_id",ids);
+}
+async function deleteProduction(id){
+ const p=productions.find(x=>String(x.id)===String(id));if(!p||!canDeleteProduction(p))return alert("你沒有刪除此生產單的權限");
+ if(!confirm(`確定刪除 ${p.production_no}？\n相關 IPQC、信賴度與照片也會一起刪除，且無法復原。`))return;
+ const insIds=inspections.filter(x=>String(x.production_id)===String(id)).map(x=>x.id),relIds=reliability.filter(x=>String(x.production_id)===String(id)).map(x=>x.id);
+ try{await deleteStoredPhotos("inspection",insIds);await deleteStoredPhotos("reliability",relIds);if(insIds.length){const {error}=await sb.from("inspections").delete().in("id",insIds);if(error)throw error}if(relIds.length){const {error}=await sb.from("reliability_tests").delete().in("id",relIds);if(error)throw error}const {error}=await sb.from("production_orders").delete().eq("id",id);if(error)throw error;await loadAll()}catch(e){alert(e.message)}
+}
+async function deleteInspection(id){if(!canManage())return alert("沒有刪除權限");if(!confirm("確定刪除這筆巡檢紀錄？"))return;try{await deleteStoredPhotos("inspection",id);const {error}=await sb.from("inspections").delete().eq("id",id);if(error)throw error;await loadAll()}catch(e){alert(e.message)}}
+async function deleteReliability(id){if(!canManage())return alert("沒有刪除權限");if(!confirm("確定刪除這筆信賴度紀錄？刪除後該生產單可能重新顯示待測。"))return;try{await deleteStoredPhotos("reliability",id);const {error}=await sb.from("reliability_tests").delete().eq("id",id);if(error)throw error;await loadAll()}catch(e){alert(e.message)}}
+async function deletePart(id){if(!canManage())return;if(!confirm("確定刪除此料號？既有生產與巡檢紀錄不會被刪除。"))return;const {error}=await sb.from("part_numbers").delete().eq("id",id);if(error)return alert(error.message);await loadAll()}
+async function deleteEmployee(id){if(!canManage())return;if(!confirm("確定刪除此人員？既有歷史紀錄不會被刪除。"))return;const {error}=await sb.from("employees").delete().eq("id",id);if(error)return alert(error.message);await loadAll()}
 function renderRecords(){
  const q=$("recordSearch").value.trim().toLowerCase(),d=$("recordDate").value;
  const rows=inspections.filter(x=>(!d||x.inspection_date===d)&&(!q||[x.part_number_code,x.operator_name,x.inspector_name,x.quality_inspector_name,productions.find(p=>String(p.id)===String(x.production_id))?.production_no].some(v=>String(v||"").toLowerCase().includes(q))));
  const groups={};rows.forEach(r=>{const p=productions.find(x=>String(x.id)===String(r.production_id)),key=p?.production_no||r.part_number_code||"未分類";(groups[key]??=[]).push(r)});
- $("recordsTable").innerHTML=Object.entries(groups).map(([key,items])=>`<div class="group-card"><button class="group-summary" onclick="this.parentElement.classList.toggle('open')"><div><b>${esc(key)}</b><div class="small muted">${esc(items[0]?.part_number_code||"")}｜${items.length} 筆</div></div><span>▶</span></button><div class="group-detail"><div class="table-wrap"><table><tr><th>日期時間</th><th>OK</th><th>NG</th><th>巡檢／品檢</th><th>照片</th></tr>${items.map(r=>{const t=totals(r);return `<tr><td>${esc(r.inspection_date)} ${esc((r.inspection_time||"").slice(0,5))}</td><td>${t.ok}</td><td class="${t.ng?'ngtxt':''}">${t.ng}</td><td>${esc(r.inspector_name||"-")}／${esc(r.quality_inspector_name||"-")}</td><td>${photoLinks("inspection",r.id)}</td></tr>`}).join("")}</table></div></div></div>`).join("")||'<div class="muted">沒有符合的巡檢紀錄</div>'
+ $("recordsTable").innerHTML=Object.entries(groups).map(([key,items])=>`<div class="group-card"><button class="group-summary" onclick="this.parentElement.classList.toggle('open')"><div><b>${esc(key)}</b><div class="small muted">${esc(items[0]?.part_number_code||"")}｜${items.length} 筆</div></div><span>▶</span></button><div class="group-detail"><div class="table-wrap"><table><tr><th>日期時間</th><th>OK</th><th>NG</th><th>巡檢／品檢</th><th>照片</th><th>操作</th></tr>${items.map(r=>{const t=totals(r);return `<tr><td>${esc(r.inspection_date)} ${esc((r.inspection_time||"").slice(0,5))}</td><td>${t.ok}</td><td class="${t.ng?'ngtxt':''}">${t.ng}</td><td>${esc(r.inspector_name||"-")}／${esc(r.quality_inspector_name||"-")}</td><td>${photoLinks("inspection",r.id)}</td><td class="delete-cell">${canManage()?`<button class="btn danger" onclick="deleteInspection('${r.id}')">刪除</button>`:"-"}</td></tr>`}).join("")}</table></div></div></div>`).join("")||'<div class="muted">沒有符合的巡檢紀錄</div>'
 }
 function renderReliabilityRecords(){
- $("reliabilityTable").innerHTML=`<table><tr><th>日期</th><th>生產單</th><th>料號</th><th>酒精</th><th>3M600</th><th>測試人員</th><th>照片</th></tr>${reliability.map(r=>{const p=productions.find(x=>String(x.id)===String(r.production_id));return `<tr><td>${esc(r.test_date||"")}</td><td>${esc(p?.production_no||"-")}</td><td>${esc(r.part_number_code||"")}</td><td>${r.alcohol_result==="NG"?'<span class="pill ng">NG</span>':'<span class="pill ok">OK</span>'}</td><td>${r.tape_3m600_result==="NG"?'<span class="pill ng">NG</span>':'<span class="pill ok">OK</span>'}</td><td>${esc(r.tester_name||"")}</td><td>${photoLinks("reliability",r.id)}</td></tr>`}).join("")}</table>`
+ $("reliabilityTable").innerHTML=`<table><tr><th>日期</th><th>生產單</th><th>料號</th><th>酒精</th><th>3M600</th><th>測試人員</th><th>照片</th><th>操作</th></tr>${reliability.map(r=>{const p=productions.find(x=>String(x.id)===String(r.production_id));return `<tr><td>${esc(r.test_date||"")}</td><td>${esc(p?.production_no||"-")}</td><td>${esc(r.part_number_code||"")}</td><td>${r.alcohol_result==="NG"?'<span class="pill ng">NG</span>':'<span class="pill ok">OK</span>'}</td><td>${r.tape_3m600_result==="NG"?'<span class="pill ng">NG</span>':'<span class="pill ok">OK</span>'}</td><td>${esc(r.tester_name||"")}</td><td>${photoLinks("reliability",r.id)}</td><td class="delete-cell">${canManage()?`<button class="btn danger" onclick="deleteReliability('${r.id}')">刪除</button>`:"-"}</td></tr>`}).join("")}</table>`
 }
 $("recordSearch").oninput=renderRecords;$("recordDate").onchange=renderRecords;
 $("addPartBtn").onclick=async()=>{if(!canManage())return;const code=$("newPartCode").value.trim();if(!code)return alert("請輸入料號");const {error}=await sb.from("part_numbers").insert({code,keywords:$("newPartKeywords").value.trim()});if(error)return alert(error.message);await loadAll()};
 $("addEmployeeBtn").onclick=async()=>{if(!canManage())return;const name=$("newEmployeeName").value.trim();if(!name)return alert("請輸入姓名");const {error}=await sb.from("employees").insert({name,role:$("newEmployeeRole").value});if(error)return alert(error.message);await loadAll()};
-window.changeProduction=changeProduction;window.completeProduction=completeProduction;window.startInspectionFor=startInspectionFor;window.startReliability=startReliability;
+window.changeProduction=changeProduction;window.completeProduction=completeProduction;window.startInspectionFor=startInspectionFor;window.startReliability=startReliability;window.deleteProduction=deleteProduction;window.deleteInspection=deleteInspection;window.deleteReliability=deleteReliability;window.deletePart=deletePart;window.deleteEmployee=deleteEmployee;
+setInterval(()=>{if(currentUser)renderAll()},60000);
 (async()=>{try{const saved=JSON.parse(localStorage.getItem("ipqc_v4_login")||"null");if(saved&&ACCOUNTS[saved.account]){currentUser=saved;await enterApp()}}catch(e){}})();
 </script>
 </body>
