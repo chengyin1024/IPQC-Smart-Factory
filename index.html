@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#173f31">
-<title>IPQC Smart Factory V4.1.1</title>
+<title>IPQC Smart Factory V4.1.5</title>
 <style>
 :root{--p:#173f31;--p2:#255d49;--bg:#f2f6f4;--line:#d8e2de;--ok:#16733b;--ng:#b42318;--warn:#9a6700;--pause:#8a5b00}
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI","Noto Sans TC",sans-serif;background:var(--bg);color:#17332a}
@@ -40,7 +40,7 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
 <body>
 <section id="loginPage" class="login">
  <div class="login-card">
-  <h1>IPQC Smart Factory</h1><p class="muted">V4.1.3 巡檢修正版</p>
+  <h1>IPQC Smart Factory</h1><p class="muted">V4.1.5 穩定操作版｜2026-07-22</p>
   <div id="loginMsg"></div>
   <div class="field"><label>公司帳號</label><input id="account" autocomplete="username"></div>
   <div class="field"><label>密碼</label><input id="password" type="password" autocomplete="current-password"></div>
@@ -51,7 +51,7 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
 </section>
 
 <section id="appPage" class="hidden">
-<header><div class="head"><div><div class="brand">IPQC Smart Factory <span class="badge">V4.1.1</span></div><div id="userInfo" class="small"></div></div><button id="logoutBtn" class="btn secondary">登出</button></div></header>
+<header><div class="head"><div><div class="brand">IPQC Smart Factory <span class="badge">V4.1.5</span></div><div id="userInfo" class="small"></div></div><button id="logoutBtn" class="btn secondary">登出</button></div></header>
 <main class="wrap">
  <div id="setupBanner" class="setup-banner hidden">資料庫尚未完成 V4.1 安裝。請先在 Supabase 執行更新包內的「install.sql」，再重新整理。</div>
  <div class="nav">
@@ -100,11 +100,20 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
     <div class="field"><label>巡檢人員 *</label><select id="inspectorName"><option value="">請選擇巡檢人員</option></select></div>
     <div class="field"><label>品檢人員</label><input id="qualityInspectorName" list="employeeList"></div>
    </div>
-   <div class="process"><h3>印刷 A</h3><div class="row"><div class="field"><label>OK</label><input id="aOk" type="number" min="0" value="0"></div><div class="field"><label>NG</label><input id="aNg" type="number" min="0" value="0"></div></div></div>
-   <div class="process"><h3>印刷 B</h3><div class="row"><div class="field"><label>OK</label><input id="bOk" type="number" min="0" value="0"></div><div class="field"><label>NG</label><input id="bNg" type="number" min="0" value="0"></div></div></div>
-   <div class="process"><h3>包裝</h3><div class="row"><div class="field"><label>OK</label><input id="pOk" type="number" min="0" value="0"></div><div class="field"><label>NG</label><input id="pNg" type="number" min="0" value="0"></div></div></div>
-   <div class="row"><div class="field"><label>NG原因</label><select id="ngReason"><option value="">無</option><option>漏印</option><option>偏位</option><option>重影</option><option>刮傷</option><option>溢墨</option><option>色差</option><option>異物</option><option>包裝異常</option><option>其他</option></select></div><div class="field"><label>備註／處理方式</label><textarea id="notes"></textarea></div></div>
-   <div class="photo-grid"><div class="photo-box"><b>首件照片（第一筆巡檢可拍）</b><input id="firstPhoto" type="file" accept="image/*" capture="environment"><img id="firstPreview" class="hidden"></div><div class="photo-box"><b>NG照片</b><input id="ngPhoto" type="file" accept="image/*" capture="environment"><img id="ngPreview" class="hidden"></div><div class="photo-box"><b>其他照片</b><input id="otherPhoto" type="file" accept="image/*" capture="environment"><img id="otherPreview" class="hidden"></div></div>
+   <div class="process"><h3>印刷 A</h3>
+    <div class="row"><div class="field"><label>OK</label><input id="aOk" type="number" min="0" value="0" inputmode="numeric"></div><div class="field"><label>NG</label><input id="aNg" type="number" min="0" value="0" inputmode="numeric"></div></div>
+    <div class="row"><div class="field"><label>印刷 A－NG 原因</label><select id="aNgReason"><option value="">無</option><option>漏印</option><option>偏位</option><option>重影</option><option>刮傷</option><option>溢墨</option><option>色差</option><option>異物</option><option>包裝異常</option><option>其他</option></select></div><div class="field"><label>印刷 A－NG 照片</label><input id="aNgPhoto" type="file" accept="image/*" capture="environment"><img id="aNgPreview" class="hidden"></div></div>
+   </div>
+   <div class="process"><h3>印刷 B</h3>
+    <div class="row"><div class="field"><label>OK</label><input id="bOk" type="number" min="0" value="0" inputmode="numeric"></div><div class="field"><label>NG</label><input id="bNg" type="number" min="0" value="0" inputmode="numeric"></div></div>
+    <div class="row"><div class="field"><label>印刷 B－NG 原因</label><select id="bNgReason"><option value="">無</option><option>漏印</option><option>偏位</option><option>重影</option><option>刮傷</option><option>溢墨</option><option>色差</option><option>異物</option><option>包裝異常</option><option>其他</option></select></div><div class="field"><label>印刷 B－NG 照片</label><input id="bNgPhoto" type="file" accept="image/*" capture="environment"><img id="bNgPreview" class="hidden"></div></div>
+   </div>
+   <div class="process"><h3>包裝</h3>
+    <div class="row"><div class="field"><label>OK</label><input id="pOk" type="number" min="0" value="0" inputmode="numeric"></div><div class="field"><label>NG</label><input id="pNg" type="number" min="0" value="0" inputmode="numeric"></div></div>
+    <div class="row"><div class="field"><label>包裝－NG 原因</label><select id="pNgReason"><option value="">無</option><option>漏印</option><option>偏位</option><option>重影</option><option>刮傷</option><option>溢墨</option><option>色差</option><option>異物</option><option>包裝異常</option><option>其他</option></select></div><div class="field"><label>包裝－NG 照片</label><input id="pNgPhoto" type="file" accept="image/*" capture="environment"><img id="pNgPreview" class="hidden"></div></div>
+   </div>
+   <div class="field"><label>備註／處理方式</label><textarea id="notes"></textarea></div>
+   <div class="photo-grid"><div class="photo-box"><b>首件照片（第一筆巡檢可拍）</b><input id="firstPhoto" type="file" accept="image/*" capture="environment"><img id="firstPreview" class="hidden"></div><div class="photo-box"><b>其他照片</b><input id="otherPhoto" type="file" accept="image/*" capture="environment"><img id="otherPreview" class="hidden"></div></div>
    <button id="saveInspectionBtn" class="btn primary" style="margin-top:14px">儲存巡檢</button>
   </div>
  </section>
@@ -236,13 +245,13 @@ $("createProductionBtn").onclick=async()=>{
 async function changeProduction(id,status){const payload={status};if(status==="paused")payload.paused_at=new Date().toISOString();if(status==="active")payload.resumed_at=new Date().toISOString();const {error}=await sb.from("production_orders").update(payload).eq("id",id);if(error)return alert(error.message);await loadAll()}
 async function completeProduction(id){const p=productions.find(x=>String(x.id)===String(id)),t=productionTotals(id);if(!confirm(`確定完成 ${p?.production_no}？\nOK ${t.ok}｜NG ${t.ng}｜良率 ${t.yield.toFixed(1)}%`))return;const {error}=await sb.from("production_orders").update({status:"completed",completed_at:new Date().toISOString()}).eq("id",id);if(error)return alert(error.message);await loadAll()}
 function clearInspectionPhotos(){
- ["firstPhoto","ngPhoto","otherPhoto"].forEach(id=>{$(id).value=""});
- ["firstPreview","ngPreview","otherPreview"].forEach(id=>{const img=$(id);if(img.src&&img.src.startsWith("blob:"))URL.revokeObjectURL(img.src);img.removeAttribute("src");img.classList.add("hidden")});
+ ["firstPhoto","aNgPhoto","bNgPhoto","pNgPhoto","otherPhoto"].forEach(id=>{$(id).value=""});
+ ["firstPreview","aNgPreview","bNgPreview","pNgPreview","otherPreview"].forEach(id=>{const img=$(id);if(img.src&&img.src.startsWith("blob:"))URL.revokeObjectURL(img.src);img.removeAttribute("src");img.classList.add("hidden")});
 }
 function resetInspectionForm(keepProduction=true){
  clearInspectionPhotos();
  ["aOk","aNg","bOk","bNg","pOk","pNg"].forEach(id=>$(id).value=0);
- $("ngReason").value="";
+ ["aNgReason","bNgReason","pNgReason"].forEach(id=>$(id).value="");
  $("notes").value="";
  $("formMsg").innerHTML="";
  $("inspectionDateTime").value=nowParts().text;
@@ -258,7 +267,7 @@ $("inspectionProduction").onchange=()=>{inspectionDraftProductionId=$("inspectio
 function startReliability(id){const p=productions.find(x=>String(x.id)===String(id));showPage("reliability");$("relProductionId").value=id;$("relProductionInfo").textContent=`${p.production_no}｜${p.part_number_code}｜烘烤完成後進行測試`;$("reliabilityFormCard").classList.remove("hidden");window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"})}
 document.querySelectorAll(".result-buttons").forEach(g=>g.querySelectorAll(".result-btn").forEach(b=>b.onclick=()=>{const target=$(g.dataset.resultTarget);target.value=b.dataset.value;g.querySelectorAll(".result-btn").forEach(x=>x.classList.remove("active-ok","active-ng"));b.classList.add(b.dataset.value==="OK"?"active-ok":"active-ng")}));
 function setupPreview(inputId,imgId){$(inputId).onchange=()=>{inspectionDraftProductionId=$("inspectionProduction").value||inspectionDraftProductionId;const f=$(inputId).files[0];if(!f)return;const img=$(imgId);if(img.src&&img.src.startsWith("blob:"))URL.revokeObjectURL(img.src);img.src=URL.createObjectURL(f);img.classList.remove("hidden")}}
-[["firstPhoto","firstPreview"],["ngPhoto","ngPreview"],["otherPhoto","otherPreview"],["relPhoto","relPreview"]].forEach(x=>setupPreview(...x));
+[["firstPhoto","firstPreview"],["aNgPhoto","aNgPreview"],["bNgPhoto","bNgPreview"],["pNgPhoto","pNgPreview"],["otherPhoto","otherPreview"],["relPhoto","relPreview"]].forEach(x=>setupPreview(...x));
 async function uploadPhoto(file,parentType,parentId,photoType){if(!file)return;const ext=(file.name.split(".").pop()||"jpg").toLowerCase(),path=`${parentType}/${parentId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;const {error}=await sb.storage.from("ipqc-photos").upload(path,file,{cacheControl:"3600"});if(error)throw error;const {data}=sb.storage.from("ipqc-photos").getPublicUrl(path);const {error:dbErr}=await sb.from("inspection_photos").insert({parent_type:parentType,parent_id:String(parentId),photo_type:photoType,storage_path:path,public_url:data.publicUrl});if(dbErr)throw dbErr}
 async function ensurePart(code){if(!code||parts.some(x=>String(x.code).toLowerCase()===code.toLowerCase()))return;const {error}=await sb.from("part_numbers").insert({code,keywords:""});if(error&&error.code!=="23505")throw error}
 async function ensureEmployee(name,role){if(!name||employees.some(x=>String(x.name).toLowerCase()===name.toLowerCase()))return;const {error}=await sb.from("employees").insert({name,role});if(error&&error.code!=="23505")throw error}
@@ -268,18 +277,30 @@ $("saveInspectionBtn").onclick=async()=>{
  inspectionDraftProductionId=pid;
  const inspector=$("inspectorName").value.trim();
  if(!inspector){alert("尚未選擇巡檢人員");return}
+ const aNg=num($("aNg").value),bNg=num($("bNg").value),pNg=num($("pNg").value);
  const ok=num($("aOk").value)+num($("bOk").value)+num($("pOk").value);
- const ng=num($("aNg").value)+num($("bNg").value)+num($("pNg").value);
+ const ng=aNg+bNg+pNg;
  if(ok===0&&ng===0){alert("尚未填寫巡檢數量");return}
- if(ng>0&&!$("ngReason").value){alert("尚未填寫 NG 原因");return}
- if(ng>0&&!$("ngPhoto").files[0]){alert("有 NG 時必須拍攝 NG 照片");return}
- const n=nowParts(),payload={production_id:pid,inspection_date:n.date,inspection_time:n.time,part_number_code:p.part_number_code,operator_name:p.operator_name||"",inspector_name:inspector,quality_inspector_name:$("qualityInspectorName").value.trim(),machine:p.machine||"",printing_a_status:"check",printing_a_ok:num($("aOk").value),printing_a_ng:num($("aNg").value),printing_b_status:"check",printing_b_ok:num($("bOk").value),printing_b_ng:num($("bNg").value),packing_status:"check",packing_ok:num($("pOk").value),packing_ng:num($("pNg").value),ng_reason:$("ngReason").value,notes:$("notes").value.trim()};
+ if(aNg>0&&!$("aNgReason").value){alert("尚未填寫印刷 A 的 NG 原因");return}
+ if(aNg>0&&!$("aNgPhoto").files[0]){alert("印刷 A 有 NG，必須拍攝 NG 照片");return}
+ if(bNg>0&&!$("bNgReason").value){alert("尚未填寫印刷 B 的 NG 原因");return}
+ if(bNg>0&&!$("bNgPhoto").files[0]){alert("印刷 B 有 NG，必須拍攝 NG 照片");return}
+ if(pNg>0&&!$("pNgReason").value){alert("尚未填寫包裝的 NG 原因");return}
+ if(pNg>0&&!$("pNgPhoto").files[0]){alert("包裝有 NG，必須拍攝 NG 照片");return}
+ const stationReasons=[
+  aNg>0?`印刷A：${$("aNgReason").value}`:"",
+  bNg>0?`印刷B：${$("bNgReason").value}`:"",
+  pNg>0?`包裝：${$("pNgReason").value}`:""
+ ].filter(Boolean).join("｜");
+ const n=nowParts(),payload={production_id:pid,inspection_date:n.date,inspection_time:n.time,part_number_code:p.part_number_code,operator_name:p.operator_name||"",inspector_name:inspector,quality_inspector_name:$("qualityInspectorName").value.trim(),machine:p.machine||"",printing_a_status:"check",printing_a_ok:num($("aOk").value),printing_a_ng:aNg,printing_b_status:"check",printing_b_ok:num($("bOk").value),printing_b_ng:bNg,packing_status:"check",packing_ok:num($("pOk").value),packing_ng:pNg,ng_reason:stationReasons,notes:$("notes").value.trim()};
  $("saveInspectionBtn").disabled=true;
  try{
   const {data,error}=await sb.from("inspections").insert(payload).select().single();
   if(error)throw error;
   await uploadPhoto($("firstPhoto").files[0],"inspection",data.id,"首件");
-  await uploadPhoto($("ngPhoto").files[0],"inspection",data.id,"NG");
+  await uploadPhoto($("aNgPhoto").files[0],"inspection",data.id,"印刷A NG");
+  await uploadPhoto($("bNgPhoto").files[0],"inspection",data.id,"印刷B NG");
+  await uploadPhoto($("pNgPhoto").files[0],"inspection",data.id,"包裝 NG");
   await uploadPhoto($("otherPhoto").files[0],"inspection",data.id,"其他");
   await ensureEmployee(payload.quality_inspector_name,"品檢員");
   resetInspectionForm(true);
@@ -293,11 +314,45 @@ $("saveInspectionBtn").onclick=async()=>{
  }
 }
 $("saveReliabilityBtn").onclick=async()=>{
- const pid=$("relProductionId").value,p=productions.find(x=>String(x.id)===String(pid));if(!p)return msg($("relMsg"),"請先選擇生產單");if(!$("relAlcohol").value||!$("relTape").value)return msg($("relMsg"),"請選擇酒精與 3M600 結果");
+ const pid=$("relProductionId").value,p=productions.find(x=>String(x.id)===String(pid));
+ if(!p){alert("尚未選擇生產單");return}
+ if(!$("relAlcohol").value){alert("尚未完成 99% 酒精測試");return}
+ if(!$("relTape").value){alert("尚未完成 3M600 測試");return}
+ const tester=$("relTester").value.trim();
+ if(!tester){alert("尚未選擇或填寫測試人員");return}
+ if(!$("relPhoto").files[0]){alert("尚未拍攝信賴度照片");return}
  const firstInspection=inspections.filter(x=>String(x.production_id)===String(pid)).sort((a,b)=>String(a.created_at).localeCompare(String(b.created_at)))[0];
- const payload={production_id:pid,inspection_id:firstInspection?.id||null,part_number_code:p.part_number_code,alcohol_result:$("relAlcohol").value,tape_3m600_result:$("relTape").value,tester_name:$("relTester").value.trim(),test_date:today(),notes:$("relNotes").value.trim()};
- const {data,error}=await sb.from("reliability_tests").insert(payload).select().single();if(error)return msg($("relMsg"),error.message);
- try{await uploadPhoto($("relPhoto").files[0],"reliability",data.id,"信賴度");await ensureEmployee(payload.tester_name,"品檢員");msg($("relMsg"),"信賴度測試已完成",true);$("reliabilityFormCard").classList.add("hidden");await loadAll()}catch(e){msg($("relMsg"),e.message)}
+ const payload={production_id:pid,inspection_id:firstInspection?.id||null,part_number_code:p.part_number_code,alcohol_result:$("relAlcohol").value,tape_3m600_result:$("relTape").value,tester_name:tester,test_date:today(),notes:$("relNotes").value.trim()};
+ $("saveReliabilityBtn").disabled=true;
+ try{
+  const {data,error}=await sb.from("reliability_tests").insert(payload).select().single();
+  if(error)throw error;
+  await uploadPhoto($("relPhoto").files[0],"reliability",data.id,"信賴度");
+  await ensureEmployee(payload.tester_name,"品檢員");
+  const keepProductionId=pid;
+  $("relAlcohol").value="";
+  $("relTape").value="";
+  $("relTester").value="";
+  $("relNotes").value="";
+  $("relPhoto").value="";
+  const relImg=$("relPreview");
+  if(relImg.src&&relImg.src.startsWith("blob:"))URL.revokeObjectURL(relImg.src);
+  relImg.removeAttribute("src");
+  relImg.classList.add("hidden");
+  document.querySelectorAll('.result-buttons[data-result-target="relAlcohol"] .result-btn,.result-buttons[data-result-target="relTape"] .result-btn').forEach(btn=>btn.classList.remove("active-ok","active-ng"));
+  await loadAll();
+  const latestProduction=productions.find(x=>String(x.id)===String(keepProductionId));
+  $("relProductionId").value=keepProductionId;
+  if(latestProduction){
+   $("relProductionInfo").textContent=`${latestProduction.production_no}｜${latestProduction.part_number_code}｜烘烤完成後進行測試`;
+   $("reliabilityFormCard").classList.remove("hidden");
+  }
+  alert("✅ 完成信賴度測試");
+ }catch(e){
+  alert("信賴度測試儲存失敗："+e.message);
+ }finally{
+  $("saveReliabilityBtn").disabled=false;
+ }
 }
 async function deleteStoredPhotos(parentType,parentIds){
  const ids=(Array.isArray(parentIds)?parentIds:[parentIds]).map(String),targets=photos.filter(x=>x.parent_type===parentType&&ids.includes(String(x.parent_id)));
@@ -326,6 +381,29 @@ function renderReliabilityRecords(){
 $("recordSearch").oninput=renderRecords;$("recordDate").onchange=renderRecords;
 $("addPartBtn").onclick=async()=>{if(!canManage())return;const code=$("newPartCode").value.trim();if(!code)return alert("請輸入料號");const {error}=await sb.from("part_numbers").insert({code,keywords:$("newPartKeywords").value.trim()});if(error)return alert(error.message);await loadAll()};
 $("addEmployeeBtn").onclick=async()=>{if(!canManage())return;const name=$("newEmployeeName").value.trim();if(!name)return alert("請輸入姓名");const {error}=await sb.from("employees").insert({name,role:$("newEmployeeRole").value});if(error)return alert(error.message);await loadAll()};
+
+function setupZeroClearInputs(){
+ ["aOk","aNg","bOk","bNg","pOk","pNg"].forEach(id=>{
+  const el=$(id);
+  if(!el||el.dataset.zeroClearReady==="1")return;
+  el.dataset.zeroClearReady="1";
+  el.addEventListener("focus",()=>{
+   if(el.value==="0"){
+    el.value="";
+   }else{
+    el.select();
+   }
+  });
+  el.addEventListener("blur",()=>{
+   if(el.value===""||Number(el.value)<0)el.value="0";
+  });
+  el.addEventListener("input",()=>{
+   if(el.value!==""&&Number(el.value)<0)el.value="0";
+  });
+ });
+}
+setupZeroClearInputs();
+
 window.changeProduction=changeProduction;window.completeProduction=completeProduction;window.startInspectionFor=startInspectionFor;window.startReliability=startReliability;window.deleteProduction=deleteProduction;window.deleteInspection=deleteInspection;window.deleteReliability=deleteReliability;window.deletePart=deletePart;window.deleteEmployee=deleteEmployee;
 setInterval(()=>{if(currentUser)renderAll()},60000);
 (async()=>{try{const saved=JSON.parse(localStorage.getItem("ipqc_v4_login")||"null");if(saved&&ACCOUNTS[saved.account]){currentUser=saved;await enterApp()}}catch(e){}})();
