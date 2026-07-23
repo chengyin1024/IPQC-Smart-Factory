@@ -1,4 +1,3 @@
-window.IPQC_CONFIG = {
-  SUPABASE_URL: "請貼上你的 Project URL",
-  SUPABASE_PUBLISHABLE_KEY: "請貼上你的 Publishable key"
-};
+window.IPQC_CONFIG = window.IPQC_CONFIG || {};
+window.IPQC_CONFIG.SUPABASE_URL = window.IPQC_CONFIG.SUPABASE_URL || "https://huhenjkybvzkqczkvmkh.supabase.co";
+window.IPQC_CONFIG.SUPABASE_PUBLISHABLE_KEY = window.IPQC_CONFIG.SUPABASE_PUBLISHABLE_KEY || "sb_publishable_cFXdFQJi9cAiBDNXMcHEYw_yYKMKP5D";

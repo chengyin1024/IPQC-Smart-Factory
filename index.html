@@ -61,6 +61,7 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
   <button class="btn primary" data-page="dashboard">首頁</button>
   <button class="btn secondary" data-page="production">生產管理</button>
   <button class="btn secondary" data-page="inspection">IPQC巡檢</button>
+  <button class="btn secondary" data-page="qcReport">QC Report</button>
   <button class="btn secondary" data-page="reliability">信賴度測試</button>
   <button class="btn secondary" data-page="records">巡檢紀錄</button>
   <button class="btn secondary" data-page="relRecords">信賴度紀錄</button>
@@ -125,6 +126,26 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
   </div>
  </section>
 
+ <section id="qcReport" class="page hidden">
+  <div class="card">
+   <h2>QC Report</h2>
+   <div id="qcReportMsg"></div>
+   <div class="row">
+    <div class="field"><label>日期</label><input id="qcReportDate" readonly></div>
+    <div class="field"><label>QC 登入帳號</label><input id="qcReportQcAccount" readonly></div>
+   </div>
+   <div class="row">
+    <div class="field"><label>本次印刷數量</label><input id="qcReportPrintedQty" type="number" min="0" value="0" inputmode="numeric"></div>
+    <div class="field"><label>印刷 NG</label><input id="qcReportPrintingNg" type="number" min="0" value="0" inputmode="numeric"></div>
+   </div>
+   <div class="row">
+    <div class="field"><label>烘烤 NG</label><input id="qcReportBakingNg" type="number" min="0" value="0" inputmode="numeric"></div>
+    <div class="field"><label>素材 NG</label><input id="qcReportMaterialNg" type="number" min="0" value="0" inputmode="numeric"></div>
+   </div>
+   <button id="saveQcReportBtn" class="btn primary" style="margin-top:14px">儲存 QC Report</button>
+  </div>
+ </section>
+
  <section id="reliability" class="page hidden">
   <div class="card"><h2>待做信賴度的生產單</h2><p class="muted">信賴度與 IPQC 分開；產品烘烤完成後，再進來做首件酒精與 3M600 測試。</p><div id="relMsg"></div><div id="pendingReliability" class="production-list"></div></div>
   <div id="reliabilityFormCard" class="card hidden">
@@ -155,10 +176,11 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
 </main>
 </section>
 
+<script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPABASE_URL="https://huhenjkybvzkqczkvmkh.supabase.co";
-const SUPABASE_KEY="sb_publishable_cFXdFQJi9cAiBDNXMcHEYw_yYKMKP5D";
+const SUPABASE_URL=window.IPQC_CONFIG?.SUPABASE_URL || "https://huhenjkybvzkqczkvmkh.supabase.co";
+const SUPABASE_KEY=window.IPQC_CONFIG?.SUPABASE_PUBLISHABLE_KEY || "sb_publishable_cFXdFQJi9cAiBDNXMcHEYw_yYKMKP5D";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const ACCOUNTS={chengyin:{password:"0000",role:"owner",name:"老闆"},"3F":{password:"0000",role:"supervisor",name:"主管"},"3F1":{password:"0000",role:"worker",name:"員工"}};
 const $=id=>document.getElementById(id);
@@ -205,11 +227,17 @@ function slotLabel(d){return `${localDate(d)} ${String(d.getHours()).padStart(2,
 function relPill(pid){const p=productions.find(x=>String(x.id)===String(pid));if(!p)return '<span class="pill pending">🟡 待測</span>';const s=reliabilityState(p);if(s.pending)return `<span class="pill pending">🟡 待測（${esc(slotLabel(s.required))}）</span>`;if(s.latest?.alcohol_result==="NG"||s.latest?.tape_3m600_result==="NG")return '<span class="pill ng">🔴 NG</span>';return '<span class="pill ok">🟢 已完成</span>'}
 function canDeleteProduction(p){return isOwner()||(currentUser?.role==="supervisor"&&p.status!=="completed")}
 function photoLinks(type,id){const ps=photos.filter(p=>p.parent_type===type&&String(p.parent_id)===String(id));return ps.length?ps.map(p=>`<a href="${esc(p.public_url)}" target="_blank">查看照片</a>`).join("｜"):"-"}
-function showPage(id){document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));$(id).classList.remove("hidden");document.querySelectorAll(".nav button").forEach(x=>{x.classList.remove("primary");x.classList.add("secondary")});const b=document.querySelector(`[data-page="${id}"]`);if(b){b.classList.add("primary");b.classList.remove("secondary")}if(id==="inspection")$("inspectionDateTime").value=nowParts().text}
+function populateQcReportForm(){
+  $("qcReportDate").value=today();
+  $("qcReportQcAccount").value=currentUser?.account || "";
+  ["qcReportPrintedQty","qcReportPrintingNg","qcReportBakingNg","qcReportMaterialNg"].forEach(id=>$(id).value=0);
+  $("qcReportMsg").innerHTML="";
+}
+function showPage(id){document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));$(id).classList.remove("hidden");document.querySelectorAll(".nav button").forEach(x=>{x.classList.remove("primary");x.classList.add("secondary")});const b=document.querySelector(`[data-page="${id}"]`);if(b){b.classList.add("primary");b.classList.remove("secondary")}if(id==="inspection")$("inspectionDateTime").value=nowParts().text;if(id==="qcReport")populateQcReportForm()}
 document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{if(b.classList.contains("role-supervisor")&&!canManage())return;showPage(b.dataset.page)});
 $("loginBtn").onclick=()=>{const a=$("account").value.trim(),p=$("password").value,f=ACCOUNTS[a];if(!f||f.password!==p)return msg($("loginMsg"),"帳號或密碼錯誤");currentUser={account:a,...f};if($("remember").checked)localStorage.setItem("ipqc_v4_login",JSON.stringify(currentUser));enterApp()};
 $("logoutBtn").onclick=()=>{localStorage.removeItem("ipqc_v4_login");location.reload()};
-async function enterApp(){document.body.dataset.role=currentUser.role;$("loginPage").classList.add("hidden");$("appPage").classList.remove("hidden");$("userInfo").textContent=`${currentUser.name}｜${currentUser.account}`;await loadAll()}
+async function enterApp(){document.body.dataset.role=currentUser.role;$("loginPage").classList.add("hidden");$("appPage").classList.remove("hidden");$("userInfo").textContent=`${currentUser.name}｜${currentUser.account}`;populateQcReportForm();await loadAll()}
 async function loadAll(){
  const [p,i,r,pa,e,ph]=await Promise.all([
   sb.from("production_orders").select("*").order("created_at",{ascending:false}).limit(500),
@@ -254,6 +282,30 @@ function renderAll(){
  applyLanguage();
 }
 async function createProductionNo(){const d=today().replaceAll("-","");const same=productions.filter(x=>String(x.production_no||"").startsWith("P"+d));const n=String(same.length+1).padStart(3,"0");return `P${d}-${n}`}
+
+$("saveQcReportBtn").onclick=async()=>{
+ if(!currentUser){alert("請先登入");return}
+ const payload={
+  report_date:$("qcReportDate").value||today(),
+  qc_account:$("qcReportQcAccount").value.trim()||currentUser.account,
+  printed_quantity:num($("qcReportPrintedQty").value),
+  printing_ng:num($("qcReportPrintingNg").value),
+  baking_ng:num($("qcReportBakingNg").value),
+  material_ng:num($("qcReportMaterialNg").value),
+  created_by:currentUser.account
+ };
+ $("saveQcReportBtn").disabled=true;
+ try{
+  const {data,error}=await sb.from("qc_reports").insert(payload).select().single();
+  if(error)throw error;
+  msg($("qcReportMsg"),"QC Report 已成功儲存",true);
+  populateQcReportForm();
+ }catch(e){
+  msg($("qcReportMsg"),"QC Report 儲存失敗："+e.message);
+ }finally{
+  $("saveQcReportBtn").disabled=false;
+ }
+}
 $("createProductionBtn").onclick=async()=>{
  if(!v4Ready)return msg($("prodMsg"),"請先執行 V4.1 的 install.sql");
  const part=$("prodPart").value.trim();if(!part)return msg($("prodMsg"),"請填寫料號");

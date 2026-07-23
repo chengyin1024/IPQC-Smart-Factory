@@ -23,3 +23,16 @@ create table public.ipqc_records (
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
+
+create table if not exists public.qc_reports (
+  id uuid primary key default gen_random_uuid(),
+  report_date date not null,
+  qc_account text not null,
+  printed_quantity integer default 0,
+  printing_ng integer default 0,
+  baking_ng integer default 0,
+  material_ng integer default 0,
+  created_by text,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
