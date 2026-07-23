@@ -129,20 +129,38 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
  <section id="qcReport" class="page hidden">
   <div class="card">
    <h2>QC Report</h2>
-   <div id="qcReportMsg"></div>
    <div class="row">
-    <div class="field"><label>日期</label><input id="qcReportDate" readonly></div>
-    <div class="field"><label>QC 登入帳號</label><input id="qcReportQcAccount" readonly></div>
+    <div class="field"><label>料號</label><input id="qcPartNumber" placeholder="請輸入料號"></div>
    </div>
    <div class="row">
-    <div class="field"><label>本次印刷數量</label><input id="qcReportPrintedQty" type="number" min="0" value="0" inputmode="numeric"></div>
-    <div class="field"><label>印刷 NG</label><input id="qcReportPrintingNg" type="number" min="0" value="0" inputmode="numeric"></div>
+    <div class="field"><label>印刷人員</label><input id="qcPrinterOperator" placeholder="請輸入印刷人員"></div>
+    <div class="field"><label>QC 人員</label><input id="qcQcOperator" placeholder="請輸入 QC 人員"></div>
    </div>
-   <div class="row">
-    <div class="field"><label>烘烤 NG</label><input id="qcReportBakingNg" type="number" min="0" value="0" inputmode="numeric"></div>
-    <div class="field"><label>素材 NG</label><input id="qcReportMaterialNg" type="number" min="0" value="0" inputmode="numeric"></div>
+   <div class="field">
+    <label>印刷道次</label>
+    <select id="qcPrintingPass">
+     <option value="">請選擇</option>
+     <option>第1道</option>
+     <option>第2道</option>
+     <option>第3道</option>
+    </select>
+    <button id="qcStartProductionBtn" type="button" class="btn primary" style="margin-top:10px;width:100%;padding:13px 14px">開始生產</button>
+    <div id="qcValidationMsg" class="hidden" style="margin-top:8px"></div>
    </div>
-   <button id="saveQcReportBtn" class="btn primary" style="margin-top:14px">儲存 QC Report</button>
+   <div id="qcProductionDetail" class="hidden" style="margin-top:12px;display:grid;gap:10px">
+    <div class="field"><label>開始日期</label><input id="qcStartDate" readonly></div>
+    <div class="field"><label>開始時間</label><input id="qcStartTime" readonly></div>
+    <div class="field"><label>結束日期</label><input id="qcEndDate" readonly></div>
+    <div class="field"><label>結束時間</label><input id="qcEndTime" readonly></div>
+    <div class="field"><label>本次工時</label><input id="qcWorkDuration" readonly></div>
+    <div class="field"><label>本次生產數量</label><input id="qcProductionQty" type="number" min="0" value="0" inputmode="numeric"></div>
+    <div class="field"><label>印刷 NG</label><input id="qcPrintingNg" type="number" min="0" value="0" inputmode="numeric"></div>
+    <div class="field"><label>烘烤 NG</label><input id="qcBakingNg" type="number" min="0" value="0" inputmode="numeric"></div>
+    <div class="field"><label>素材 NG</label><input id="qcMaterialNg" type="number" min="0" value="0" inputmode="numeric"></div>
+    <button id="qcEndProductionBtn" type="button" class="btn primary" style="width:100%;padding:13px 14px">本次生產結束</button>
+    <button id="qcContinueProductionBtn" type="button" class="btn secondary" style="width:100%;padding:13px 14px">繼續生產</button>
+    <button id="qcCompleteProductionBtn" type="button" class="btn danger" style="width:100%;padding:13px 14px">工單完全結束</button>
+   </div>
   </div>
  </section>
 
@@ -176,15 +194,14 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
 </main>
 </section>
 
-<script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPABASE_URL=window.IPQC_CONFIG?.SUPABASE_URL || "https://huhenjkybvzkqczkvmkh.supabase.co";
-const SUPABASE_KEY=window.IPQC_CONFIG?.SUPABASE_PUBLISHABLE_KEY || "sb_publishable_cFXdFQJi9cAiBDNXMcHEYw_yYKMKP5D";
+const SUPABASE_URL="https://huhenjkybvzkqczkvmkh.supabase.co";
+const SUPABASE_KEY="sb_publishable_cFXdFQJi9cAiBDNXMcHEYw_yYKMKP5D";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const ACCOUNTS={chengyin:{password:"0000",role:"owner",name:"老闆"},"3F":{password:"0000",role:"supervisor",name:"主管"},"3F1":{password:"0000",role:"worker",name:"員工"}};
 const $=id=>document.getElementById(id);
-let currentUser=null, productions=[], inspections=[], reliability=[], parts=[], employees=[], photos=[], v4Ready=true, inspectionDraftProductionId='';
+let currentUser=null, productions=[], inspections=[], reliability=[], parts=[], employees=[], photos=[], v4Ready=true, inspectionDraftProductionId='', currentQcReportId=null;
 let currentLang=localStorage.getItem("ipqc_v416_lang")||"zh";
 const originalText=new WeakMap();
 const VI={"V4.1.6 多人與紀錄顯示版｜2026-07-22":"Phiên bản V4.1.6 nhiều nhân viên và hiển thị hồ sơ｜2026-07-22","公司帳號":"Tài khoản công ty","密碼":"Mật khẩu","記住登入":"Ghi nhớ đăng nhập","登入":"Đăng nhập","登出":"Đăng xuất","首頁":"Trang chủ","生產管理":"Quản lý sản xuất","IPQC巡檢":"Kiểm tra IPQC","信賴度測試":"Kiểm tra độ tin cậy","巡檢紀錄":"Lịch sử kiểm tra","信賴度紀錄":"Lịch sử độ tin cậy","基礎資料":"Dữ liệu cơ bản","生產中":"Đang sản xuất","今日巡檢":"Kiểm tra hôm nay","待信賴度":"Chờ kiểm tra độ tin cậy","今日良率":"Tỷ lệ đạt hôm nay","今日待辦":"Việc cần làm hôm nay","目前生產狀態":"Trạng thái sản xuất hiện tại","建立生產":"Tạo lệnh sản xuất","料號 *":"Mã hàng *","機台":"Máy","作業員 1 *":"Công nhân 1 *","作業員 2":"Công nhân 2","作業員 3":"Công nhân 3","請選擇作業員":"Chọn công nhân","不選擇":"Không chọn","預計數量（選填）":"Số lượng dự kiến (không bắt buộc)","備註":"Ghi chú","開始生產":"Bắt đầu sản xuất","生產中／暫停":"Đang sản xuất / Tạm dừng","最近完成":"Hoàn thành gần đây","新增 IPQC 巡檢":"Thêm kiểm tra IPQC","生產單 *":"Lệnh sản xuất *","日期時間":"Ngày giờ","巡檢人員 *":"Nhân viên kiểm tra *","請選擇巡檢人員":"Chọn nhân viên kiểm tra","品檢人員 1":"Nhân viên QC 1","品檢人員 2":"Nhân viên QC 2","品檢人員 3":"Nhân viên QC 3","請選擇品檢人員":"Chọn nhân viên QC","印刷 A":"In A","印刷 B":"In B","包裝":"Đóng gói","印刷 A－NG 原因":"In A - Nguyên nhân NG","印刷 B－NG 原因":"In B - Nguyên nhân NG","包裝－NG 原因":"Đóng gói - Nguyên nhân NG","印刷 A－NG 照片":"In A - Ảnh NG","印刷 B－NG 照片":"In B - Ảnh NG","包裝－NG 照片":"Đóng gói - Ảnh NG","無":"Không","漏印":"Thiếu in","偏位":"Lệch vị trí","重影":"Bóng đôi","刮傷":"Trầy xước","溢墨":"Tràn mực","色差":"Sai màu","異物":"Dị vật","包裝異常":"Lỗi đóng gói","其他":"Khác","備註／處理方式":"Ghi chú / Cách xử lý","首件照片（第一筆巡檢可拍）":"Ảnh sản phẩm đầu tiên","其他照片":"Ảnh khác","儲存巡檢":"Lưu kiểm tra","搜尋生產單／料號／人員":"Tìm lệnh sản xuất / mã hàng / nhân viên","日期":"Ngày","處理方式":"Cách xử lý","NG 原因":"Nguyên nhân NG","巡檢／品檢":"Kiểm tra / QC","照片":"Ảnh","操作":"Thao tác","刪除":"Xóa","完成信賴度測試":"Hoàn thành kiểm tra độ tin cậy","測試人員":"Người kiểm tra","信賴度照片":"Ảnh độ tin cậy","完成測試":"Hoàn thành kiểm tra","料號管理":"Quản lý mã hàng","品名／關鍵字":"Tên hàng / từ khóa","新增料號":"Thêm mã hàng","人員管理":"Quản lý nhân viên","姓名 *":"Tên *","職務":"Chức vụ","作業員":"Công nhân","巡檢員":"Nhân viên kiểm tra","品檢員":"Nhân viên QC","主管":"Quản lý","新增人員":"Thêm nhân viên","目前料號":"Mã hàng hiện có","目前人員":"Nhân viên hiện có","查看照片":"Xem ảnh","沒有符合的巡檢紀錄":"Không có hồ sơ kiểm tra phù hợp"};
@@ -227,17 +244,92 @@ function slotLabel(d){return `${localDate(d)} ${String(d.getHours()).padStart(2,
 function relPill(pid){const p=productions.find(x=>String(x.id)===String(pid));if(!p)return '<span class="pill pending">🟡 待測</span>';const s=reliabilityState(p);if(s.pending)return `<span class="pill pending">🟡 待測（${esc(slotLabel(s.required))}）</span>`;if(s.latest?.alcohol_result==="NG"||s.latest?.tape_3m600_result==="NG")return '<span class="pill ng">🔴 NG</span>';return '<span class="pill ok">🟢 已完成</span>'}
 function canDeleteProduction(p){return isOwner()||(currentUser?.role==="supervisor"&&p.status!=="completed")}
 function photoLinks(type,id){const ps=photos.filter(p=>p.parent_type===type&&String(p.parent_id)===String(id));return ps.length?ps.map(p=>`<a href="${esc(p.public_url)}" target="_blank">查看照片</a>`).join("｜"):"-"}
-function populateQcReportForm(){
-  $("qcReportDate").value=today();
-  $("qcReportQcAccount").value=currentUser?.account || "";
-  ["qcReportPrintedQty","qcReportPrintingNg","qcReportBakingNg","qcReportMaterialNg"].forEach(id=>$(id).value=0);
-  $("qcReportMsg").innerHTML="";
+function showPage(id){document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));$(id).classList.remove("hidden");document.querySelectorAll(".nav button").forEach(x=>{x.classList.remove("primary");x.classList.add("secondary")});const b=document.querySelector(`[data-page="${id}"]`);if(b){b.classList.add("primary");b.classList.remove("secondary")}if(id==="inspection")$("inspectionDateTime").value=nowParts().text}
+function showQcProductionDetail(){const el=$("qcProductionDetail");if(el)el.classList.remove("hidden")}
+function hideQcProductionDetail(){const el=$("qcProductionDetail");if(el)el.classList.add("hidden")}
+function resetQcReportUi(){const formFields=["qcPartNumber","qcPrinterOperator","qcQcOperator","qcPrintingPass","qcStartDate","qcStartTime","qcEndDate","qcEndTime","qcWorkDuration"];formFields.forEach(id=>{const el=$(id);if(el)el.value=""});const detailEl=$("qcProductionDetail");if(detailEl)detailEl.classList.add("hidden");const msgEl=$("qcValidationMsg");if(msgEl){msgEl.innerHTML="";msgEl.classList.add("hidden")};currentQcReportId=null}
+async function handleQcStartProduction(){const required=[{id:"qcPartNumber",message:"請輸入料號"},{id:"qcPrinterOperator",message:"請選擇印刷人員"},{id:"qcQcOperator",message:"請選擇 QC 人員"},{id:"qcPrintingPass",message:"請選擇印刷道次"}];for(const item of required){const el=$(item.id);if(!el||!el.value.trim()){const msgEl=$("qcValidationMsg");if(msgEl){msgEl.classList.remove("hidden");msgEl.innerHTML=`<div class="msg err">${esc(item.message)}</div>`}hideQcProductionDetail();return} }const msgEl=$("qcValidationMsg");if(msgEl){msgEl.innerHTML="";msgEl.classList.add("hidden")}const start=new Date();const startDate=`${String(start.getFullYear()).padStart(4,"0")}/${String(start.getMonth()+1).padStart(2,"0")}/${String(start.getDate()).padStart(2,"0")}`;const startTime=`${String(start.getHours()).padStart(2,"0")}:${String(start.getMinutes()).padStart(2,"0")}:${String(start.getSeconds()).padStart(2,"0")}`;const dateEl=$("qcStartDate");const timeEl=$("qcStartTime");if(dateEl)dateEl.value=startDate;if(timeEl)timeEl.value=startTime;showQcProductionDetail();const {data,error}=await sb.from("qc_reports").insert({
+ report_date:today(),
+ qc_account:currentUser?.account||"",
+ part_number:$("qcPartNumber").value.trim(),
+ printer_name:$("qcPrinterOperator").value.trim(),
+ qc_name:$("qcQcOperator").value.trim(),
+ printing_pass:$("qcPrintingPass").value,
+ start_date:startDate.replace(/\//g,"-"),
+ start_time:startTime,
+ created_by:currentUser?.account||""
+}).select("id").single();if(error){alert(error.message);return}currentQcReportId=data?.id||null}
+async function handleQcEndProduction(){
+ const detailEl=$("qcProductionDetail");
+ if(!detailEl||detailEl.classList.contains("hidden"))return;
+ const end=new Date();
+ const endDate=`${String(end.getFullYear()).padStart(4,"0")}/${String(end.getMonth()+1).padStart(2,"0")}/${String(end.getDate()).padStart(2,"0")}`;
+ const endTime=`${String(end.getHours()).padStart(2,"0")}:${String(end.getMinutes()).padStart(2,"0")}:${String(end.getSeconds()).padStart(2,"0")}`;
+ const dateEl=$("qcEndDate");
+ const timeEl=$("qcEndTime");
+ if(dateEl)dateEl.value=endDate;
+ if(timeEl)timeEl.value=endTime;
+ const startDateEl=$("qcStartDate");
+ const startTimeEl=$("qcStartTime");
+ const durationEl=$("qcWorkDuration");
+ if(startDateEl&&startTimeEl&&durationEl){
+  const startValue=startDateEl.value&&startTimeEl.value?`${startDateEl.value} ${startTimeEl.value}`:"";
+  if(startValue){
+   const startParts=startValue.match(/(\d{4})\/(\d{2})\/(\d{2})\s+(\d{2}):(\d{2}):(\d{2})/);
+   const endParts=`${endDate} ${endTime}`.match(/(\d{4})\/(\d{2})\/(\d{2})\s+(\d{2}):(\d{2}):(\d{2})/);
+   if(startParts&&endParts){
+    const startDateTime=new Date(Number(startParts[1]),Number(startParts[2])-1,Number(startParts[3]),Number(startParts[4]),Number(startParts[5]),Number(startParts[6]));
+    const endDateTime=new Date(Number(endParts[1]),Number(endParts[2])-1,Number(endParts[3]),Number(endParts[4]),Number(endParts[5]),Number(endParts[6]));
+    const diff=Math.max(0,Math.floor((endDateTime-startDateTime)/1000));
+    const hh=String(Math.floor(diff/3600)).padStart(2,"0");
+    const mm=String(Math.floor((diff%3600)/60)).padStart(2,"0");
+    const ss=String(diff%60).padStart(2,"0");
+    durationEl.value=`${hh}:${mm}:${ss}`;
+   }
+  }
+ }
+ if(currentQcReportId){
+  const {error}=await sb.from("qc_reports").update({
+   report_date:today(),
+   qc_account:currentUser?.account||"",
+   part_number:$("qcPartNumber").value.trim(),
+   printer_name:$("qcPrinterOperator").value.trim(),
+   qc_name:$("qcQcOperator").value.trim(),
+   printing_pass:$("qcPrintingPass").value,
+   start_date:$("qcStartDate").value.replace(/\//g,"-"),
+   start_time:$("qcStartTime").value,
+   end_date:endDate.replace(/\//g,"-"),
+   end_time:endTime,
+   work_duration:durationEl?.value||"",
+   printed_quantity:Number($("qcProductionQty").value)||0,
+   printing_ng:Number($("qcPrintingNg").value)||0,
+   baking_ng:Number($("qcBakingNg").value)||0,
+   material_ng:Number($("qcMaterialNg").value)||0,
+   updated_at:new Date().toISOString()
+  }).eq("id",currentQcReportId);
+  if(error)alert(error.message);
+ }
 }
-function showPage(id){document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));$(id).classList.remove("hidden");document.querySelectorAll(".nav button").forEach(x=>{x.classList.remove("primary");x.classList.add("secondary")});const b=document.querySelector(`[data-page="${id}"]`);if(b){b.classList.add("primary");b.classList.remove("secondary")}if(id==="inspection")$("inspectionDateTime").value=nowParts().text;if(id==="qcReport")populateQcReportForm()}
+async function handleQcContinueProduction(){const endDateEl=$("qcEndDate");const endTimeEl=$("qcEndTime");const durationEl=$("qcWorkDuration");if(endDateEl)endDateEl.value="";if(endTimeEl)endTimeEl.value="";if(durationEl)durationEl.value="";const {data,error}=await sb.from("qc_reports").insert({
+ report_date:today(),
+ qc_account:currentUser?.account||"",
+ part_number:$("qcPartNumber").value.trim(),
+ printer_name:$("qcPrinterOperator").value.trim(),
+ qc_name:$("qcQcOperator").value.trim(),
+ printing_pass:$("qcPrintingPass").value,
+ start_date:$("qcStartDate").value.replace(/\//g,"-"),
+ start_time:$("qcStartTime").value,
+ created_by:currentUser?.account||""
+}).select("id").single();if(error){alert(error.message);return}currentQcReportId=data?.id||null}
+function handleQcCompleteProduction(){resetQcReportUi()}
 document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{if(b.classList.contains("role-supervisor")&&!canManage())return;showPage(b.dataset.page)});
+if($("qcStartProductionBtn"))$("qcStartProductionBtn").onclick=handleQcStartProduction;
+if($("qcEndProductionBtn"))$("qcEndProductionBtn").onclick=handleQcEndProduction;
+if($("qcContinueProductionBtn"))$("qcContinueProductionBtn").onclick=handleQcContinueProduction;
+if($("qcCompleteProductionBtn"))$("qcCompleteProductionBtn").onclick=handleQcCompleteProduction;
 $("loginBtn").onclick=()=>{const a=$("account").value.trim(),p=$("password").value,f=ACCOUNTS[a];if(!f||f.password!==p)return msg($("loginMsg"),"帳號或密碼錯誤");currentUser={account:a,...f};if($("remember").checked)localStorage.setItem("ipqc_v4_login",JSON.stringify(currentUser));enterApp()};
 $("logoutBtn").onclick=()=>{localStorage.removeItem("ipqc_v4_login");location.reload()};
-async function enterApp(){document.body.dataset.role=currentUser.role;$("loginPage").classList.add("hidden");$("appPage").classList.remove("hidden");$("userInfo").textContent=`${currentUser.name}｜${currentUser.account}`;populateQcReportForm();await loadAll()}
+async function enterApp(){document.body.dataset.role=currentUser.role;$("loginPage").classList.add("hidden");$("appPage").classList.remove("hidden");$("userInfo").textContent=`${currentUser.name}｜${currentUser.account}`;await loadAll()}
 async function loadAll(){
  const [p,i,r,pa,e,ph]=await Promise.all([
   sb.from("production_orders").select("*").order("created_at",{ascending:false}).limit(500),
@@ -282,30 +374,6 @@ function renderAll(){
  applyLanguage();
 }
 async function createProductionNo(){const d=today().replaceAll("-","");const same=productions.filter(x=>String(x.production_no||"").startsWith("P"+d));const n=String(same.length+1).padStart(3,"0");return `P${d}-${n}`}
-
-$("saveQcReportBtn").onclick=async()=>{
- if(!currentUser){alert("請先登入");return}
- const payload={
-  report_date:$("qcReportDate").value||today(),
-  qc_account:$("qcReportQcAccount").value.trim()||currentUser.account,
-  printed_quantity:num($("qcReportPrintedQty").value),
-  printing_ng:num($("qcReportPrintingNg").value),
-  baking_ng:num($("qcReportBakingNg").value),
-  material_ng:num($("qcReportMaterialNg").value),
-  created_by:currentUser.account
- };
- $("saveQcReportBtn").disabled=true;
- try{
-  const {data,error}=await sb.from("qc_reports").insert(payload).select().single();
-  if(error)throw error;
-  msg($("qcReportMsg"),"QC Report 已成功儲存",true);
-  populateQcReportForm();
- }catch(e){
-  msg($("qcReportMsg"),"QC Report 儲存失敗："+e.message);
- }finally{
-  $("saveQcReportBtn").disabled=false;
- }
-}
 $("createProductionBtn").onclick=async()=>{
  if(!v4Ready)return msg($("prodMsg"),"請先執行 V4.1 的 install.sql");
  const part=$("prodPart").value.trim();if(!part)return msg($("prodMsg"),"請填寫料號");
