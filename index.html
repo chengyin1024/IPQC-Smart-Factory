@@ -77,6 +77,7 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
   </div>
   <div class="card"><h2>今日待辦</h2><div id="todoList"></div></div>
   <div class="card"><h2>目前生產狀態</h2><div id="dashboardProductions" class="production-list"></div></div>
+  <div id="qcProductionStatsCard" class="card hidden"><h2>QC 生產統計（今日）</h2><div id="qcProductionStats" class="meta"></div></div>
  </section>
 
  <section id="production" class="page hidden">
@@ -161,6 +162,10 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
     <button id="qcContinueProductionBtn" type="button" class="btn secondary" style="width:100%;padding:13px 14px">繼續生產</button>
     <button id="qcCompleteProductionBtn" type="button" class="btn danger" style="width:100%;padding:13px 14px">工單完全結束</button>
    </div>
+   <div class="card" style="margin-top:14px">
+    <h3>歷史紀錄</h3>
+    <div id="qcReportHistoryList" class="production-list"></div>
+   </div>
   </div>
  </section>
 
@@ -195,13 +200,14 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
 </section>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="script.js"></script>
 <script>
 const SUPABASE_URL="https://huhenjkybvzkqczkvmkh.supabase.co";
 const SUPABASE_KEY="sb_publishable_cFXdFQJi9cAiBDNXMcHEYw_yYKMKP5D";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const ACCOUNTS={chengyin:{password:"0000",role:"owner",name:"老闆"},"3F":{password:"0000",role:"supervisor",name:"主管"},"3F1":{password:"0000",role:"worker",name:"員工"}};
 const $=id=>document.getElementById(id);
-let currentUser=null, productions=[], inspections=[], reliability=[], parts=[], employees=[], photos=[], v4Ready=true, inspectionDraftProductionId='', currentQcReportId=null;
+let currentUser=null, productions=[], inspections=[], reliability=[], parts=[], employees=[], photos=[], qcReports=[], v4Ready=true, inspectionDraftProductionId='', currentQcReportId=null;
 let currentLang=localStorage.getItem("ipqc_v416_lang")||"zh";
 const originalText=new WeakMap();
 const VI={"V4.1.6 多人與紀錄顯示版｜2026-07-22":"Phiên bản V4.1.6 nhiều nhân viên và hiển thị hồ sơ｜2026-07-22","公司帳號":"Tài khoản công ty","密碼":"Mật khẩu","記住登入":"Ghi nhớ đăng nhập","登入":"Đăng nhập","登出":"Đăng xuất","首頁":"Trang chủ","生產管理":"Quản lý sản xuất","IPQC巡檢":"Kiểm tra IPQC","信賴度測試":"Kiểm tra độ tin cậy","巡檢紀錄":"Lịch sử kiểm tra","信賴度紀錄":"Lịch sử độ tin cậy","基礎資料":"Dữ liệu cơ bản","生產中":"Đang sản xuất","今日巡檢":"Kiểm tra hôm nay","待信賴度":"Chờ kiểm tra độ tin cậy","今日良率":"Tỷ lệ đạt hôm nay","今日待辦":"Việc cần làm hôm nay","目前生產狀態":"Trạng thái sản xuất hiện tại","建立生產":"Tạo lệnh sản xuất","料號 *":"Mã hàng *","機台":"Máy","作業員 1 *":"Công nhân 1 *","作業員 2":"Công nhân 2","作業員 3":"Công nhân 3","請選擇作業員":"Chọn công nhân","不選擇":"Không chọn","預計數量（選填）":"Số lượng dự kiến (không bắt buộc)","備註":"Ghi chú","開始生產":"Bắt đầu sản xuất","生產中／暫停":"Đang sản xuất / Tạm dừng","最近完成":"Hoàn thành gần đây","新增 IPQC 巡檢":"Thêm kiểm tra IPQC","生產單 *":"Lệnh sản xuất *","日期時間":"Ngày giờ","巡檢人員 *":"Nhân viên kiểm tra *","請選擇巡檢人員":"Chọn nhân viên kiểm tra","品檢人員 1":"Nhân viên QC 1","品檢人員 2":"Nhân viên QC 2","品檢人員 3":"Nhân viên QC 3","請選擇品檢人員":"Chọn nhân viên QC","印刷 A":"In A","印刷 B":"In B","包裝":"Đóng gói","印刷 A－NG 原因":"In A - Nguyên nhân NG","印刷 B－NG 原因":"In B - Nguyên nhân NG","包裝－NG 原因":"Đóng gói - Nguyên nhân NG","印刷 A－NG 照片":"In A - Ảnh NG","印刷 B－NG 照片":"In B - Ảnh NG","包裝－NG 照片":"Đóng gói - Ảnh NG","無":"Không","漏印":"Thiếu in","偏位":"Lệch vị trí","重影":"Bóng đôi","刮傷":"Trầy xước","溢墨":"Tràn mực","色差":"Sai màu","異物":"Dị vật","包裝異常":"Lỗi đóng gói","其他":"Khác","備註／處理方式":"Ghi chú / Cách xử lý","首件照片（第一筆巡檢可拍）":"Ảnh sản phẩm đầu tiên","其他照片":"Ảnh khác","儲存巡檢":"Lưu kiểm tra","搜尋生產單／料號／人員":"Tìm lệnh sản xuất / mã hàng / nhân viên","日期":"Ngày","處理方式":"Cách xử lý","NG 原因":"Nguyên nhân NG","巡檢／品檢":"Kiểm tra / QC","照片":"Ảnh","操作":"Thao tác","刪除":"Xóa","完成信賴度測試":"Hoàn thành kiểm tra độ tin cậy","測試人員":"Người kiểm tra","信賴度照片":"Ảnh độ tin cậy","完成測試":"Hoàn thành kiểm tra","料號管理":"Quản lý mã hàng","品名／關鍵字":"Tên hàng / từ khóa","新增料號":"Thêm mã hàng","人員管理":"Quản lý nhân viên","姓名 *":"Tên *","職務":"Chức vụ","作業員":"Công nhân","巡檢員":"Nhân viên kiểm tra","品檢員":"Nhân viên QC","主管":"Quản lý","新增人員":"Thêm nhân viên","目前料號":"Mã hàng hiện có","目前人員":"Nhân viên hiện có","查看照片":"Xem ảnh","沒有符合的巡檢紀錄":"Không có hồ sơ kiểm tra phù hợp"};
@@ -244,7 +250,30 @@ function slotLabel(d){return `${localDate(d)} ${String(d.getHours()).padStart(2,
 function relPill(pid){const p=productions.find(x=>String(x.id)===String(pid));if(!p)return '<span class="pill pending">🟡 待測</span>';const s=reliabilityState(p);if(s.pending)return `<span class="pill pending">🟡 待測（${esc(slotLabel(s.required))}）</span>`;if(s.latest?.alcohol_result==="NG"||s.latest?.tape_3m600_result==="NG")return '<span class="pill ng">🔴 NG</span>';return '<span class="pill ok">🟢 已完成</span>'}
 function canDeleteProduction(p){return isOwner()||(currentUser?.role==="supervisor"&&p.status!=="completed")}
 function photoLinks(type,id){const ps=photos.filter(p=>p.parent_type===type&&String(p.parent_id)===String(id));return ps.length?ps.map(p=>`<a href="${esc(p.public_url)}" target="_blank">查看照片</a>`).join("｜"):"-"}
-function showPage(id){document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));$(id).classList.remove("hidden");document.querySelectorAll(".nav button").forEach(x=>{x.classList.remove("primary");x.classList.add("secondary")});const b=document.querySelector(`[data-page="${id}"]`);if(b){b.classList.add("primary");b.classList.remove("secondary")}if(id==="inspection")$("inspectionDateTime").value=nowParts().text}
+function isQcReportOnlyUser(){return currentUser?.account==="3F1"}
+function enforcePageId(id){return isQcReportOnlyUser()&&id!=="qcReport"?null:id}
+function applyPageAccessUi(){
+ const restricted=isQcReportOnlyUser();
+ document.querySelectorAll(".nav button").forEach(btn=>{
+  const page=btn.dataset.page;
+  if(restricted){
+   if(page==="qcReport")btn.classList.remove("hidden");else btn.classList.add("hidden");
+  }else{
+   btn.classList.remove("hidden");
+  }
+ });
+}
+function showPage(id){
+ const targetId=enforcePageId(id);
+ applyPageAccessUi();
+ if(!targetId){return}
+ document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));
+ if($(targetId))$(targetId).classList.remove("hidden");
+ document.querySelectorAll(".nav button").forEach(x=>{x.classList.remove("primary");x.classList.add("secondary")});
+ const b=document.querySelector(`[data-page="${targetId}"]`);
+ if(b){b.classList.add("primary");b.classList.remove("secondary")}
+ if(targetId==="inspection")$("inspectionDateTime").value=nowParts().text
+}
 function showQcProductionDetail(){const el=$("qcProductionDetail");if(el)el.classList.remove("hidden")}
 function hideQcProductionDetail(){const el=$("qcProductionDetail");if(el)el.classList.add("hidden")}
 function resetQcReportUi(){const formFields=["qcPartNumber","qcPrinterOperator","qcQcOperator","qcPrintingPass","qcStartDate","qcStartTime","qcEndDate","qcEndTime","qcWorkDuration"];formFields.forEach(id=>{const el=$(id);if(el)el.value=""});const detailEl=$("qcProductionDetail");if(detailEl)detailEl.classList.add("hidden");const msgEl=$("qcValidationMsg");if(msgEl){msgEl.innerHTML="";msgEl.classList.add("hidden")};currentQcReportId=null}
@@ -329,23 +358,52 @@ if($("qcContinueProductionBtn"))$("qcContinueProductionBtn").onclick=handleQcCon
 if($("qcCompleteProductionBtn"))$("qcCompleteProductionBtn").onclick=handleQcCompleteProduction;
 $("loginBtn").onclick=()=>{const a=$("account").value.trim(),p=$("password").value,f=ACCOUNTS[a];if(!f||f.password!==p)return msg($("loginMsg"),"帳號或密碼錯誤");currentUser={account:a,...f};if($("remember").checked)localStorage.setItem("ipqc_v4_login",JSON.stringify(currentUser));enterApp()};
 $("logoutBtn").onclick=()=>{localStorage.removeItem("ipqc_v4_login");location.reload()};
-async function enterApp(){document.body.dataset.role=currentUser.role;$("loginPage").classList.add("hidden");$("appPage").classList.remove("hidden");$("userInfo").textContent=`${currentUser.name}｜${currentUser.account}`;await loadAll()}
+async function enterApp(){document.body.dataset.role=currentUser.role;$("loginPage").classList.add("hidden");$("appPage").classList.remove("hidden");$("userInfo").textContent=`${currentUser.name}｜${currentUser.account}`;await loadAll();const defaultPage=currentUser?.account==="chengyin"?"dashboard":currentUser?.account==="3F"?"production":"qcReport";showPage(defaultPage);}
 async function loadAll(){
- const [p,i,r,pa,e,ph]=await Promise.all([
+ const [p,i,r,pa,e,ph,q]=await Promise.all([
   sb.from("production_orders").select("*").order("created_at",{ascending:false}).limit(500),
   sb.from("inspections").select("*").order("created_at",{ascending:false}).limit(1000),
   sb.from("reliability_tests").select("*").order("created_at",{ascending:false}).limit(500),
   sb.from("part_numbers").select("*").eq("active",true).order("code"),
   sb.from("employees").select("*").eq("active",true).order("name"),
-  sb.from("inspection_photos").select("*").order("created_at",{ascending:false}).limit(1500)
+  sb.from("inspection_photos").select("*").order("created_at",{ascending:false}).limit(1500),
+  sb.from("qc_reports").select("*").order("created_at",{ascending:false}).limit(1000)
  ]);
  if(p.error){v4Ready=false;$("setupBanner").classList.remove("hidden");productions=[]}else{v4Ready=true;$("setupBanner").classList.add("hidden");productions=p.data||[]}
- inspections=i.data||[];reliability=r.data||[];parts=pa.data||[];employees=e.data||[];photos=ph.data||[];renderAll()
+ inspections=i.data||[];reliability=r.data||[];parts=pa.data||[];employees=e.data||[];photos=ph.data||[];qcReports=q.error?[]:q.data||[];renderAll()
 }
 function renderProductionCard(p,actions=true){
  const t=productionTotals(p.id), count=inspections.filter(x=>String(x.production_id)===String(p.id)).length;
  const deleteBtn=canDeleteProduction(p)?`<button class="btn delete-top" onclick="deleteProduction('${p.id}')" title="刪除生產單">🗑 刪除</button>`:"";
  return `<div class="production-card"><div class="production-head"><div><div class="production-no">${esc(p.production_no)}</div><div class="production-part">${esc(p.part_number_code)}</div></div><div class="production-head-actions">${statusPill(p.status)}${deleteBtn}</div></div><div class="meta">機台：${esc(p.machine||"-")}｜作業員：${displayNames(p.operator_name)}<br>開始：${esc((p.started_at||"").replace("T"," ").slice(0,16))}｜巡檢：${count} 次<br>OK ${t.ok}｜NG ${t.ng}｜良率 ${t.yield.toFixed(1)}%｜信賴度 ${relPill(p.id)}</div>${actions?`<div class="actions" style="margin-top:10px">${p.status==="active"?`<button class="btn warning" onclick="changeProduction('${p.id}','paused')">暫停生產</button>`:""}${p.status==="paused"?`<button class="btn secondary" onclick="changeProduction('${p.id}','active')">恢復生產</button>`:""}${p.status!=="completed"?`<button class="btn danger" onclick="completeProduction('${p.id}')">完成生產</button>`:""}<button class="btn ghost" onclick="startInspectionFor('${p.id}')">新增巡檢</button>${p.status!=="completed"&&reliabilityState(p).pending?`<button class="btn ghost" onclick="startReliability('${p.id}')">做信賴度</button>`:""}</div>`:""}</div>`
+}
+function renderQcProductionStats(){
+ const card=$("qcProductionStatsCard");
+ const container=$("qcProductionStats");
+ if(!card||!container)return;
+ const visible=currentUser?.account==="chengyin";
+ card.classList.toggle("hidden",!visible);
+ if(!visible){container.innerHTML="";return;}
+ const todayStr=today();
+ const rows=(qcReports||[]).filter(x=>String(x.end_date||"").trim()===todayStr);
+ const totalQty=rows.reduce((sum,x)=>sum+(Number(x.printed_quantity)||0),0);
+ const printingNg=rows.reduce((sum,x)=>sum+(Number(x.printing_ng)||0),0);
+ const bakingNg=rows.reduce((sum,x)=>sum+(Number(x.baking_ng)||0),0);
+ const materialNg=rows.reduce((sum,x)=>sum+(Number(x.material_ng)||0),0);
+ const goodQty=Math.max(0,totalQty-printingNg-bakingNg-materialNg);
+ const rate=totalQty>0?goodQty/totalQty*100:0;
+ container.innerHTML=`<div class="meta">今日完成批次：<b>${rows.length}</b><br>今日生產總數：<b>${totalQty}</b><br>今日良品數：<b>${goodQty}</b><br>今日印刷NG：<b>${printingNg}</b><br>今日烘烤NG：<b>${bakingNg}</b><br>今日素材NG：<b>${materialNg}</b><br>今日QC良率：<b>${rate.toFixed(1)}%</b></div>`;
+}
+function renderQcReportHistory(){
+ const container=$("qcReportHistoryList");
+ if(!container)return;
+ const rows=(qcReports||[]).slice().sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
+ container.innerHTML=rows.length?rows.map(r=>{
+  const part=esc(r.part_number||"-");
+  const doneTime=esc([r.end_date||"-",r.end_time||"-"].filter(Boolean).join(" "));
+  const deleteBtn=currentUser?.account==="chengyin"?`<button class="btn danger" onclick="deleteQcReportRecord('${r.id}')">🗑️ 刪除</button>`:"";
+  return `<div class="production-card"><div class="production-head"><div><div class="production-no">${esc(r.report_date||"")}</div><div class="production-part">${part}</div></div><div class="production-head-actions">${deleteBtn}</div></div><div class="meta">印刷人員：${esc(r.printer_name||"-")}｜QC：${esc(r.qc_name||"-")}<br>道次：${esc(r.printing_pass||"-")}｜完成時間：${doneTime}<br>生產數量：${num(r.printed_quantity)}｜印刷NG：${num(r.printing_ng)}｜烘烤NG：${num(r.baking_ng)}｜素材NG：${num(r.material_ng)}</div></div>`;
+ }).join(""):'<div class="muted">目前沒有 QC Report 紀錄</div>';
 }
 function renderAll(){
  $("partList").innerHTML=parts.map(x=>`<option value="${esc(x.code)}">${esc(x.keywords||"")}</option>`).join("");
@@ -367,6 +425,8 @@ function renderAll(){
  $("statActive").textContent=active.length;$("statInspections").textContent=todayRows.length;$("statPendingRel").textContent=active.filter(x=>reliabilityState(x).pending).length;$("statYield").textContent=(ok+ng?ok/(ok+ng)*100:0).toFixed(1)+"%";
  const pending=active.filter(x=>reliabilityState(x).pending);
  $("todoList").innerHTML=`<div class="meta">🧪 待信賴度：<b>${pending.length}</b> 件<br>🔴 今日 NG：<b>${ng}</b> 件<br>📝 今日巡檢：<b>${todayRows.length}</b> 次</div>`;
+ renderQcProductionStats();
+ renderQcReportHistory();
  $("pendingReliability").innerHTML=pending.length?pending.map(p=>`<div class="production-card"><div class="production-no">${esc(p.production_no)}</div><div class="production-part">${esc(p.part_number_code)}</div><div class="meta">開始：${esc((p.started_at||"").replace("T"," ").slice(0,16))}｜機台：${esc(p.machine||"-")}<br>應測時段：${esc(slotLabel(reliabilityState(p).required))}</div><button class="btn primary" style="margin-top:10px" onclick="startReliability('${p.id}')">開始測試</button></div>`).join(""):'<div class="muted">目前沒有待測項目</div>';
  renderRecords();renderReliabilityRecords();
  $("partsTable").innerHTML=`<table><tr><th>料號</th><th>品名／關鍵字</th><th>操作</th></tr>${parts.map(x=>`<tr><td>${esc(x.code)}</td><td>${esc(x.keywords||"")}</td><td class="delete-cell">${canManage()?`<button class="btn danger" onclick="deletePart('${x.id}')">刪除</button>`:"-"}</td></tr>`).join("")}</table>`;
@@ -511,6 +571,20 @@ async function deleteInspection(id){if(!canManage())return alert("沒有刪除�
 async function deleteReliability(id){if(!canManage())return alert("沒有刪除權限");if(!confirm("確定刪除這筆信賴度紀錄？刪除後該生產單可能重新顯示待測。"))return;try{await deleteStoredPhotos("reliability",id);const {error}=await sb.from("reliability_tests").delete().eq("id",id);if(error)throw error;await loadAll()}catch(e){alert(e.message)}}
 async function deletePart(id){if(!canManage())return;if(!confirm("確定刪除此料號？既有生產與巡檢紀錄不會被刪除。"))return;const {error}=await sb.from("part_numbers").delete().eq("id",id);if(error)return alert(error.message);await loadAll()}
 async function deleteEmployee(id){if(!canManage())return;if(!confirm("確定刪除此人員？既有歷史紀錄不會被刪除。"))return;const {error}=await sb.from("employees").delete().eq("id",id);if(error)return alert(error.message);await loadAll()}
+async function deleteQcReportRecord(id){
+ const report=qcReports.find(x=>String(x.id)===String(id));
+ if(!report||currentUser?.account!=="chengyin")return;
+ const part=report.part_number||"-";
+ const doneTime=[report.end_date||"-",report.end_time||"-"].filter(Boolean).join(" ");
+ if(!confirm(`確定要刪除此筆 QC 紀錄？\n料號：${part}\n完成時間：${doneTime}\n此動作無法復原。`))return;
+ try{
+  const {error}=await sb.from("qc_reports").delete().eq("id",id);
+  if(error)throw error;
+  await loadAll();
+ }catch(e){
+  alert("刪除失敗，請稍後再試。")
+ }
+}
 function renderRecords(){
  const q=$("recordSearch").value.trim().toLowerCase(),d=$("recordDate").value;
  const rows=inspections.filter(x=>(!d||x.inspection_date===d)&&(!q||[x.part_number_code,x.operator_name,x.inspector_name,x.quality_inspector_name,productions.find(p=>String(p.id)===String(x.production_id))?.production_no].some(v=>String(v||"").toLowerCase().includes(q))));
