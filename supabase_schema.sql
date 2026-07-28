@@ -1,4 +1,5 @@
 -- Supabase 資料表草案（正式多人同步版使用）
+-- QC 多道印刷／兩位 QC 交接功能，請另外執行 qc_batch_migration.sql。
 create table public.ipqc_records (
   id uuid primary key default gen_random_uuid(),
   inspection_date date not null,

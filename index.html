@@ -65,6 +65,7 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
   <button class="btn secondary" data-page="reliability">信賴度測試</button>
   <button class="btn secondary" data-page="records">巡檢紀錄</button>
   <button class="btn secondary" data-page="relRecords">信賴度紀錄</button>
+  <button class="btn secondary" data-page="completedProductions">已完成生產</button>
   <button class="btn secondary role-supervisor" data-page="master">基礎資料</button>
  </div>
 
@@ -95,7 +96,10 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
    <button id="createProductionBtn" class="btn primary">開始生產</button>
   </div>
   <div class="card"><h2>生產中／暫停</h2><div id="activeProductions" class="production-list"></div></div>
-  <div class="card"><h2>最近完成</h2><div id="doneProductions" class="production-list"></div></div>
+ </section>
+
+ <section id="completedProductions" class="page hidden">
+  <div class="card"><h2>已完成生產</h2><p class="muted">同料號會收在一起；點料號展開後可查看每次完成日期與當時狀況。</p><div class="field" style="max-width:360px"><label>完成日期</label><input id="doneProductionDate" type="date"></div><div id="doneProductions" class="production-list"></div></div>
  </section>
 
  <section id="inspection" class="page hidden">
@@ -112,16 +116,18 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
    <div class="process"><h3>印刷 A</h3>
     <div class="row"><div class="field"><label>OK</label><input id="aOk" type="number" min="0" value="0" inputmode="numeric"></div><div class="field"><label>NG</label><input id="aNg" type="number" min="0" value="0" inputmode="numeric"></div></div>
     <div class="row"><div class="field"><label>印刷 A－NG 原因</label><select id="aNgReason"><option value="">無</option><option>漏印</option><option>偏位</option><option>重影</option><option>刮傷</option><option>溢墨</option><option>色差</option><option>異物</option><option>包裝異常</option><option>其他</option></select></div><div class="field"><label>印刷 A－NG 照片</label><input id="aNgPhoto" type="file" accept="image/*" capture="environment"><img id="aNgPreview" class="hidden"></div></div>
+    <div class="field"><label>印刷 A－備註／處理方式</label><textarea id="aNotes" placeholder="請填寫印刷 A 的處理方式"></textarea></div>
    </div>
    <div class="process"><h3>印刷 B</h3>
     <div class="row"><div class="field"><label>OK</label><input id="bOk" type="number" min="0" value="0" inputmode="numeric"></div><div class="field"><label>NG</label><input id="bNg" type="number" min="0" value="0" inputmode="numeric"></div></div>
     <div class="row"><div class="field"><label>印刷 B－NG 原因</label><select id="bNgReason"><option value="">無</option><option>漏印</option><option>偏位</option><option>重影</option><option>刮傷</option><option>溢墨</option><option>色差</option><option>異物</option><option>包裝異常</option><option>其他</option></select></div><div class="field"><label>印刷 B－NG 照片</label><input id="bNgPhoto" type="file" accept="image/*" capture="environment"><img id="bNgPreview" class="hidden"></div></div>
+    <div class="field"><label>印刷 B－備註／處理方式</label><textarea id="bNotes" placeholder="請填寫印刷 B 的處理方式"></textarea></div>
    </div>
    <div class="process"><h3>包裝</h3>
     <div class="row"><div class="field"><label>OK</label><input id="pOk" type="number" min="0" value="0" inputmode="numeric"></div><div class="field"><label>NG</label><input id="pNg" type="number" min="0" value="0" inputmode="numeric"></div></div>
     <div class="row"><div class="field"><label>包裝－NG 原因</label><select id="pNgReason"><option value="">無</option><option>漏印</option><option>偏位</option><option>重影</option><option>刮傷</option><option>溢墨</option><option>色差</option><option>異物</option><option>包裝異常</option><option>其他</option></select></div><div class="field"><label>包裝－NG 照片</label><input id="pNgPhoto" type="file" accept="image/*" capture="environment"><img id="pNgPreview" class="hidden"></div></div>
    </div>
-   <div class="field"><label>備註／處理方式</label><textarea id="notes"></textarea></div>
+   <div class="field"><label>包裝－備註／處理方式</label><textarea id="notes" placeholder="請填寫包裝的處理方式"></textarea></div>
    <div class="photo-grid"><div class="photo-box"><b>首件照片（第一筆巡檢可拍）</b><input id="firstPhoto" type="file" accept="image/*" capture="environment"><img id="firstPreview" class="hidden"></div><div class="photo-box"><b>其他照片</b><input id="otherPhoto" type="file" accept="image/*" capture="environment"><img id="otherPreview" class="hidden"></div></div>
    <button id="saveInspectionBtn" class="btn primary" style="margin-top:14px">儲存巡檢</button>
   </div>
@@ -129,42 +135,49 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
 
  <section id="qcReport" class="page hidden">
   <div class="card">
-   <h2>QC Report</h2>
-   <div class="row">
-    <div class="field"><label>料號</label><input id="qcPartNumber" placeholder="請輸入料號"></div>
-   </div>
-   <div class="row">
-    <div class="field"><label>印刷人員</label><input id="qcPrinterOperator" placeholder="請輸入印刷人員"></div>
-    <div class="field"><label>QC 人員</label><input id="qcQcOperator" placeholder="請輸入 QC 人員"></div>
-   </div>
-   <div class="field">
-    <label>印刷道次</label>
-    <select id="qcPrintingPass">
-     <option value="">請選擇</option>
-     <option>第1道</option>
-     <option>第2道</option>
-     <option>第3道</option>
-    </select>
-    <button id="qcStartProductionBtn" type="button" class="btn primary" style="margin-top:10px;width:100%;padding:13px 14px">開始生產</button>
-    <div id="qcValidationMsg" class="hidden" style="margin-top:8px"></div>
-   </div>
-   <div id="qcProductionDetail" class="hidden" style="margin-top:12px;display:grid;gap:10px">
-    <div class="field"><label>開始日期</label><input id="qcStartDate" readonly></div>
-    <div class="field"><label>開始時間</label><input id="qcStartTime" readonly></div>
-    <div class="field"><label>結束日期</label><input id="qcEndDate" readonly></div>
-    <div class="field"><label>結束時間</label><input id="qcEndTime" readonly></div>
-    <div class="field"><label>本次工時</label><input id="qcWorkDuration" readonly></div>
-    <div class="field"><label>本次生產數量</label><input id="qcProductionQty" type="number" min="0" value="0" inputmode="numeric"></div>
-    <div class="field"><label>印刷 NG</label><input id="qcPrintingNg" type="number" min="0" value="0" inputmode="numeric"></div>
-    <div class="field"><label>烘烤 NG</label><input id="qcBakingNg" type="number" min="0" value="0" inputmode="numeric"></div>
-    <div class="field"><label>素材 NG</label><input id="qcMaterialNg" type="number" min="0" value="0" inputmode="numeric"></div>
-    <button id="qcEndProductionBtn" type="button" class="btn primary" style="width:100%;padding:13px 14px">本次生產結束</button>
-    <button id="qcContinueProductionBtn" type="button" class="btn secondary" style="width:100%;padding:13px 14px">繼續生產</button>
-    <button id="qcCompleteProductionBtn" type="button" class="btn danger" style="width:100%;padding:13px 14px">工單完全結束</button>
+   <h2>QC 印刷批次</h2>
+   <div id="qcBatchMsg"></div>
+   <div id="qcNewBatchPanel">
+    <div class="row">
+     <div class="field"><label>料號</label><input id="qcBatchPartNumber" list="partList" placeholder="請輸入料號"></div>
+     <div class="field"><label>印刷人員（選填）</label><input id="qcBatchPrinter" placeholder="請輸入印刷人員"></div>
+    </div>
+    <button id="qcCreateBatchBtn" type="button" class="btn primary" style="width:100%;padding:13px 14px">開始新一批印刷</button>
    </div>
    <div class="card" style="margin-top:14px">
-    <h3>歷史紀錄</h3>
-    <div id="qcReportHistoryList" class="production-list"></div>
+    <h3>尚未完成的批次</h3>
+    <p class="muted small">任何 QC 都可以選擇一批接手，系統會自動顯示下一道。</p>
+    <div id="qcActiveBatchList" class="production-list"></div>
+   </div>
+   <div id="qcStepPanel" class="card hidden" style="margin-top:14px">
+    <h3>記錄下一道印刷</h3>
+    <div id="qcSelectedBatchInfo" class="msg warn"></div>
+    <div class="row">
+     <div class="field"><label>目前 QC</label><input id="qcStepAccount" readonly></div>
+     <div class="field"><label>機台</label><input id="qcStepMachine" placeholder="例如：1 號機"></div>
+    </div>
+    <div class="row3">
+     <div class="field"><label>印刷 NG</label><input id="qcStepPrintingNg" type="number" min="0" value="0" inputmode="numeric"></div>
+     <div class="field"><label>烘烤 NG</label><input id="qcStepBakingNg" type="number" min="0" value="0" inputmode="numeric"></div>
+     <div class="field"><label>素材 NG</label><input id="qcStepMaterialNg" type="number" min="0" value="0" inputmode="numeric"></div>
+    </div>
+    <div class="field"><label>本批生產總數（含 NG，只在最後一道填）</label><input id="qcBatchTotalQty" type="number" min="0" value="0" inputmode="numeric"></div>
+    <div class="actions"><button id="qcSaveStepBtn" type="button" class="btn secondary">完成此道，交給下一道</button><button id="qcCompleteBatchBtn" type="button" class="btn primary">完成此道並結束本批</button><button id="qcCloseStepBtn" type="button" class="btn ghost">取消選擇</button></div>
+   </div>
+   <div id="qcRangeStatsCard" class="card" style="margin-top:14px">
+    <h3>期間生產統計</h3>
+    <p class="muted small">依「完成日期」統計；生產總數包含所有 NG。</p>
+    <div class="row3">
+     <div class="field"><label>開始日期</label><input id="qcStatsStartDate" type="date"></div>
+     <div class="field"><label>結束日期</label><input id="qcStatsEndDate" type="date"></div>
+     <div class="field"><label>料號（選填）</label><input id="qcStatsPart" list="partList" placeholder="例如：A"></div>
+    </div>
+    <div class="actions"><button id="qcStatsApplyBtn" type="button" class="btn primary">查詢統計</button><button id="qcStatsResetBtn" type="button" class="btn secondary">重設為本月</button></div>
+    <div id="qcRangeStats" class="meta" style="margin-top:12px"></div>
+   </div>
+   <div class="card" style="margin-top:14px">
+    <h3>已完成批次</h3>
+    <div id="qcBatchHistoryList" class="production-list"></div>
    </div>
   </div>
  </section>
@@ -205,9 +218,9 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
 const SUPABASE_URL="https://huhenjkybvzkqczkvmkh.supabase.co";
 const SUPABASE_KEY="sb_publishable_cFXdFQJi9cAiBDNXMcHEYw_yYKMKP5D";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-const ACCOUNTS={chengyin:{password:"0000",role:"owner",name:"老闆"},"3F":{password:"0000",role:"supervisor",name:"主管"},"3F1":{password:"0000",role:"worker",name:"員工"}};
+const ACCOUNTS={chengyin:{password:"0000",role:"owner",name:"老闆"},"3F":{password:"0000",role:"supervisor",name:"主管"},"3F1":{password:"0000",role:"worker",name:"QC 1"},"3F2":{password:"0000",role:"worker",name:"QC 2"}};
 const $=id=>document.getElementById(id);
-let currentUser=null, productions=[], inspections=[], reliability=[], parts=[], employees=[], photos=[], qcReports=[], v4Ready=true, inspectionDraftProductionId='', currentQcReportId=null;
+let currentUser=null, productions=[], inspections=[], reliability=[], parts=[], employees=[], photos=[], qcReports=[], qcBatches=[], qcBatchSteps=[], v4Ready=true, qcBatchReady=true, inspectionDraftProductionId='', currentQcBatchId=null;
 let currentLang=localStorage.getItem("ipqc_v416_lang")||"zh";
 const originalText=new WeakMap();
 const VI={"V4.1.6 多人與紀錄顯示版｜2026-07-22":"Phiên bản V4.1.6 nhiều nhân viên và hiển thị hồ sơ｜2026-07-22","公司帳號":"Tài khoản công ty","密碼":"Mật khẩu","記住登入":"Ghi nhớ đăng nhập","登入":"Đăng nhập","登出":"Đăng xuất","首頁":"Trang chủ","生產管理":"Quản lý sản xuất","IPQC巡檢":"Kiểm tra IPQC","信賴度測試":"Kiểm tra độ tin cậy","巡檢紀錄":"Lịch sử kiểm tra","信賴度紀錄":"Lịch sử độ tin cậy","基礎資料":"Dữ liệu cơ bản","生產中":"Đang sản xuất","今日巡檢":"Kiểm tra hôm nay","待信賴度":"Chờ kiểm tra độ tin cậy","今日良率":"Tỷ lệ đạt hôm nay","今日待辦":"Việc cần làm hôm nay","目前生產狀態":"Trạng thái sản xuất hiện tại","建立生產":"Tạo lệnh sản xuất","料號 *":"Mã hàng *","機台":"Máy","作業員 1 *":"Công nhân 1 *","作業員 2":"Công nhân 2","作業員 3":"Công nhân 3","請選擇作業員":"Chọn công nhân","不選擇":"Không chọn","預計數量（選填）":"Số lượng dự kiến (không bắt buộc)","備註":"Ghi chú","開始生產":"Bắt đầu sản xuất","生產中／暫停":"Đang sản xuất / Tạm dừng","最近完成":"Hoàn thành gần đây","新增 IPQC 巡檢":"Thêm kiểm tra IPQC","生產單 *":"Lệnh sản xuất *","日期時間":"Ngày giờ","巡檢人員 *":"Nhân viên kiểm tra *","請選擇巡檢人員":"Chọn nhân viên kiểm tra","品檢人員 1":"Nhân viên QC 1","品檢人員 2":"Nhân viên QC 2","品檢人員 3":"Nhân viên QC 3","請選擇品檢人員":"Chọn nhân viên QC","印刷 A":"In A","印刷 B":"In B","包裝":"Đóng gói","印刷 A－NG 原因":"In A - Nguyên nhân NG","印刷 B－NG 原因":"In B - Nguyên nhân NG","包裝－NG 原因":"Đóng gói - Nguyên nhân NG","印刷 A－NG 照片":"In A - Ảnh NG","印刷 B－NG 照片":"In B - Ảnh NG","包裝－NG 照片":"Đóng gói - Ảnh NG","無":"Không","漏印":"Thiếu in","偏位":"Lệch vị trí","重影":"Bóng đôi","刮傷":"Trầy xước","溢墨":"Tràn mực","色差":"Sai màu","異物":"Dị vật","包裝異常":"Lỗi đóng gói","其他":"Khác","備註／處理方式":"Ghi chú / Cách xử lý","首件照片（第一筆巡檢可拍）":"Ảnh sản phẩm đầu tiên","其他照片":"Ảnh khác","儲存巡檢":"Lưu kiểm tra","搜尋生產單／料號／人員":"Tìm lệnh sản xuất / mã hàng / nhân viên","日期":"Ngày","處理方式":"Cách xử lý","NG 原因":"Nguyên nhân NG","巡檢／品檢":"Kiểm tra / QC","照片":"Ảnh","操作":"Thao tác","刪除":"Xóa","完成信賴度測試":"Hoàn thành kiểm tra độ tin cậy","測試人員":"Người kiểm tra","信賴度照片":"Ảnh độ tin cậy","完成測試":"Hoàn thành kiểm tra","料號管理":"Quản lý mã hàng","品名／關鍵字":"Tên hàng / từ khóa","新增料號":"Thêm mã hàng","人員管理":"Quản lý nhân viên","姓名 *":"Tên *","職務":"Chức vụ","作業員":"Công nhân","巡檢員":"Nhân viên kiểm tra","品檢員":"Nhân viên QC","主管":"Quản lý","新增人員":"Thêm nhân viên","目前料號":"Mã hàng hiện có","目前人員":"Nhân viên hiện có","查看照片":"Xem ảnh","沒有符合的巡檢紀錄":"Không có hồ sơ kiểm tra phù hợp"};
@@ -250,7 +263,7 @@ function slotLabel(d){return `${localDate(d)} ${String(d.getHours()).padStart(2,
 function relPill(pid){const p=productions.find(x=>String(x.id)===String(pid));if(!p)return '<span class="pill pending">🟡 待測</span>';const s=reliabilityState(p);if(s.pending)return `<span class="pill pending">🟡 待測（${esc(slotLabel(s.required))}）</span>`;if(s.latest?.alcohol_result==="NG"||s.latest?.tape_3m600_result==="NG")return '<span class="pill ng">🔴 NG</span>';return '<span class="pill ok">🟢 已完成</span>'}
 function canDeleteProduction(p){return isOwner()||(currentUser?.role==="supervisor"&&p.status!=="completed")}
 function photoLinks(type,id){const ps=photos.filter(p=>p.parent_type===type&&String(p.parent_id)===String(id));return ps.length?ps.map(p=>`<a href="${esc(p.public_url)}" target="_blank">查看照片</a>`).join("｜"):"-"}
-function isQcReportOnlyUser(){return currentUser?.account==="3F1"}
+function isQcReportOnlyUser(){return ["3F1","3F2"].includes(currentUser?.account)}
 function enforcePageId(id){return isQcReportOnlyUser()&&id!=="qcReport"?null:id}
 function applyPageAccessUi(){
  const restricted=isQcReportOnlyUser();
@@ -274,108 +287,88 @@ function showPage(id){
  if(b){b.classList.add("primary");b.classList.remove("secondary")}
  if(targetId==="inspection")$("inspectionDateTime").value=nowParts().text
 }
-function showQcProductionDetail(){const el=$("qcProductionDetail");if(el)el.classList.remove("hidden")}
-function hideQcProductionDetail(){const el=$("qcProductionDetail");if(el)el.classList.add("hidden")}
-function resetQcReportUi(){const formFields=["qcPartNumber","qcPrinterOperator","qcQcOperator","qcPrintingPass","qcStartDate","qcStartTime","qcEndDate","qcEndTime","qcWorkDuration"];formFields.forEach(id=>{const el=$(id);if(el)el.value=""});const detailEl=$("qcProductionDetail");if(detailEl)detailEl.classList.add("hidden");const msgEl=$("qcValidationMsg");if(msgEl){msgEl.innerHTML="";msgEl.classList.add("hidden")};currentQcReportId=null}
-async function handleQcStartProduction(){const required=[{id:"qcPartNumber",message:"請輸入料號"},{id:"qcPrinterOperator",message:"請選擇印刷人員"},{id:"qcQcOperator",message:"請選擇 QC 人員"},{id:"qcPrintingPass",message:"請選擇印刷道次"}];for(const item of required){const el=$(item.id);if(!el||!el.value.trim()){const msgEl=$("qcValidationMsg");if(msgEl){msgEl.classList.remove("hidden");msgEl.innerHTML=`<div class="msg err">${esc(item.message)}</div>`}hideQcProductionDetail();return} }const msgEl=$("qcValidationMsg");if(msgEl){msgEl.innerHTML="";msgEl.classList.add("hidden")}const start=new Date();const startDate=`${String(start.getFullYear()).padStart(4,"0")}/${String(start.getMonth()+1).padStart(2,"0")}/${String(start.getDate()).padStart(2,"0")}`;const startTime=`${String(start.getHours()).padStart(2,"0")}:${String(start.getMinutes()).padStart(2,"0")}:${String(start.getSeconds()).padStart(2,"0")}`;const dateEl=$("qcStartDate");const timeEl=$("qcStartTime");if(dateEl)dateEl.value=startDate;if(timeEl)timeEl.value=startTime;showQcProductionDetail();const {data,error}=await sb.from("qc_reports").insert({
- report_date:today(),
- qc_account:currentUser?.account||"",
- part_number:$("qcPartNumber").value.trim(),
- printer_name:$("qcPrinterOperator").value.trim(),
- qc_name:$("qcQcOperator").value.trim(),
- printing_pass:$("qcPrintingPass").value,
- start_date:startDate.replace(/\//g,"-"),
- start_time:startTime,
- created_by:currentUser?.account||""
-}).select("id").single();if(error){alert(error.message);return}currentQcReportId=data?.id||null}
-async function handleQcEndProduction(){
- const detailEl=$("qcProductionDetail");
- if(!detailEl||detailEl.classList.contains("hidden"))return;
- const end=new Date();
- const endDate=`${String(end.getFullYear()).padStart(4,"0")}/${String(end.getMonth()+1).padStart(2,"0")}/${String(end.getDate()).padStart(2,"0")}`;
- const endTime=`${String(end.getHours()).padStart(2,"0")}:${String(end.getMinutes()).padStart(2,"0")}:${String(end.getSeconds()).padStart(2,"0")}`;
- const dateEl=$("qcEndDate");
- const timeEl=$("qcEndTime");
- if(dateEl)dateEl.value=endDate;
- if(timeEl)timeEl.value=endTime;
- const startDateEl=$("qcStartDate");
- const startTimeEl=$("qcStartTime");
- const durationEl=$("qcWorkDuration");
- if(startDateEl&&startTimeEl&&durationEl){
-  const startValue=startDateEl.value&&startTimeEl.value?`${startDateEl.value} ${startTimeEl.value}`:"";
-  if(startValue){
-   const startParts=startValue.match(/(\d{4})\/(\d{2})\/(\d{2})\s+(\d{2}):(\d{2}):(\d{2})/);
-   const endParts=`${endDate} ${endTime}`.match(/(\d{4})\/(\d{2})\/(\d{2})\s+(\d{2}):(\d{2}):(\d{2})/);
-   if(startParts&&endParts){
-    const startDateTime=new Date(Number(startParts[1]),Number(startParts[2])-1,Number(startParts[3]),Number(startParts[4]),Number(startParts[5]),Number(startParts[6]));
-    const endDateTime=new Date(Number(endParts[1]),Number(endParts[2])-1,Number(endParts[3]),Number(endParts[4]),Number(endParts[5]),Number(endParts[6]));
-    const diff=Math.max(0,Math.floor((endDateTime-startDateTime)/1000));
-    const hh=String(Math.floor(diff/3600)).padStart(2,"0");
-    const mm=String(Math.floor((diff%3600)/60)).padStart(2,"0");
-    const ss=String(diff%60).padStart(2,"0");
-    durationEl.value=`${hh}:${mm}:${ss}`;
-   }
-  }
- }
- if(currentQcReportId){
-  const {error}=await sb.from("qc_reports").update({
-   report_date:today(),
-   qc_account:currentUser?.account||"",
-   part_number:$("qcPartNumber").value.trim(),
-   printer_name:$("qcPrinterOperator").value.trim(),
-   qc_name:$("qcQcOperator").value.trim(),
-   printing_pass:$("qcPrintingPass").value,
-   start_date:$("qcStartDate").value.replace(/\//g,"-"),
-   start_time:$("qcStartTime").value,
-   end_date:endDate.replace(/\//g,"-"),
-   end_time:endTime,
-   work_duration:durationEl?.value||"",
-   printed_quantity:Number($("qcProductionQty").value)||0,
-   printing_ng:Number($("qcPrintingNg").value)||0,
-   baking_ng:Number($("qcBakingNg").value)||0,
-   material_ng:Number($("qcMaterialNg").value)||0,
-   updated_at:new Date().toISOString()
-  }).eq("id",currentQcReportId);
-  if(error)alert(error.message);
- }
+function qcBatchStepsFor(batchId){return qcBatchSteps.filter(step=>String(step.batch_id)===String(batchId)).sort((a,b)=>num(a.step_number)-num(b.step_number))}
+function qcBatchNg(batchId){return qcBatchStepsFor(batchId).reduce((total,step)=>({printing:total.printing+num(step.printing_ng),baking:total.baking+num(step.baking_ng),material:total.material+num(step.material_ng)}),{printing:0,baking:0,material:0})}
+function qcCompletedDate(batch){return batch.completed_date||localDate(new Date(batch.completed_at||0))}
+function createQcBatchNo(){return `QC-${today().replaceAll("-","")}-${String(Date.now()).slice(-6)}`}
+function qcBatchMessage(text,ok=false){const el=$("qcBatchMsg");if(el)msg(el,text,ok)}
+function resetQcStepPanel(){currentQcBatchId=null;$("qcStepPanel").classList.add("hidden");["qcStepMachine","qcStepPrintingNg","qcStepBakingNg","qcStepMaterialNg","qcBatchTotalQty"].forEach(id=>$(id).value=id==="qcStepMachine"?"":0)}
+function selectQcBatch(id){
+ const batch=qcBatches.find(x=>String(x.id)===String(id));
+ if(!batch||batch.status!=="in_progress")return;
+ currentQcBatchId=batch.id;
+ const nextStep=qcBatchStepsFor(batch.id).length+1;
+ $("qcStepAccount").value=`${currentUser.name}｜${currentUser.account}`;
+ $("qcSelectedBatchInfo").innerHTML=`<b>${esc(batch.part_number)}</b>｜批次 ${esc(batch.batch_no)}｜目前第 ${nextStep} 道${batch.printer_name?`｜印刷人員：${esc(batch.printer_name)}`:""}`;
+ ["qcStepMachine","qcStepPrintingNg","qcStepBakingNg","qcStepMaterialNg","qcBatchTotalQty"].forEach(id=>$(id).value=id==="qcStepMachine"?"":0);
+ $("qcStepPanel").classList.remove("hidden");
+ $("qcStepPanel").scrollIntoView({behavior:"smooth",block:"start"});
 }
-async function handleQcContinueProduction(){const endDateEl=$("qcEndDate");const endTimeEl=$("qcEndTime");const durationEl=$("qcWorkDuration");if(endDateEl)endDateEl.value="";if(endTimeEl)endTimeEl.value="";if(durationEl)durationEl.value="";const {data,error}=await sb.from("qc_reports").insert({
- report_date:today(),
- qc_account:currentUser?.account||"",
- part_number:$("qcPartNumber").value.trim(),
- printer_name:$("qcPrinterOperator").value.trim(),
- qc_name:$("qcQcOperator").value.trim(),
- printing_pass:$("qcPrintingPass").value,
- start_date:$("qcStartDate").value.replace(/\//g,"-"),
- start_time:$("qcStartTime").value,
- created_by:currentUser?.account||""
-}).select("id").single();if(error){alert(error.message);return}currentQcReportId=data?.id||null}
-function handleQcCompleteProduction(){resetQcReportUi()}
+async function createQcBatch(){
+ if(!qcBatchReady)return qcBatchMessage("QC 批次資料表尚未建立，請先執行更新 SQL");
+ const part=$("qcBatchPartNumber").value.trim();if(!part)return qcBatchMessage("請輸入料號");
+ const payload={batch_no:createQcBatchNo(),part_number:part,printer_name:$("qcBatchPrinter").value.trim()||null,status:"in_progress",started_by:currentUser.account};
+ const {data,error}=await sb.from("qc_batches").insert(payload).select().single();
+ if(error)return qcBatchMessage(error.message);
+ await ensurePart(part);$("qcBatchPartNumber").value="";$("qcBatchPrinter").value="";qcBatchMessage(`已建立 ${payload.part_number} 的新批次`,true);await loadAll();selectQcBatch(data.id);
+}
+async function saveQcBatchStep(completeBatch=false){
+ const batch=qcBatches.find(x=>String(x.id)===String(currentQcBatchId));
+ if(!batch)return alert("請先選擇要登記的批次");
+ const machine=$("qcStepMachine").value.trim();if(!machine)return alert("請輸入機台");
+ const stepNg=num($("qcStepPrintingNg").value)+num($("qcStepBakingNg").value)+num($("qcStepMaterialNg").value);
+ const totalQty=num($("qcBatchTotalQty").value);
+ if(completeBatch&&totalQty<=0)return alert("最後一道請填寫本批生產總數（含 NG）");
+ if(completeBatch){const previous=qcBatchNg(batch.id);if(previous.printing+previous.baking+previous.material+stepNg>totalQty)return alert("各道 NG 加總不可大於本批生產總數")}
+ const {error:stepError}=await sb.from("qc_batch_steps").insert({batch_id:batch.id,step_number:qcBatchStepsFor(batch.id).length+1,machine_name:machine,qc_account:currentUser.account,printing_ng:num($("qcStepPrintingNg").value),baking_ng:num($("qcStepBakingNg").value),material_ng:num($("qcStepMaterialNg").value)});
+ if(stepError)return alert(stepError.message);
+ if(completeBatch){
+  const {error:batchError}=await sb.from("qc_batches").update({status:"completed",total_quantity:totalQty,completed_by:currentUser.account,completed_date:today(),completed_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq("id",batch.id);
+  if(batchError)return alert(batchError.message);
+ }
+ await loadAll();resetQcStepPanel();qcBatchMessage(completeBatch?"本批已完成並儲存":"已完成此道，可由下一位 QC 接手",true);
+}
 document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{if(b.classList.contains("role-supervisor")&&!canManage())return;showPage(b.dataset.page)});
-if($("qcStartProductionBtn"))$("qcStartProductionBtn").onclick=handleQcStartProduction;
-if($("qcEndProductionBtn"))$("qcEndProductionBtn").onclick=handleQcEndProduction;
-if($("qcContinueProductionBtn"))$("qcContinueProductionBtn").onclick=handleQcContinueProduction;
-if($("qcCompleteProductionBtn"))$("qcCompleteProductionBtn").onclick=handleQcCompleteProduction;
+if($("qcCreateBatchBtn"))$("qcCreateBatchBtn").onclick=createQcBatch;
+if($("qcSaveStepBtn"))$("qcSaveStepBtn").onclick=()=>saveQcBatchStep(false);
+if($("qcCompleteBatchBtn"))$("qcCompleteBatchBtn").onclick=()=>saveQcBatchStep(true);
+if($("qcCloseStepBtn"))$("qcCloseStepBtn").onclick=resetQcStepPanel;
+ if($("qcStatsApplyBtn"))$("qcStatsApplyBtn").onclick=renderQcRangeStats;
+ if($("qcStatsResetBtn"))$("qcStatsResetBtn").onclick=()=>{ $("qcStatsStartDate").value=`${today().slice(0,8)}01`;$("qcStatsEndDate").value=today();$("qcStatsPart").value="";renderQcRangeStats() };
+ if($("doneProductionDate"))$("doneProductionDate").onchange=renderCompletedProductions;
 $("loginBtn").onclick=()=>{const a=$("account").value.trim(),p=$("password").value,f=ACCOUNTS[a];if(!f||f.password!==p)return msg($("loginMsg"),"帳號或密碼錯誤");currentUser={account:a,...f};if($("remember").checked)localStorage.setItem("ipqc_v4_login",JSON.stringify(currentUser));enterApp()};
 $("logoutBtn").onclick=()=>{localStorage.removeItem("ipqc_v4_login");location.reload()};
 async function enterApp(){document.body.dataset.role=currentUser.role;$("loginPage").classList.add("hidden");$("appPage").classList.remove("hidden");$("userInfo").textContent=`${currentUser.name}｜${currentUser.account}`;await loadAll();const defaultPage=currentUser?.account==="chengyin"?"dashboard":currentUser?.account==="3F"?"production":"qcReport";showPage(defaultPage);}
 async function loadAll(){
- const [p,i,r,pa,e,ph,q]=await Promise.all([
+ const [p,i,r,pa,e,ph,q,qb,qs]=await Promise.all([
   sb.from("production_orders").select("*").order("created_at",{ascending:false}).limit(500),
   sb.from("inspections").select("*").order("created_at",{ascending:false}).limit(1000),
   sb.from("reliability_tests").select("*").order("created_at",{ascending:false}).limit(500),
   sb.from("part_numbers").select("*").eq("active",true).order("code"),
   sb.from("employees").select("*").eq("active",true).order("name"),
   sb.from("inspection_photos").select("*").order("created_at",{ascending:false}).limit(1500),
-  sb.from("qc_reports").select("*").order("created_at",{ascending:false}).limit(1000)
+  sb.from("qc_reports").select("*").order("created_at",{ascending:false}).limit(1000),
+  sb.from("qc_batches").select("*").order("started_at",{ascending:false}).limit(1000),
+  sb.from("qc_batch_steps").select("*").order("created_at",{ascending:false}).limit(3000)
  ]);
  if(p.error){v4Ready=false;$("setupBanner").classList.remove("hidden");productions=[]}else{v4Ready=true;$("setupBanner").classList.add("hidden");productions=p.data||[]}
- inspections=i.data||[];reliability=r.data||[];parts=pa.data||[];employees=e.data||[];photos=ph.data||[];qcReports=q.error?[]:q.data||[];renderAll()
+ inspections=i.data||[];reliability=r.data||[];parts=pa.data||[];employees=e.data||[];photos=ph.data||[];qcReports=q.error?[]:q.data||[];qcBatchReady=!qb.error&&!qs.error;qcBatches=qb.error?[]:qb.data||[];qcBatchSteps=qs.error?[]:qs.data||[];renderAll()
 }
 function renderProductionCard(p,actions=true){
  const t=productionTotals(p.id), count=inspections.filter(x=>String(x.production_id)===String(p.id)).length;
  const deleteBtn=canDeleteProduction(p)?`<button class="btn delete-top" onclick="deleteProduction('${p.id}')" title="刪除生產單">🗑 刪除</button>`:"";
  return `<div class="production-card"><div class="production-head"><div><div class="production-no">${esc(p.production_no)}</div><div class="production-part">${esc(p.part_number_code)}</div></div><div class="production-head-actions">${statusPill(p.status)}${deleteBtn}</div></div><div class="meta">機台：${esc(p.machine||"-")}｜作業員：${displayNames(p.operator_name)}<br>開始：${esc((p.started_at||"").replace("T"," ").slice(0,16))}｜巡檢：${count} 次<br>OK ${t.ok}｜NG ${t.ng}｜良率 ${t.yield.toFixed(1)}%｜信賴度 ${relPill(p.id)}</div>${actions?`<div class="actions" style="margin-top:10px">${p.status==="active"?`<button class="btn warning" onclick="changeProduction('${p.id}','paused')">暫停生產</button>`:""}${p.status==="paused"?`<button class="btn secondary" onclick="changeProduction('${p.id}','active')">恢復生產</button>`:""}${p.status!=="completed"?`<button class="btn danger" onclick="completeProduction('${p.id}')">完成生產</button>`:""}<button class="btn ghost" onclick="startInspectionFor('${p.id}')">新增巡檢</button>${p.status!=="completed"&&reliabilityState(p).pending?`<button class="btn ghost" onclick="startReliability('${p.id}')">做信賴度</button>`:""}</div>`:""}</div>`
+}
+function renderCompletedProductions(){
+ const container=$("doneProductions");if(!container)return;
+ const selectedDate=$("doneProductionDate")?.value||"";
+ const rows=productions.filter(p=>p.status==="completed"&&(!selectedDate||localDate(new Date(p.completed_at||p.updated_at||p.created_at))===selectedDate)).sort((a,b)=>new Date(b.completed_at||b.updated_at||0)-new Date(a.completed_at||a.updated_at||0));
+ const groups={};
+ rows.forEach(p=>{const key=p.part_number_code||"未分類";(groups[key]??=[]).push(p)});
+ container.innerHTML=Object.entries(groups).map(([part,items])=>{
+  const latest=localDate(new Date(items[0].completed_at||items[0].updated_at||items[0].created_at));
+  return `<div class="group-card"><button class="group-summary" onclick="this.parentElement.classList.toggle('open')"><div><div class="record-part">${esc(part)}</div><div class="small muted">${items.length} 筆｜最近完成：${esc(latest)}</div></div><span>▶</span></button><div class="group-detail">${items.map(p=>renderProductionCard(p,false)).join("")}</div></div>`;
+ }).join("")||'<div class="muted">沒有符合日期的已完成生產單</div>';
 }
 function renderQcProductionStats(){
  const card=$("qcProductionStatsCard");
@@ -385,25 +378,63 @@ function renderQcProductionStats(){
  card.classList.toggle("hidden",!visible);
  if(!visible){container.innerHTML="";return;}
  const todayStr=today();
- const rows=(qcReports||[]).filter(x=>String(x.end_date||"").trim()===todayStr);
- const totalQty=rows.reduce((sum,x)=>sum+(Number(x.printed_quantity)||0),0);
- const printingNg=rows.reduce((sum,x)=>sum+(Number(x.printing_ng)||0),0);
- const bakingNg=rows.reduce((sum,x)=>sum+(Number(x.baking_ng)||0),0);
- const materialNg=rows.reduce((sum,x)=>sum+(Number(x.material_ng)||0),0);
+ const rows=(qcBatches||[]).filter(x=>x.status==="completed"&&qcCompletedDate(x)===todayStr);
+ const totalQty=rows.reduce((sum,x)=>sum+num(x.total_quantity),0);
+ const printingNg=rows.reduce((sum,x)=>sum+qcBatchNg(x.id).printing,0);
+ const bakingNg=rows.reduce((sum,x)=>sum+qcBatchNg(x.id).baking,0);
+ const materialNg=rows.reduce((sum,x)=>sum+qcBatchNg(x.id).material,0);
  const goodQty=Math.max(0,totalQty-printingNg-bakingNg-materialNg);
  const rate=totalQty>0?goodQty/totalQty*100:0;
  container.innerHTML=`<div class="meta">今日完成批次：<b>${rows.length}</b><br>今日生產總數：<b>${totalQty}</b><br>今日良品數：<b>${goodQty}</b><br>今日印刷NG：<b>${printingNg}</b><br>今日烘烤NG：<b>${bakingNg}</b><br>今日素材NG：<b>${materialNg}</b><br>今日QC良率：<b>${rate.toFixed(1)}%</b></div>`;
 }
-function renderQcReportHistory(){
- const container=$("qcReportHistoryList");
- if(!container)return;
- const rows=(qcReports||[]).slice().sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
- container.innerHTML=rows.length?rows.map(r=>{
-  const part=esc(r.part_number||"-");
-  const doneTime=esc([r.end_date||"-",r.end_time||"-"].filter(Boolean).join(" "));
-  const deleteBtn=currentUser?.account==="chengyin"?`<button class="btn danger" onclick="deleteQcReportRecord('${r.id}')">🗑️ 刪除</button>`:"";
-  return `<div class="production-card"><div class="production-head"><div><div class="production-no">${esc(r.report_date||"")}</div><div class="production-part">${part}</div></div><div class="production-head-actions">${deleteBtn}</div></div><div class="meta">印刷人員：${esc(r.printer_name||"-")}｜QC：${esc(r.qc_name||"-")}<br>道次：${esc(r.printing_pass||"-")}｜完成時間：${doneTime}<br>生產數量：${num(r.printed_quantity)}｜印刷NG：${num(r.printing_ng)}｜烘烤NG：${num(r.baking_ng)}｜素材NG：${num(r.material_ng)}</div></div>`;
- }).join(""):'<div class="muted">目前沒有 QC Report 紀錄</div>';
+function setQcStatsMonthDefaults(){
+ const start=$("qcStatsStartDate"),end=$("qcStatsEndDate");
+ if(start&&!start.value)start.value=`${today().slice(0,8)}01`;
+ if(end&&!end.value)end.value=today();
+}
+function renderQcRangeStats(){
+ const card=$("qcRangeStatsCard"),container=$("qcRangeStats");
+ if(!card||!container)return;
+ const visible=canManage();
+ card.classList.toggle("hidden",!visible);
+ if(!visible){container.innerHTML="";return}
+ setQcStatsMonthDefaults();
+ const start=$("qcStatsStartDate").value,end=$("qcStatsEndDate").value,part=$("qcStatsPart").value.trim().toLowerCase();
+ if(start&&end&&start>end){container.innerHTML='<div class="msg err">開始日期不可晚於結束日期</div>';return}
+ const rows=(qcBatches||[]).filter(x=>{
+  const completed=qcCompletedDate(x);
+  return x.status==="completed"&&completed&&(!start||completed>=start)&&(!end||completed<=end)&&(!part||String(x.part_number||"").trim().toLowerCase()===part);
+ });
+ const totalQty=rows.reduce((sum,x)=>sum+num(x.total_quantity),0);
+ const printingNg=rows.reduce((sum,x)=>sum+qcBatchNg(x.id).printing,0);
+ const bakingNg=rows.reduce((sum,x)=>sum+qcBatchNg(x.id).baking,0);
+ const materialNg=rows.reduce((sum,x)=>sum+qcBatchNg(x.id).material,0);
+ const totalNg=printingNg+bakingNg+materialNg;
+ const goodQty=Math.max(0,totalQty-totalNg);
+ const rate=totalQty?goodQty/totalQty*100:0;
+ const range=`${start||"最早紀錄"} 至 ${end||"今天"}`;
+ const scope=part?`｜料號：${esc($("qcStatsPart").value.trim())}`:"｜全部料號";
+ container.innerHTML=`<div class="small muted">${range}${scope}</div><div class="grid" style="margin-top:10px"><div class="card stat"><span class="muted">完成批次</span><b>${rows.length}</b></div><div class="card stat"><span class="muted">生產總數</span><b>${totalQty}</b></div><div class="card stat"><span class="muted">良品數</span><b class="oktxt">${goodQty}</b></div><div class="card stat"><span class="muted">QC 良率</span><b>${rate.toFixed(1)}%</b></div></div><div class="meta">NG 合計：<b class="ngtxt">${totalNg}</b>（印刷 ${printingNg}｜烘烤 ${bakingNg}｜素材 ${materialNg}）</div>`;
+}
+function renderQcBatchLists(){
+ const activeContainer=$("qcActiveBatchList"),historyContainer=$("qcBatchHistoryList");
+ if(!activeContainer||!historyContainer)return;
+ if(!qcBatchReady){
+  const message='<div class="msg err">QC 多道印刷功能尚未安裝。請先在 Supabase 執行 qc_batch_migration.sql。</div>';
+  activeContainer.innerHTML=message;historyContainer.innerHTML="";return;
+ }
+ const active=(qcBatches||[]).filter(x=>x.status==="in_progress").sort((a,b)=>new Date(b.started_at||0)-new Date(a.started_at||0));
+ activeContainer.innerHTML=active.length?active.map(batch=>{
+  const steps=qcBatchStepsFor(batch.id),detail=steps.length?steps.map(step=>`第 ${num(step.step_number)} 道：${esc(step.machine_name)}｜${esc(step.qc_account)}｜NG ${num(step.printing_ng)+num(step.baking_ng)+num(step.material_ng)}`).join("<br>"):"尚未登記任何道次";
+  return `<div class="production-card"><div class="production-head"><div><div class="production-no">${esc(batch.batch_no)}</div><div class="production-part">${esc(batch.part_number)}</div></div><div class="production-head-actions"><span class="pill pending">第 ${steps.length+1} 道待登記</span></div></div><div class="meta">開始：${esc((batch.started_at||"").replace("T"," ").slice(0,16))}｜建立：${esc(batch.started_by||"-")}<br>${detail}</div><button class="btn primary" style="margin-top:10px" onclick="selectQcBatch('${batch.id}')">接手下一道</button></div>`;
+ }).join(""):'<div class="muted">目前沒有尚未完成的批次</div>';
+ const completed=(qcBatches||[]).filter(x=>x.status==="completed").sort((a,b)=>new Date(b.completed_at||0)-new Date(a.completed_at||0));
+ historyContainer.innerHTML=completed.length?completed.map(batch=>{
+  const steps=qcBatchStepsFor(batch.id),ng=qcBatchNg(batch.id),totalNg=ng.printing+ng.baking+ng.material,good=Math.max(0,num(batch.total_quantity)-totalNg);
+  const detail=steps.map(step=>`第 ${num(step.step_number)} 道：${esc(step.machine_name)}｜${esc(step.qc_account)}｜NG ${num(step.printing_ng)+num(step.baking_ng)+num(step.material_ng)}`).join("<br>");
+  const deleteBtn=isOwner()?`<button class="btn delete-top" onclick="deleteQcBatch('${batch.id}')">🗑 刪除</button>`:"";
+  return `<div class="production-card"><div class="production-head"><div><div class="production-no">${esc(batch.batch_no)}</div><div class="production-part">${esc(batch.part_number)}</div></div><div class="production-head-actions"><span class="pill done">已完成</span>${deleteBtn}</div></div><div class="meta">總數（含 NG）：${num(batch.total_quantity)}｜良品：${good}｜NG：${totalNg}<br>完成：${esc((batch.completed_at||"").replace("T"," ").slice(0,16))}｜最後登記：${esc(batch.completed_by||"-")}<br>${detail}</div></div>`;
+ }).join(""):'<div class="muted">目前沒有已完成批次</div>';
 }
 function renderAll(){
  $("partList").innerHTML=parts.map(x=>`<option value="${esc(x.code)}">${esc(x.keywords||"")}</option>`).join("");
@@ -413,9 +444,9 @@ function renderAll(){
  const oldInspector=$("inspectorName").value;
  $("inspectorName").innerHTML='<option value="">請選擇巡檢人員</option>'+employees.filter(x=>x.active!==false).map(x=>`<option value="${esc(x.name)}">${esc(x.name)}${x.role?`｜${esc(x.role)}`:""}</option>`).join("");
  if([...$("inspectorName").options].some(o=>o.value===oldInspector))$("inspectorName").value=oldInspector;
- const active=productions.filter(x=>x.status!=="completed"), done=productions.filter(x=>x.status==="completed").slice(0,20);
+ const active=productions.filter(x=>x.status!=="completed");
  $("activeProductions").innerHTML=active.length?active.map(x=>renderProductionCard(x)).join(""):'<div class="muted">目前沒有生產中的料號</div>';
- $("doneProductions").innerHTML=done.length?done.map(x=>renderProductionCard(x,false)).join(""):'<div class="muted">尚無完成紀錄</div>';
+ renderCompletedProductions();
  $("dashboardProductions").innerHTML=active.length?active.map(x=>renderProductionCard(x,false)).join(""):'<div class="muted">目前沒有生產中的料號</div>';
  const activeSelectable=productions.filter(x=>x.status==="active");
  const selectedProduction=inspectionDraftProductionId||$("inspectionProduction").value;
@@ -426,7 +457,8 @@ function renderAll(){
  const pending=active.filter(x=>reliabilityState(x).pending);
  $("todoList").innerHTML=`<div class="meta">🧪 待信賴度：<b>${pending.length}</b> 件<br>🔴 今日 NG：<b>${ng}</b> 件<br>📝 今日巡檢：<b>${todayRows.length}</b> 次</div>`;
  renderQcProductionStats();
- renderQcReportHistory();
+ renderQcRangeStats();
+ renderQcBatchLists();
  $("pendingReliability").innerHTML=pending.length?pending.map(p=>`<div class="production-card"><div class="production-no">${esc(p.production_no)}</div><div class="production-part">${esc(p.part_number_code)}</div><div class="meta">開始：${esc((p.started_at||"").replace("T"," ").slice(0,16))}｜機台：${esc(p.machine||"-")}<br>應測時段：${esc(slotLabel(reliabilityState(p).required))}</div><button class="btn primary" style="margin-top:10px" onclick="startReliability('${p.id}')">開始測試</button></div>`).join(""):'<div class="muted">目前沒有待測項目</div>';
  renderRecords();renderReliabilityRecords();
  $("partsTable").innerHTML=`<table><tr><th>料號</th><th>品名／關鍵字</th><th>操作</th></tr>${parts.map(x=>`<tr><td>${esc(x.code)}</td><td>${esc(x.keywords||"")}</td><td class="delete-cell">${canManage()?`<button class="btn danger" onclick="deletePart('${x.id}')">刪除</button>`:"-"}</td></tr>`).join("")}</table>`;
@@ -452,7 +484,7 @@ function resetInspectionForm(keepProduction=true){
  clearInspectionPhotos();
  ["aOk","aNg","bOk","bNg","pOk","pNg"].forEach(id=>$(id).value=0);
  ["aNgReason","bNgReason","pNgReason"].forEach(id=>$(id).value="");
- $("notes").value="";
+ ["aNotes","bNotes","notes"].forEach(id=>$(id).value="");
  ["qualityInspectorName1","qualityInspectorName2","qualityInspectorName3"].forEach(id=>$(id).value="");
  $("formMsg").innerHTML="";
  $("inspectionDateTime").value=nowParts().text;
@@ -494,7 +526,7 @@ $("saveInspectionBtn").onclick=async()=>{
   pNg>0?`包裝：${$("pNgReason").value}`:""
  ].filter(Boolean).join("｜");
  const qualityNames=joinUnique(["qualityInspectorName1","qualityInspectorName2","qualityInspectorName3"],"品檢人員");if(qualityNames===null)return;
- const n=nowParts(),payload={production_id:pid,inspection_date:n.date,inspection_time:n.time,part_number_code:p.part_number_code,operator_name:p.operator_name||"",inspector_name:inspector,quality_inspector_name:qualityNames,machine:p.machine||"",printing_a_status:"check",printing_a_ok:num($("aOk").value),printing_a_ng:aNg,printing_b_status:"check",printing_b_ok:num($("bOk").value),printing_b_ng:bNg,packing_status:"check",packing_ok:num($("pOk").value),packing_ng:pNg,ng_reason:stationReasons,notes:$("notes").value.trim()};
+ const n=nowParts(),payload={production_id:pid,inspection_date:n.date,inspection_time:n.time,part_number_code:p.part_number_code,operator_name:p.operator_name||"",inspector_name:inspector,quality_inspector_name:qualityNames,machine:p.machine||"",printing_a_status:"check",printing_a_ok:num($("aOk").value),printing_a_ng:aNg,printing_a_notes:$("aNotes").value.trim(),printing_b_status:"check",printing_b_ok:num($("bOk").value),printing_b_ng:bNg,printing_b_notes:$("bNotes").value.trim(),packing_status:"check",packing_ok:num($("pOk").value),packing_ng:pNg,ng_reason:stationReasons,notes:$("notes").value.trim()};
  $("saveInspectionBtn").disabled=true;
  try{
   const {data,error}=await sb.from("inspections").insert(payload).select().single();
@@ -571,6 +603,17 @@ async function deleteInspection(id){if(!canManage())return alert("沒有刪除�
 async function deleteReliability(id){if(!canManage())return alert("沒有刪除權限");if(!confirm("確定刪除這筆信賴度紀錄？刪除後該生產單可能重新顯示待測。"))return;try{await deleteStoredPhotos("reliability",id);const {error}=await sb.from("reliability_tests").delete().eq("id",id);if(error)throw error;await loadAll()}catch(e){alert(e.message)}}
 async function deletePart(id){if(!canManage())return;if(!confirm("確定刪除此料號？既有生產與巡檢紀錄不會被刪除。"))return;const {error}=await sb.from("part_numbers").delete().eq("id",id);if(error)return alert(error.message);await loadAll()}
 async function deleteEmployee(id){if(!canManage())return;if(!confirm("確定刪除此人員？既有歷史紀錄不會被刪除。"))return;const {error}=await sb.from("employees").delete().eq("id",id);if(error)return alert(error.message);await loadAll()}
+async function deleteQcBatch(id){
+ const batch=qcBatches.find(x=>String(x.id)===String(id));
+ if(!batch||!isOwner())return alert("只有老闆帳號可以刪除已完成批次");
+ const steps=qcBatchStepsFor(batch.id);
+ if(!confirm(`確定刪除這批 QC 紀錄？\n料號：${batch.part_number}\n批次：${batch.batch_no}\n包含 ${steps.length} 道印刷紀錄，刪除後無法復原。`))return;
+ try{
+  const {error}=await sb.from("qc_batches").delete().eq("id",batch.id);
+  if(error)throw error;
+  await loadAll();
+ }catch(e){alert(`刪除失敗：${e.message||"請稍後再試"}`)}
+}
 async function deleteQcReportRecord(id){
  const report=qcReports.find(x=>String(x.id)===String(id));
  if(!report||currentUser?.account!=="chengyin")return;
@@ -589,7 +632,11 @@ function renderRecords(){
  const q=$("recordSearch").value.trim().toLowerCase(),d=$("recordDate").value;
  const rows=inspections.filter(x=>(!d||x.inspection_date===d)&&(!q||[x.part_number_code,x.operator_name,x.inspector_name,x.quality_inspector_name,productions.find(p=>String(p.id)===String(x.production_id))?.production_no].some(v=>String(v||"").toLowerCase().includes(q))));
  const groups={};rows.forEach(r=>{const p=productions.find(x=>String(x.id)===String(r.production_id)),key=String(r.production_id||r.part_number_code||"未分類");if(!groups[key])groups[key]={part:r.part_number_code||"未分類",productionNo:p?.production_no||"",items:[]};groups[key].items.push(r)});
- $("recordsTable").innerHTML=Object.values(groups).map(g=>`<div class="group-card"><button class="group-summary" onclick="this.parentElement.classList.toggle('open')"><div><div class="record-part">${esc(g.part)}</div><div class="small muted">${g.items.length} 筆</div></div><span>▶</span></button><div class="group-detail">${g.items.map(r=>{const aNg=num(r.printing_a_ng),bNg=num(r.printing_b_ng),pNg=num(r.packing_ng),reason=esc(r.ng_reason||"-");return `<div class="record-entry"><div class="record-entry-head"><div><b>${esc(r.inspection_date)} ${esc((r.inspection_time||"").slice(0,5))}</b><div class="small muted">巡檢：${esc(r.inspector_name||"-")}｜品檢：${displayNames(r.quality_inspector_name)}</div><div class="small muted">作業員：${displayNames(r.operator_name)}</div></div>${canManage()?`<button class="btn danger" onclick="deleteInspection('${r.id}')">刪除</button>`:""}</div><div class="record-stations"><div class="record-station"><b>印刷 A</b>OK ${num(r.printing_a_ok)}｜<span class="${aNg?'ngtxt':''}">NG ${aNg}</span></div><div class="record-station"><b>印刷 B</b>OK ${num(r.printing_b_ok)}｜<span class="${bNg?'ngtxt':''}">NG ${bNg}</span></div><div class="record-station"><b>包裝</b>OK ${num(r.packing_ok)}｜<span class="${pNg?'ngtxt':''}">NG ${pNg}</span></div></div>${aNg+bNg+pNg?`<div class="record-ng-info"><b>NG 原因：</b>${reason}</div>`:""}<div class="record-solution"><b>處理方式：</b>${esc(r.notes||"未填寫")}</div><div style="margin-top:9px"><b>照片：</b>${photoLinks("inspection",r.id)}</div></div>`}).join("")}</div></div>`).join("")||'<div class="muted">沒有符合的巡檢紀錄</div>';
+ $("recordsTable").innerHTML=Object.values(groups).map(g=>`<div class="group-card"><button class="group-summary" onclick="this.parentElement.classList.toggle('open')"><div><div class="record-part">${esc(g.part)}</div><div class="small muted">${g.items.length} 筆</div></div><span>▶</span></button><div class="group-detail">${g.items.map(r=>{
+  const aNg=num(r.printing_a_ng),bNg=num(r.printing_b_ng),pNg=num(r.packing_ng),reason=esc(r.ng_reason||"-");
+  const stationNotes=`<div class="record-solution"><b>印刷 A 處理方式：</b>${esc(r.printing_a_notes||"未填寫")}</div><div class="record-solution"><b>印刷 B 處理方式：</b>${esc(r.printing_b_notes||"未填寫")}</div><div class="record-solution"><b>包裝處理方式：</b>${esc(r.notes||"未填寫")}</div>`;
+  return `<div class="record-entry"><div class="record-entry-head"><div><b>${esc(r.inspection_date)} ${esc((r.inspection_time||"").slice(0,5))}</b><div class="small muted">巡檢：${esc(r.inspector_name||"-")}｜品檢：${displayNames(r.quality_inspector_name)}</div><div class="small muted">作業員：${displayNames(r.operator_name)}</div></div>${canManage()?`<button class="btn danger" onclick="deleteInspection('${r.id}')">刪除</button>`:""}</div><div class="record-stations"><div class="record-station"><b>印刷 A</b>OK ${num(r.printing_a_ok)}｜<span class="${aNg?'ngtxt':''}">NG ${aNg}</span></div><div class="record-station"><b>印刷 B</b>OK ${num(r.printing_b_ok)}｜<span class="${bNg?'ngtxt':''}">NG ${bNg}</span></div><div class="record-station"><b>包裝</b>OK ${num(r.packing_ok)}｜<span class="${pNg?'ngtxt':''}">NG ${pNg}</span></div></div>${aNg+bNg+pNg?`<div class="record-ng-info"><b>NG 原因：</b>${reason}</div>`:""}${stationNotes}<div style="margin-top:9px"><b>照片：</b>${photoLinks("inspection",r.id)}</div></div>`;
+ }).join("")}</div></div>`).join("")||'<div class="muted">沒有符合的巡檢紀錄</div>';
  applyLanguage();
 }
 function renderReliabilityRecords(){
@@ -625,7 +672,7 @@ function setupZeroClearInputs(){
 setupZeroClearInputs();
 applyLanguage();
 
-window.changeProduction=changeProduction;window.completeProduction=completeProduction;window.startInspectionFor=startInspectionFor;window.startReliability=startReliability;window.deleteProduction=deleteProduction;window.deleteInspection=deleteInspection;window.deleteReliability=deleteReliability;window.deletePart=deletePart;window.deleteEmployee=deleteEmployee;
+window.changeProduction=changeProduction;window.completeProduction=completeProduction;window.startInspectionFor=startInspectionFor;window.startReliability=startReliability;window.deleteProduction=deleteProduction;window.deleteInspection=deleteInspection;window.deleteReliability=deleteReliability;window.deletePart=deletePart;window.deleteEmployee=deleteEmployee;window.selectQcBatch=selectQcBatch;window.deleteQcBatch=deleteQcBatch;
 setInterval(()=>{if(currentUser)renderAll()},60000);
 (async()=>{try{const saved=JSON.parse(localStorage.getItem("ipqc_v4_login")||"null");if(saved&&ACCOUNTS[saved.account]){currentUser=saved;await enterApp()}}catch(e){}})();
 </script>
