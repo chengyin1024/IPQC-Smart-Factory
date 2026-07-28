@@ -207,15 +207,31 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
  <section id="businessAnalysis" class="page hidden">
   <div class="card">
    <h2>經營分析（Beta）</h2>
-   <div class="msg warn">🚧 開發中</div>
-   <p class="muted">未來功能：</p>
-   <ul>
-    <li>生產統計</li>
-    <li>一道印刷速度</li>
-    <li>印刷人績效</li>
-    <li>NG 分析</li>
-    <li>趨勢圖</li>
-   </ul>
+   <p class="muted small">依 QC Report 已完成批次統計；一道印刷速度與印刷人績效只計算「只有一道印刷紀錄」的批次。</p>
+   <div class="row3">
+    <div class="field"><label>開始日期</label><input id="businessStartDate" type="date"></div>
+    <div class="field"><label>結束日期</label><input id="businessEndDate" type="date"></div>
+    <div class="field"><label>搜尋料號或印刷人員</label><input id="businessKeyword" list="partList" placeholder="輸入部分關鍵字即可"></div>
+   </div>
+   <div class="actions">
+    <button id="businessApplyBtn" type="button" class="btn primary">查詢分析</button>
+    <button id="businessResetBtn" type="button" class="btn secondary">重設為本月</button>
+   </div>
+   <div id="businessAnalysisMessage"></div>
+  </div>
+  <div id="businessSummary" class="grid"></div>
+  <div class="card">
+   <h3>料號生產統計</h3>
+   <div id="businessPartStats" class="table-wrap"></div>
+  </div>
+  <div class="card">
+   <h3>一道印刷速度與印刷人績效</h3>
+   <p class="muted small">兩道以上印刷的產品不列入速度及人員績效。</p>
+   <div id="businessPrinterStats" class="table-wrap"></div>
+  </div>
+  <div class="card">
+   <h3>每日生產趨勢</h3>
+   <div id="businessDailyStats" class="table-wrap"></div>
   </div>
  </section>
 
@@ -318,10 +334,78 @@ function showPage(id){
  const b=document.querySelector(`[data-page="${targetId}"]`);
  if(b){b.classList.add("primary");b.classList.remove("secondary")}
  if(targetId==="inspection")$("inspectionDateTime").value=nowParts().text
+ if(targetId==="businessAnalysis")renderBusinessAnalysis()
 }
 function qcBatchStepsFor(batchId){return qcBatchSteps.filter(step=>String(step.batch_id)===String(batchId)).sort((a,b)=>num(a.step_number)-num(b.step_number))}
 function qcBatchNg(batchId){return qcBatchStepsFor(batchId).reduce((total,step)=>({printing:total.printing+num(step.printing_ng),baking:total.baking+num(step.baking_ng),material:total.material+num(step.material_ng)}),{printing:0,baking:0,material:0})}
 function qcCompletedDate(batch){return batch.completed_date||localDate(new Date(batch.completed_at||0))}
+function qcBatchHours(batch){
+ const started=new Date(batch.started_at||0),completed=new Date(batch.completed_at||0);
+ const hours=(completed-started)/3600000;
+ return Number.isFinite(hours)&&hours>=1/60?hours:0
+}
+function formatWorkHours(hours){
+ const minutes=Math.max(0,Math.round(num(hours)*60));
+ return `${Math.floor(minutes/60)} 小時 ${minutes%60} 分`
+}
+function setBusinessAnalysisDefaults(force=false){
+ const start=$("businessStartDate"),end=$("businessEndDate");
+ if(start&&(force||!start.value))start.value=`${today().slice(0,8)}01`;
+ if(end&&(force||!end.value))end.value=today()
+}
+function renderBusinessAnalysis(){
+ if(currentUser?.account!=="chengyin")return;
+ const summary=$("businessSummary"),partStats=$("businessPartStats"),printerStats=$("businessPrinterStats"),dailyStats=$("businessDailyStats"),message=$("businessAnalysisMessage");
+ if(!summary||!partStats||!printerStats||!dailyStats||!message)return;
+ setBusinessAnalysisDefaults();
+ const start=$("businessStartDate").value,end=$("businessEndDate").value,keyword=$("businessKeyword").value.trim().toLowerCase();
+ if(start&&end&&start>end){
+  message.innerHTML='<div class="msg err">開始日期不可晚於結束日期</div>';
+  summary.innerHTML="";partStats.innerHTML="";printerStats.innerHTML="";dailyStats.innerHTML="";
+  return
+ }
+ message.innerHTML="";
+ const rows=(qcBatches||[]).filter(batch=>{
+  const completed=qcCompletedDate(batch),searchText=`${batch.part_number||""} ${batch.printer_name||""}`.toLowerCase();
+  return batch.status==="completed"&&completed&&(!start||completed>=start)&&(!end||completed<=end)&&(!keyword||searchText.includes(keyword))
+ });
+ const totals=rows.reduce((result,batch)=>{
+  const ng=qcBatchNg(batch.id);
+  result.quantity+=num(batch.total_quantity);
+  result.printingNg+=ng.printing;
+  result.bakingNg+=ng.baking;
+  result.materialNg+=ng.material;
+  result.hours+=qcBatchHours(batch);
+  return result
+ },{quantity:0,printingNg:0,bakingNg:0,materialNg:0,hours:0});
+ const totalNg=totals.printingNg+totals.bakingNg+totals.materialNg,good=Math.max(0,totals.quantity-totalNg),yieldRate=totals.quantity?good/totals.quantity*100:0;
+ const singleRows=rows.filter(batch=>qcBatchStepsFor(batch.id).length===1),singleHours=singleRows.reduce((sum,batch)=>sum+qcBatchHours(batch),0),singleQty=singleRows.reduce((sum,batch)=>sum+num(batch.total_quantity),0),singleSpeed=singleHours?singleQty/singleHours:0;
+ summary.innerHTML=`<div class="card stat"><span class="muted">完成批次</span><b>${rows.length.toLocaleString("zh-TW")}</b></div><div class="card stat"><span class="muted">生產總數</span><b>${totals.quantity.toLocaleString("zh-TW")}</b></div><div class="card stat"><span class="muted">良品數</span><b class="oktxt">${good.toLocaleString("zh-TW")}</b></div><div class="card stat"><span class="muted">QC 良率</span><b>${yieldRate.toFixed(1)}%</b></div><div class="card stat"><span class="muted">批次總經過工時</span><b>${formatWorkHours(totals.hours)}</b></div><div class="card stat"><span class="muted">一道印刷平均速度</span><b>${singleSpeed?`${Math.round(singleSpeed).toLocaleString("zh-TW")} 支／小時`:"-"}</b></div>`;
+ const byPart={};
+ rows.forEach(batch=>{
+  const key=batch.part_number||"未填寫",ng=qcBatchNg(batch.id);
+  if(!byPart[key])byPart[key]={batches:0,quantity:0,printingNg:0,bakingNg:0,materialNg:0,hours:0};
+  const item=byPart[key];item.batches++;item.quantity+=num(batch.total_quantity);item.printingNg+=ng.printing;item.bakingNg+=ng.baking;item.materialNg+=ng.material;item.hours+=qcBatchHours(batch)
+ });
+ const partRows=Object.entries(byPart).sort((a,b)=>b[1].quantity-a[1].quantity);
+ partStats.innerHTML=partRows.length?`<table><tr><th>料號</th><th>完成批次</th><th>生產總數</th><th>良品</th><th>印刷 NG</th><th>烘烤 NG</th><th>素材 NG</th><th>經過工時</th></tr>${partRows.map(([part,item])=>{const ng=item.printingNg+item.bakingNg+item.materialNg;return `<tr><td><b>${esc(part)}</b></td><td>${item.batches}</td><td>${item.quantity.toLocaleString("zh-TW")}</td><td class="oktxt">${Math.max(0,item.quantity-ng).toLocaleString("zh-TW")}</td><td class="${item.printingNg?"ngtxt":""}">${item.printingNg}</td><td class="${item.bakingNg?"ngtxt":""}">${item.bakingNg}</td><td class="${item.materialNg?"ngtxt":""}">${item.materialNg}</td><td>${formatWorkHours(item.hours)}</td></tr>`}).join("")}</table>`:'<div class="muted">這個日期區間沒有符合的已完成紀錄</div>';
+ const byPrinter={};
+ singleRows.forEach(batch=>{
+  const key=batch.printer_name||"未填寫",hours=qcBatchHours(batch),ng=qcBatchNg(batch.id),totalNg=ng.printing+ng.baking+ng.material;
+  if(!byPrinter[key])byPrinter[key]={batches:0,quantity:0,good:0,ng:0,hours:0};
+  const item=byPrinter[key];item.batches++;item.quantity+=num(batch.total_quantity);item.good+=Math.max(0,num(batch.total_quantity)-totalNg);item.ng+=totalNg;item.hours+=hours
+ });
+ const printerRows=Object.entries(byPrinter).sort((a,b)=>(b[1].hours?b[1].quantity/b[1].hours:0)-(a[1].hours?a[1].quantity/a[1].hours:0));
+ printerStats.innerHTML=printerRows.length?`<table><tr><th>印刷人員</th><th>一道印刷批次</th><th>完成數量</th><th>總工時</th><th>平均速度</th><th>NG</th><th>良率</th></tr>${printerRows.map(([printer,item])=>{const speed=item.hours?item.quantity/item.hours:0,rate=item.quantity?item.good/item.quantity*100:0;return `<tr><td><b>${esc(printer)}</b></td><td>${item.batches}</td><td>${item.quantity.toLocaleString("zh-TW")}</td><td>${formatWorkHours(item.hours)}</td><td><b>${speed?`${Math.round(speed).toLocaleString("zh-TW")} 支／小時`:"-"}</b></td><td class="${item.ng?"ngtxt":""}">${item.ng}</td><td>${rate.toFixed(1)}%</td></tr>`}).join("")}</table>`:'<div class="muted">這個日期區間沒有一道印刷的完成紀錄</div>';
+ const byDay={};
+ rows.forEach(batch=>{
+  const day=qcCompletedDate(batch),ng=qcBatchNg(batch.id),totalNg=ng.printing+ng.baking+ng.material;
+  if(!byDay[day])byDay[day]={batches:0,quantity:0,good:0,ng:0};
+  const item=byDay[day];item.batches++;item.quantity+=num(batch.total_quantity);item.good+=Math.max(0,num(batch.total_quantity)-totalNg);item.ng+=totalNg
+ });
+ const dayRows=Object.entries(byDay).sort((a,b)=>b[0].localeCompare(a[0]));
+ dailyStats.innerHTML=dayRows.length?`<table><tr><th>完成日期</th><th>批次</th><th>生產總數</th><th>良品</th><th>NG</th><th>良率</th></tr>${dayRows.map(([day,item])=>`<tr><td>${esc(day)}</td><td>${item.batches}</td><td>${item.quantity.toLocaleString("zh-TW")}</td><td class="oktxt">${item.good.toLocaleString("zh-TW")}</td><td class="${item.ng?"ngtxt":""}">${item.ng}</td><td>${(item.quantity?item.good/item.quantity*100:0).toFixed(1)}%</td></tr>`).join("")}</table>`:'<div class="muted">這個日期區間沒有每日趨勢資料</div>'
+}
 function createQcBatchNo(){return `QC-${today().replaceAll("-","")}-${String(Date.now()).slice(-6)}`}
 function qcBatchMessage(text,ok=false){const el=$("qcBatchMsg");if(el)msg(el,text,ok)}
 function resetQcStepPanel(){currentQcBatchId=null;$("qcStepPanel").classList.add("hidden");["qcStepMachine","qcStepPrintingNg","qcStepBakingNg","qcStepMaterialNg","qcBatchTotalQty"].forEach(id=>$(id).value=id==="qcStepMachine"?"":0)}
@@ -367,6 +451,8 @@ if($("qcCompleteBatchBtn"))$("qcCompleteBatchBtn").onclick=()=>saveQcBatchStep(t
 if($("qcCloseStepBtn"))$("qcCloseStepBtn").onclick=resetQcStepPanel;
  if($("qcStatsApplyBtn"))$("qcStatsApplyBtn").onclick=renderQcRangeStats;
  if($("qcStatsResetBtn"))$("qcStatsResetBtn").onclick=()=>{ $("qcStatsStartDate").value=`${today().slice(0,8)}01`;$("qcStatsEndDate").value=today();$("qcStatsPart").value="";renderQcRangeStats() };
+ if($("businessApplyBtn"))$("businessApplyBtn").onclick=renderBusinessAnalysis;
+ if($("businessResetBtn"))$("businessResetBtn").onclick=()=>{setBusinessAnalysisDefaults(true);$("businessKeyword").value="";renderBusinessAnalysis()};
  if($("doneProductionDate"))$("doneProductionDate").onchange=renderCompletedProductions;
 $("loginBtn").onclick=()=>{const a=$("account").value.trim(),p=$("password").value,f=ACCOUNTS[a];if(!f||f.password!==p)return msg($("loginMsg"),"帳號或密碼錯誤");currentUser={account:a,...f};if($("remember").checked)localStorage.setItem("ipqc_v4_login",JSON.stringify(currentUser));enterApp()};
 $("logoutBtn").onclick=()=>{localStorage.removeItem("ipqc_v4_login");location.reload()};
@@ -491,6 +577,7 @@ function renderAll(){
  renderQcProductionStats();
  renderQcRangeStats();
  renderQcBatchLists();
+ renderBusinessAnalysis();
  $("pendingReliability").innerHTML=pending.length?pending.map(p=>`<div class="production-card"><div class="production-no">${esc(p.production_no)}</div><div class="production-part">${esc(p.part_number_code)}</div><div class="meta">開始：${esc((p.started_at||"").replace("T"," ").slice(0,16))}｜機台：${esc(p.machine||"-")}<br>應測時段：${esc(slotLabel(reliabilityState(p).required))}</div><button class="btn primary" style="margin-top:10px" onclick="startReliability('${p.id}')">開始測試</button></div>`).join(""):'<div class="muted">目前沒有待測項目</div>';
  renderRecords();renderReliabilityRecords();
  $("partsTable").innerHTML=`<table><tr><th>料號</th><th>品名／關鍵字</th><th>操作</th></tr>${parts.map(x=>`<tr><td>${esc(x.code)}</td><td>${esc(x.keywords||"")}</td><td class="delete-cell">${canManage()?`<button class="btn danger" onclick="deletePart('${x.id}')">刪除</button>`:"-"}</td></tr>`).join("")}</table>`;
