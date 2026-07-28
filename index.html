@@ -68,6 +68,7 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
   <button class="btn secondary" data-page="relRecords">信賴度紀錄</button>
   <button class="btn secondary" data-page="completedProductions">已完成生產</button>
   <button class="btn secondary role-supervisor" data-page="master">基礎資料</button>
+  <button class="btn secondary role-owner" data-page="businessAnalysis">經營分析（Beta）</button>
  </div>
 
  <section id="dashboard" class="page">
@@ -203,6 +204,21 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
  <section id="records" class="page hidden"><div class="card"><h2>巡檢紀錄</h2><div class="row"><div class="field"><label>搜尋生產單／料號／人員</label><input id="recordSearch"></div><div class="field"><label>日期</label><input id="recordDate" type="date"></div></div><div id="recordsTable"></div></div></section>
  <section id="relRecords" class="page hidden"><div class="card"><h2>信賴度紀錄</h2><div id="reliabilityTable" class="table-wrap"></div></div></section>
 
+ <section id="businessAnalysis" class="page hidden">
+  <div class="card">
+   <h2>經營分析（Beta）</h2>
+   <div class="msg warn">🚧 開發中</div>
+   <p class="muted">未來功能：</p>
+   <ul>
+    <li>生產統計</li>
+    <li>一道印刷速度</li>
+    <li>印刷人績效</li>
+    <li>NG 分析</li>
+    <li>趨勢圖</li>
+   </ul>
+  </div>
+ </section>
+
  <section id="master" class="page hidden">
   <div class="card"><h2>料號管理</h2><div class="row"><div class="field"><label>料號 *</label><input id="newPartCode"></div><div class="field"><label>品名／關鍵字</label><input id="newPartKeywords"></div></div><button id="addPartBtn" class="btn primary">新增料號</button></div>
   <div class="card"><h2>人員管理</h2><div class="row"><div class="field"><label>姓名 *</label><input id="newEmployeeName"></div><div class="field"><label>職務</label><select id="newEmployeeRole"><option>作業員</option><option>巡檢員</option><option>品檢員</option><option>主管</option></select></div></div><button id="addEmployeeBtn" class="btn primary">新增人員</button></div>
@@ -273,11 +289,18 @@ function openPhotoViewer(url){const viewer=$("photoViewer"),img=$("photoViewerIm
 function closePhotoViewer(){const viewer=$("photoViewer"),img=$("photoViewerImage");viewer.classList.add("hidden");img.removeAttribute("src")}
 function photoLinks(type,id){const ps=photos.filter(p=>p.parent_type===type&&String(p.parent_id)===String(id));return ps.length?ps.map(p=>`<button type="button" class="photo-link" data-url="${esc(p.public_url)}" onclick="openPhotoViewer(this.dataset.url)">查看照片</button>`).join("｜"):"-"}
 function isQcReportOnlyUser(){return ["3F1","3F2"].includes(currentUser?.account)}
-function enforcePageId(id){return isQcReportOnlyUser()&&id!=="qcReport"?null:id}
+function enforcePageId(id){
+ if(id==="businessAnalysis"&&currentUser?.account!=="chengyin")return null;
+ return isQcReportOnlyUser()&&id!=="qcReport"?null:id
+}
 function applyPageAccessUi(){
  const restricted=isQcReportOnlyUser();
  document.querySelectorAll(".nav button").forEach(btn=>{
   const page=btn.dataset.page;
+  if(page==="businessAnalysis"){
+   btn.classList.toggle("hidden",currentUser?.account!=="chengyin");
+   return;
+  }
   if(restricted){
    if(page==="qcReport")btn.classList.remove("hidden");else btn.classList.add("hidden");
   }else{
