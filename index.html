@@ -513,7 +513,7 @@ function setQcStatsMonthDefaults(){
 function renderQcRangeStats(){
  const card=$("qcRangeStatsCard"),container=$("qcRangeStats");
  if(!card||!container)return;
- const visible=canManage();
+ const visible=isOwner();
  card.classList.toggle("hidden",!visible);
  if(!visible){container.innerHTML="";return}
  setQcStatsMonthDefaults();
