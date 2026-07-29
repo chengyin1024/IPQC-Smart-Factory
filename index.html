@@ -573,7 +573,7 @@ function renderQcBatchLists(){
 function renderAll(){
  $("partList").innerHTML=parts.map(x=>`<option value="${esc(x.code)}">${esc(x.keywords||"")}</option>`).join("");
  $("employeeList").innerHTML=employees.map(x=>`<option value="${esc(x.name)}">${esc(employeeRoleLabel(x.role))}</option>`).join("");
- const activeEmployees=employees.filter(x=>x.active!==false),printerEmployees=activeEmployees.filter(x=>employeeRoleLabel(x.role)==="印刷手"),qualityEmployees=activeEmployees.filter(x=>employeeRoleLabel(x.role)==="品檢員"),supervisorEmployees=activeEmployees.filter(x=>employeeRoleLabel(x.role)==="主管");
+ const activeEmployees=employees.filter(x=>x.active!==false),supervisorEmployees=activeEmployees.filter(x=>employeeRoleLabel(x.role)==="主管"),printerEmployees=activeEmployees.filter(x=>["印刷手","主管"].includes(employeeRoleLabel(x.role))),qualityEmployees=activeEmployees.filter(x=>["品檢員","主管"].includes(employeeRoleLabel(x.role)));
  const employeeOptions=list=>list.map(x=>`<option value="${esc(x.name)}">${esc(x.name)}（${esc(employeeRoleLabel(x.role))}）</option>`).join("");
  const printerOptions=employeeOptions(printerEmployees),qualityOptions=employeeOptions(qualityEmployees),supervisorOptions=employeeOptions(supervisorEmployees);
  ["prodOperator1","prodOperator2","prodOperator3"].forEach(id=>{const el=$(id);if(!el)return;const keep=el.value,first=id.endsWith("1")?'<option value="">請選擇印刷手</option>':'<option value="">不選擇</option>';el.innerHTML=first+printerOptions;if([...el.options].some(o=>o.value===keep))el.value=keep});
