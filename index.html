@@ -799,7 +799,7 @@ $("addEmployeeBtn").onclick=async()=>{if(!canManage())return;const name=$("newEm
 $("langBtnLogin").onclick=toggleLanguage;
 $("langBtnHeader").onclick=toggleLanguage;
 function setupZeroClearInputs(){
- ["aOk","aNg","bOk","bNg","pOk","pNg"].forEach(id=>{
+ ["aOk","aNg","bOk","bNg","pOk","pNg","qcStepPrintingNg","qcStepBakingNg","qcStepMaterialNg","qcBatchTotalQty"].forEach(id=>{
   const el=$(id);
   if(!el||el.dataset.zeroClearReady==="1")return;
   el.dataset.zeroClearReady="1";
