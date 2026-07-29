@@ -412,17 +412,24 @@ function renderBusinessAnalysis(){
 }
 function createQcBatchNo(){return `QC-${today().replaceAll("-","")}-${String(Date.now()).slice(-6)}`}
 function qcBatchMessage(text,ok=false){const el=$("qcBatchMsg");if(el)msg(el,text,ok)}
-function resetQcStepPanel(){currentQcBatchId=null;$("qcStepPanel").classList.add("hidden");["qcStepMachine","qcStepPrintingNg","qcStepBakingNg","qcStepMaterialNg","qcBatchTotalQty"].forEach(id=>$(id).value=id==="qcStepMachine"?"":0)}
-function selectQcBatch(id){
+function qcResumeKey(){return `ipqc_qc_resume_${currentUser?.account||""}`}
+function qcDraftKey(batchId){return `ipqc_qc_draft_${currentUser?.account||""}_${batchId||""}`}
+function qcElapsedText(startedAt){const minutes=Math.max(0,Math.floor((Date.now()-new Date(startedAt||Date.now()).getTime())/60000));return `${Math.floor(minutes/60)} 小時 ${minutes%60} 分`}
+function updateQcSelectedBatchInfo(){const batch=qcBatches.find(x=>String(x.id)===String(currentQcBatchId));if(!batch)return;const nextStep=qcBatchStepsFor(batch.id).length+1;$("qcSelectedBatchInfo").innerHTML=`<b>${esc(batch.part_number)}</b>｜批次 ${esc(batch.batch_no)}｜目前第 ${nextStep} 道${batch.printer_name?`｜印刷人員：${esc(batch.printer_name)}`:""}<br><span class="small">開始時間：${esc((batch.started_at||"").replace("T"," ").slice(0,16))}｜已進行：<b>${qcElapsedText(batch.started_at)}</b></span>`}
+function saveQcStepDraft(){if(!isQcReportOnlyUser()||!currentQcBatchId)return;const draft={machine:$("qcStepMachine").value,printing:$("qcStepPrintingNg").value,baking:$("qcStepBakingNg").value,material:$("qcStepMaterialNg").value,total:$("qcBatchTotalQty").value};localStorage.setItem(qcDraftKey(currentQcBatchId),JSON.stringify(draft))}
+function fillQcStepDraft(batchId){let draft={};try{draft=JSON.parse(localStorage.getItem(qcDraftKey(batchId))||"{}")||{}}catch(e){}$("qcStepMachine").value=draft.machine||"";$("qcStepPrintingNg").value=draft.printing??0;$("qcStepBakingNg").value=draft.baking??0;$("qcStepMaterialNg").value=draft.material??0;$("qcBatchTotalQty").value=draft.total??0}
+function resetQcStepPanel(){const batchId=currentQcBatchId;if(batchId)localStorage.removeItem(qcDraftKey(batchId));localStorage.removeItem(qcResumeKey());currentQcBatchId=null;$("qcStepPanel").classList.add("hidden");["qcStepMachine","qcStepPrintingNg","qcStepBakingNg","qcStepMaterialNg","qcBatchTotalQty"].forEach(id=>$(id).value=id==="qcStepMachine"?"":0)}
+function restoreQcStepPanel(){if(!isQcReportOnlyUser())return;const selected=currentQcBatchId||localStorage.getItem(qcResumeKey());if(!selected)return;const batch=qcBatches.find(x=>String(x.id)===String(selected)&&x.status==="in_progress");if(!batch){resetQcStepPanel();return}if(!currentQcBatchId)selectQcBatch(batch.id,true);else updateQcSelectedBatchInfo()}
+function selectQcBatch(id,restoring=false){
  const batch=qcBatches.find(x=>String(x.id)===String(id));
  if(!batch||batch.status!=="in_progress")return;
  currentQcBatchId=batch.id;
- const nextStep=qcBatchStepsFor(batch.id).length+1;
+ if(isQcReportOnlyUser())localStorage.setItem(qcResumeKey(),String(batch.id));
  $("qcStepAccount").value=`${currentUser.name}｜${currentUser.account}`;
- $("qcSelectedBatchInfo").innerHTML=`<b>${esc(batch.part_number)}</b>｜批次 ${esc(batch.batch_no)}｜目前第 ${nextStep} 道${batch.printer_name?`｜印刷人員：${esc(batch.printer_name)}`:""}`;
- ["qcStepMachine","qcStepPrintingNg","qcStepBakingNg","qcStepMaterialNg","qcBatchTotalQty"].forEach(id=>$(id).value=id==="qcStepMachine"?"":0);
+ updateQcSelectedBatchInfo();
+ fillQcStepDraft(batch.id);
  $("qcStepPanel").classList.remove("hidden");
- $("qcStepPanel").scrollIntoView({behavior:"smooth",block:"start"});
+ if(!restoring)$("qcStepPanel").scrollIntoView({behavior:"smooth",block:"start"});
 }
 async function createQcBatch(){
  if(!qcBatchReady)return qcBatchMessage("QC 批次資料表尚未建立，請先執行更新 SQL");
@@ -453,6 +460,7 @@ if($("qcCreateBatchBtn"))$("qcCreateBatchBtn").onclick=createQcBatch;
 if($("qcSaveStepBtn"))$("qcSaveStepBtn").onclick=()=>saveQcBatchStep(false);
 if($("qcCompleteBatchBtn"))$("qcCompleteBatchBtn").onclick=()=>saveQcBatchStep(true);
 if($("qcCloseStepBtn"))$("qcCloseStepBtn").onclick=resetQcStepPanel;
+["qcStepMachine","qcStepPrintingNg","qcStepBakingNg","qcStepMaterialNg","qcBatchTotalQty"].forEach(id=>{if($(id))$(id).addEventListener("input",saveQcStepDraft)});
  if($("qcStatsApplyBtn"))$("qcStatsApplyBtn").onclick=renderQcRangeStats;
  if($("qcStatsResetBtn"))$("qcStatsResetBtn").onclick=()=>{ $("qcStatsStartDate").value=`${today().slice(0,8)}01`;$("qcStatsEndDate").value=today();$("qcStatsPart").value="";renderQcRangeStats() };
  if($("businessApplyBtn"))$("businessApplyBtn").onclick=renderBusinessAnalysis;
@@ -474,7 +482,7 @@ async function loadAll(){
   sb.from("qc_batch_steps").select("*").order("created_at",{ascending:false}).limit(3000)
  ]);
  if(p.error){v4Ready=false;$("setupBanner").classList.remove("hidden");productions=[]}else{v4Ready=true;$("setupBanner").classList.add("hidden");productions=p.data||[]}
- inspections=i.data||[];reliability=r.data||[];parts=pa.data||[];employees=e.data||[];photos=ph.data||[];qcReports=q.error?[]:q.data||[];qcBatchReady=!qb.error&&!qs.error;qcBatches=qb.error?[]:qb.data||[];qcBatchSteps=qs.error?[]:qs.data||[];renderAll()
+ inspections=i.data||[];reliability=r.data||[];parts=pa.data||[];employees=e.data||[];photos=ph.data||[];qcReports=q.error?[]:q.data||[];qcBatchReady=!qb.error&&!qs.error;qcBatches=qb.error?[]:qb.data||[];qcBatchSteps=qs.error?[]:qs.data||[];renderAll();restoreQcStepPanel()
 }
 function renderProductionCard(p,actions=true){
  const t=productionTotals(p.id), count=inspections.filter(x=>String(x.production_id)===String(p.id)).length;
@@ -814,7 +822,7 @@ setupZeroClearInputs();
 applyLanguage();
 
 window.changeProduction=changeProduction;window.completeProduction=completeProduction;window.startInspectionFor=startInspectionFor;window.startReliability=startReliability;window.deleteProduction=deleteProduction;window.deleteInspection=deleteInspection;window.deleteReliability=deleteReliability;window.deletePart=deletePart;window.deleteEmployee=deleteEmployee;window.selectQcBatch=selectQcBatch;window.deleteQcBatch=deleteQcBatch;
-setInterval(()=>{if(currentUser)loadAll()},30000);
+setInterval(()=>{if(currentUser)loadAll()},30000);setInterval(updateQcSelectedBatchInfo,60000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)updateQcSelectedBatchInfo()});
 (async()=>{try{const saved=JSON.parse(localStorage.getItem("ipqc_v4_login")||"null");if(saved&&ACCOUNTS[saved.account]){currentUser=saved;await enterApp()}}catch(e){}})();
 </script>
 </body>
