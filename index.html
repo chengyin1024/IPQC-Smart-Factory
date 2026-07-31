@@ -601,9 +601,10 @@ function renderQcBatchLists(){
  }
  const packer=isPackerUser(),active=(qcBatches||[]).filter(x=>packer?x.status==="awaiting_packing":x.status==="in_progress").sort((a,b)=>new Date(b.started_at||0)-new Date(a.started_at||0));
  activeContainer.innerHTML=active.length?active.map(batch=>{
-  const steps=qcBatchStepsFor(batch.id),detail=steps.length?steps.map(step=>`第 ${num(step.step_number)} 道：${esc(step.machine_name)}｜${esc(step.qc_account)}｜NG ${num(step.printing_ng)+num(step.baking_ng)+num(step.material_ng)}`).join("<br>"):"尚未登記任何道次";
+ const steps=qcBatchStepsFor(batch.id),detail=steps.length?steps.map(step=>`第 ${num(step.step_number)} 道：${esc(step.machine_name)}｜${esc(step.qc_account)}｜NG ${num(step.printing_ng)+num(step.baking_ng)+num(step.material_ng)}`).join("<br>"):"尚未登記任何道次";
   const label=packer?"待包裝檢驗":`第 ${steps.length+1} 道待登記`,button=packer?"開始包裝檢驗":"接手下一道";
-  return `<div class="production-card"><div class="production-head"><div><div class="production-no">${esc(batch.batch_no)}</div><div class="production-part">${esc(batch.part_number)}</div></div><div class="production-head-actions"><span class="pill pending">${label}</span></div></div><div class="meta">開始：${esc(localDateTime(batch.started_at))}｜建立：${esc(batch.started_by||"-")}<br>${detail}</div><button class="btn primary" style="margin-top:10px" onclick="selectQcBatch('${batch.id}')">${button}</button></div>`;
+  const deleteBtn=isOwner()?`<button class="btn delete-top" onclick="deleteQcBatch('${batch.id}')">🗑 刪除</button>`:"";
+  return `<div class="production-card"><div class="production-head"><div><div class="production-no">${esc(batch.batch_no)}</div><div class="production-part">${esc(batch.part_number)}</div></div><div class="production-head-actions"><span class="pill pending">${label}</span>${deleteBtn}</div></div><div class="meta">開始：${esc(localDateTime(batch.started_at))}｜建立：${esc(batch.started_by||"-")}<br>${detail}</div><button class="btn primary" style="margin-top:10px" onclick="selectQcBatch('${batch.id}')">${button}</button></div>`;
  }).join(""):`<div class="muted">${packer?"目前沒有待包裝檢驗的批次":"目前沒有尚未完成的批次"}</div>`;
  const completed=(qcBatches||[]).filter(x=>x.status==="completed").sort((a,b)=>new Date(b.completed_at||0)-new Date(a.completed_at||0));
  historyContainer.innerHTML=completed.length?completed.map(batch=>{
@@ -789,7 +790,7 @@ async function deletePart(id){if(!canManage())return;if(!confirm("確定刪除�
 async function deleteEmployee(id){if(!canManage())return;if(!confirm("確定刪除此人員？既有歷史紀錄不會被刪除。"))return;const {error}=await sb.from("employees").delete().eq("id",id);if(error)return alert(error.message);await loadAll()}
 async function deleteQcBatch(id){
  const batch=qcBatches.find(x=>String(x.id)===String(id));
- if(!batch||!isOwner())return alert("只有老闆帳號可以刪除已完成批次");
+ if(!batch||!isOwner())return alert("只有老闆帳號可以刪除 QC 批次");
  const steps=qcBatchStepsFor(batch.id);
  if(!confirm(`確定刪除這批 QC 紀錄？\n料號：${batch.part_number}\n批次：${batch.batch_no}\n包含 ${steps.length} 道印刷紀錄，刪除後無法復原。`))return;
  try{
