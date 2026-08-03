@@ -196,7 +196,7 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
  <section id="reliability" class="page hidden">
   <div class="card"><h2>待做信賴度的生產單</h2><p class="muted">信賴度與 IPQC 分開；產品烤漆完成後，再進來做首件酒精與 3M600 測試。</p><div id="relMsg"></div><div id="pendingReliability" class="production-list"></div></div>
   <div id="reliabilityFormCard" class="card hidden">
-   <h2>完成信賴度測試</h2>
+   <h2 id="reliabilityFormTitle">完成信賴度測試</h2>
    <input id="relProductionId" type="hidden">
    <div id="relProductionInfo" class="msg warn"></div>
    <div class="row">
@@ -296,6 +296,7 @@ function productionTotals(pid){let ok=0,ng=0;inspections.filter(x=>String(x.prod
 function statusPill(s){if(s==="active")return '<span class="pill ok">🟢 生產中</span>';if(s==="paused")return '<span class="pill pause">🟡 暫停</span>';return '<span class="pill done">⚫ 已完成</span>'}
 function relRecordsFor(pid){return reliability.filter(x=>String(x.production_id)===String(pid)).sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0))}
 function relFor(pid){return relRecordsFor(pid)[0]||null}
+function reliabilityIsNg(r){return !!r&&(r.alcohol_result==="NG"||r.tape_3m600_result==="NG")}
 function requiredReliabilitySlot(p,now=new Date()){
  const started=new Date(p.started_at||p.created_at||now), slots=[];
  const startDay=new Date(started.getFullYear(),started.getMonth(),started.getDate());
@@ -309,11 +310,12 @@ function requiredReliabilitySlot(p,now=new Date()){
 }
 function reliabilityState(p){
  const latest=relFor(p.id),required=requiredReliabilitySlot(p),latestAt=latest?new Date(latest.created_at||`${latest.test_date||today()}T00:00:00`):null;
- const pending=p.status!=="completed"&&(!latestAt||latestAt<required);
- return {latest,required,latestAt,pending};
+ const needsRetest=reliabilityIsNg(latest);
+ const pending=needsRetest||(p.status!=="completed"&&(!latestAt||latestAt<required));
+ return {latest,required,latestAt,pending,needsRetest};
 }
 function slotLabel(d){return `${localDate(d)} ${String(d.getHours()).padStart(2,"0")}:00`}
-function relPill(pid){const p=productions.find(x=>String(x.id)===String(pid));if(!p)return '<span class="pill pending">🟡 待測</span>';const s=reliabilityState(p);if(s.pending)return `<span class="pill pending">🟡 待測（${esc(slotLabel(s.required))}）</span>`;if(s.latest?.alcohol_result==="NG"||s.latest?.tape_3m600_result==="NG")return '<span class="pill ng">🔴 NG</span>';return '<span class="pill ok">🟢 已完成</span>'}
+function relPill(pid){const p=productions.find(x=>String(x.id)===String(pid));if(!p)return '<span class="pill pending">🟡 待測</span>';const s=reliabilityState(p);if(s.needsRetest)return '<span class="pill ng">🔴 NG／待重測</span>';if(s.pending)return `<span class="pill pending">🟡 待測（${esc(slotLabel(s.required))}）</span>`;return '<span class="pill ok">🟢 已完成</span>'}
 function canDeleteProduction(p){return isOwner()||(currentUser?.role==="supervisor"&&p.status!=="completed")}
 function openPhotoViewer(url){const viewer=$("photoViewer"),img=$("photoViewerImage");img.src=url;viewer.classList.remove("hidden")}
 function closePhotoViewer(){const viewer=$("photoViewer"),img=$("photoViewerImage");viewer.classList.add("hidden");img.removeAttribute("src")}
@@ -636,15 +638,15 @@ function renderAll(){
  $("inspectionProduction").innerHTML='<option value="">請選擇</option>'+activeSelectable.map(x=>`<option value="${esc(x.id)}">${esc(x.production_no)}｜${esc(x.part_number_code)}｜${esc(x.machine||"")}</option>`).join("");
  if([...$("inspectionProduction").options].some(o=>String(o.value)===String(selectedProduction)))$("inspectionProduction").value=selectedProduction;
  const todayRows=inspections.filter(x=>x.inspection_date===today());let ok=0,ng=0;todayRows.forEach(x=>{const t=totals(x);ok+=t.ok;ng+=t.ng});
- $("statActive").textContent=active.length;$("statInspections").textContent=todayRows.length;$("statPendingRel").textContent=active.filter(x=>reliabilityState(x).pending).length;$("statYield").textContent=(ok+ng?ok/(ok+ng)*100:0).toFixed(1)+"%";
- const pending=active.filter(x=>reliabilityState(x).pending);
+ $("statActive").textContent=active.length;$("statInspections").textContent=todayRows.length;$("statPendingRel").textContent=productions.filter(x=>reliabilityState(x).pending).length;$("statYield").textContent=(ok+ng?ok/(ok+ng)*100:0).toFixed(1)+"%";
+ const pending=productions.filter(x=>reliabilityState(x).pending);
  $("todoList").innerHTML=`<div class="meta">🧪 待信賴度：<b>${pending.length}</b> 件<br>🔴 今日 NG：<b>${ng}</b> 件<br>📝 今日巡檢：<b>${todayRows.length}</b> 次</div>`;
  renderQcProductionStats();
  renderQcActiveSignal();
  renderQcRangeStats();
  renderQcBatchLists();
  renderBusinessAnalysis();
- $("pendingReliability").innerHTML=pending.length?pending.map(p=>`<div class="production-card"><div class="production-no">${esc(p.production_no)}</div><div class="production-part">${esc(p.part_number_code)}</div><div class="meta">開始：${esc(localDateTime(p.started_at))}｜機台：${esc(p.machine||"-")}<br>應測時段：${esc(slotLabel(reliabilityState(p).required))}</div><button class="btn primary" style="margin-top:10px" onclick="startReliability('${p.id}')">開始測試</button></div>`).join(""):'<div class="muted">目前沒有待測項目</div>';
+ $("pendingReliability").innerHTML=pending.length?pending.map(p=>{const s=reliabilityState(p);return `<div class="production-card"><div class="production-no">${esc(p.production_no)}</div><div class="production-part">${esc(p.part_number_code)}</div><div class="meta">開始：${esc(localDateTime(p.started_at))}｜機台：${esc(p.machine||"-")}<br>${s.needsRetest?'<span class="ngtxt"><b>上次 NG，待改善後重測</b></span>':`應測時段：${esc(slotLabel(s.required))}`}</div><button class="btn primary" style="margin-top:10px" onclick="startReliability('${p.id}')">${s.needsRetest?'開始重測':'開始測試'}</button></div>`}).join(""):'<div class="muted">目前沒有待測項目</div>';
  renderRecords();renderReliabilityRecords();
  $("partsTable").innerHTML=`<table><tr><th>料號</th><th>品名／關鍵字</th><th>操作</th></tr>${parts.map(x=>`<tr><td>${esc(x.code)}</td><td>${esc(x.keywords||"")}</td><td class="delete-cell">${canManage()?`<button class="btn danger" onclick="deletePart('${x.id}')">刪除</button>`:"-"}</td></tr>`).join("")}</table>`;
  $("employeesTable").innerHTML=`<table><tr><th>姓名</th><th>職務</th><th>操作</th></tr>${employees.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(employeeRoleLabel(x.role))}</td><td class="delete-cell">${canManage()?`<button class="btn danger" onclick="deleteEmployee('${x.id}')">刪除</button>`:"-"}</td></tr>`).join("")}</table>`;
@@ -682,7 +684,7 @@ function startInspectionFor(id){
  resetInspectionForm(true);
 }
 $("inspectionProduction").onchange=()=>{inspectionDraftProductionId=$("inspectionProduction").value};
-function startReliability(id){const p=productions.find(x=>String(x.id)===String(id));showPage("reliability");$("relProductionId").value=id;$("relProductionInfo").textContent=`${p.production_no}｜${p.part_number_code}｜烤漆完成後進行測試`;$("reliabilityFormCard").classList.remove("hidden");window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"})}
+function startReliability(id){const p=productions.find(x=>String(x.id)===String(id));if(!p)return;const previous=relFor(id),isRetest=reliabilityIsNg(previous),attempt=relRecordsFor(id).length+1;showPage("reliability");$("relProductionId").value=id;$("reliabilityFormTitle").textContent=isRetest?`信賴度重測（第 ${attempt} 次）`:`完成信賴度測試（第 ${attempt} 次）`;$("relProductionInfo").textContent=isRetest?`${p.production_no}｜${p.part_number_code}｜上次結果 NG，請在改善後重測並填寫改善說明`:`${p.production_no}｜${p.part_number_code}｜烤漆完成後進行測試`;$("reliabilityFormCard").classList.remove("hidden");window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"})}
 document.querySelectorAll(".result-buttons").forEach(g=>g.querySelectorAll(".result-btn").forEach(b=>b.onclick=()=>{const target=$(g.dataset.resultTarget);target.value=b.dataset.value;g.querySelectorAll(".result-btn").forEach(x=>x.classList.remove("active-ok","active-ng"));b.classList.add(b.dataset.value==="OK"?"active-ok":"active-ng")}));
 function setupPreview(inputId,imgId){$(inputId).onchange=()=>{inspectionDraftProductionId=$("inspectionProduction").value||inspectionDraftProductionId;const f=$(inputId).files[0];if(!f)return;const img=$(imgId);if(img.src&&img.src.startsWith("blob:"))URL.revokeObjectURL(img.src);img.src=URL.createObjectURL(f);img.classList.remove("hidden")}}
 [["firstPhoto","firstPreview"],["aNgPhoto","aNgPreview"],["bNgPhoto","bNgPreview"],["pNgPhoto","pNgPreview"],["otherPhoto","otherPreview"],["relPhoto","relPreview"]].forEach(x=>setupPreview(...x));
@@ -741,6 +743,8 @@ $("saveReliabilityBtn").onclick=async()=>{
  const tester=$("relTester").value.trim();
  if(!tester){alert("尚未選擇或填寫測試人員");return}
  if(!$("relPhoto").files[0]){alert("尚未拍攝信賴度照片");return}
+ const previousResult=relFor(pid),wasRetest=reliabilityIsNg(previousResult);
+ if(wasRetest&&!$("relNotes").value.trim()){alert("重測請填寫改善內容／處理方式");return}
  const firstInspection=inspections.filter(x=>String(x.production_id)===String(pid)).sort((a,b)=>String(a.created_at).localeCompare(String(b.created_at)))[0];
  const payload={production_id:pid,inspection_id:firstInspection?.id||null,part_number_code:p.part_number_code,alcohol_result:$("relAlcohol").value,tape_3m600_result:$("relTape").value,tester_name:tester,test_date:today(),notes:$("relNotes").value.trim()};
  $("saveReliabilityBtn").disabled=true;
@@ -767,7 +771,8 @@ $("saveReliabilityBtn").onclick=async()=>{
    $("relProductionInfo").textContent=`${latestProduction.production_no}｜${latestProduction.part_number_code}｜烤漆完成後進行測試`;
    $("reliabilityFormCard").classList.remove("hidden");
   }
-  alert("✅ 完成信賴度測試");
+  const improved=wasRetest&&!reliabilityIsNg(data);
+  alert(improved?"✅ 重測 OK，已記錄為改善完成":reliabilityIsNg(data)?"⚠️ 測試仍為 NG，將繼續列入待重測":"✅ 完成信賴度測試");
  }catch(e){
   alert("信賴度測試儲存失敗："+e.message);
  }finally{
@@ -827,7 +832,8 @@ function renderRecords(){
  applyLanguage();
 }
 function renderReliabilityRecords(){
- $("reliabilityTable").innerHTML=`<table><tr><th>日期</th><th>生產單</th><th>料號</th><th>酒精</th><th>3M600</th><th>測試人員</th><th>照片</th><th>操作</th></tr>${reliability.map(r=>{const p=productions.find(x=>String(x.id)===String(r.production_id));return `<tr><td>${esc(r.test_date||"")}</td><td>${esc(p?.production_no||"-")}</td><td>${esc(r.part_number_code||"")}</td><td>${r.alcohol_result==="NG"?'<span class="pill ng">NG</span>':'<span class="pill ok">OK</span>'}</td><td>${r.tape_3m600_result==="NG"?'<span class="pill ng">NG</span>':'<span class="pill ok">OK</span>'}</td><td>${esc(r.tester_name||"")}</td><td>${photoLinks("reliability",r.id)}</td><td class="delete-cell">${canManage()?`<button class="btn danger" onclick="deleteReliability('${r.id}')">刪除</button>`:"-"}</td></tr>`}).join("")}</table>`
+ const attempts={};reliability.slice().sort((a,b)=>new Date(a.created_at||0)-new Date(b.created_at||0)).forEach(r=>{const key=String(r.production_id);attempts[String(r.id)]=(attempts[key]||0)+1;attempts[key]=attempts[String(r.id)]});
+ $("reliabilityTable").innerHTML=`<table><tr><th>日期／次數</th><th>生產單</th><th>料號</th><th>酒精</th><th>3M600</th><th>改善追蹤</th><th>測試人員</th><th>照片</th><th>操作</th></tr>${reliability.map(r=>{const p=productions.find(x=>String(x.id)===String(r.production_id)),rows=relRecordsFor(r.production_id),latest=rows[0],attempt=attempts[String(r.id)]||1,older=rows.filter(x=>new Date(x.created_at||0)<new Date(r.created_at||0)),improved=!reliabilityIsNg(r)&&older.some(reliabilityIsNg),isLatest=String(latest?.id)===String(r.id),status=improved?'<span class="pill ok">✅ 改善後 OK</span>':reliabilityIsNg(r)?'<span class="pill ng">🔴 NG</span>':'<span class="pill ok">OK</span>';return `<tr><td>${esc(r.test_date||"")}<br><span class="small">第 ${attempt} 次${attempt>1?'（重測）':''}</span></td><td>${esc(p?.production_no||"-")}</td><td>${esc(r.part_number_code||"")}</td><td>${r.alcohol_result==="NG"?'<span class="pill ng">NG</span>':'<span class="pill ok">OK</span>'}</td><td>${r.tape_3m600_result==="NG"?'<span class="pill ng">NG</span>':'<span class="pill ok">OK</span>'}</td><td>${status}${r.notes?`<div class="small" style="margin-top:6px">${esc(r.notes)}</div>`:""}</td><td>${esc(r.tester_name||"")}</td><td>${photoLinks("reliability",r.id)}</td><td class="delete-cell">${isLatest&&reliabilityIsNg(r)?`<button class="btn primary" onclick="startReliability('${r.production_id}')">重測</button> `:""}${canManage()?`<button class="btn danger" onclick="deleteReliability('${r.id}')">刪除</button>`:"-"}</td></tr>`}).join("")}</table>`
 }
 $("recordSearch").oninput=renderRecords;$("recordDate").onchange=renderRecords;
 $("addPartBtn").onclick=async()=>{if(!canManage())return;const code=$("newPartCode").value.trim();if(!code)return alert("請輸入料號");const {error}=await sb.from("part_numbers").insert({code,keywords:$("newPartKeywords").value.trim()});if(error)return alert(error.message);await loadAll()};
