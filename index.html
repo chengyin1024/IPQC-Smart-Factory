@@ -555,9 +555,10 @@ function renderQcActiveSignal(){
  if(!visible){container.innerHTML="";return}
  const active=(qcBatches||[]).filter(batch=>["in_progress","awaiting_packing"].includes(batch.status)).sort((a,b)=>new Date(b.started_at||0)-new Date(a.started_at||0));
  container.innerHTML=active.length?active.map(batch=>{
-  const steps=qcBatchStepsFor(batch.id),last=steps[steps.length-1],nextStep=steps.length+1;
-  const packing=batch.status==="awaiting_packing";
-  return `<div class="production-card"><div class="production-head"><div><div class="production-part">${esc(batch.part_number)}</div><div class="small muted">批次 ${esc(batch.batch_no)}</div></div><span class="pill pending">${packing?"🟡 待包裝檢驗":"🟡 目前印刷中"}</span></div><div class="meta">🔔 ${packing?"已交給包裝帳號":"QC 已開始印刷"}<br>開始：${esc(localDateTime(batch.started_at))}｜印刷人員：${esc(batch.printer_name||"未填寫")}<br>${packing?"等待 3F3 登記成品 NG":`目前第 ${nextStep} 道待登記${last?`｜上一道：${esc(last.machine_name)}／${esc(last.qc_account)}`:""}`}</div></div>`;
+ const steps=qcBatchStepsFor(batch.id),last=steps[steps.length-1],nextStep=steps.length+1;
+ const packing=batch.status==="awaiting_packing";
+  const deleteBtn=isOwner()?`<button class="btn delete-top" onclick="deleteQcBatch('${batch.id}')">🗑 刪除</button>`:"";
+  return `<div class="production-card"><div class="production-head"><div><div class="production-part">${esc(batch.part_number)}</div><div class="small muted">批次 ${esc(batch.batch_no)}</div></div><div class="production-head-actions"><span class="pill pending">${packing?"🟡 待包裝檢驗":"🟡 目前印刷中"}</span>${deleteBtn}</div></div><div class="meta">🔔 ${packing?"已交給包裝帳號":"QC 已開始印刷"}<br>開始：${esc(localDateTime(batch.started_at))}｜印刷人員：${esc(batch.printer_name||"未填寫")}<br>${packing?"等待 3F3 登記成品 NG":`目前第 ${nextStep} 道待登記${last?`｜上一道：${esc(last.machine_name)}／${esc(last.qc_account)}`:""}`}</div></div>`;
  }).join(""):'<div class="muted">目前沒有 QC 印刷中的批次</div>';
 }
 function setQcStatsMonthDefaults(){
