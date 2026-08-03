@@ -171,6 +171,7 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
     </div>
     <div id="qcPackingOnlyFields" class="hidden">
      <div class="field"><label>目前包裝人員</label><input id="qcPackingAccount" readonly></div>
+     <div class="field"><label>包裝人員姓名 *</label><input id="qcPackingOperatorName" placeholder="請輸入實際包裝人員姓名" autocomplete="name"></div>
      <div class="row"><div class="field"><label>印刷 NG</label><input id="qcPackingPrintingNg" type="number" min="0" value="0" inputmode="numeric"></div><div class="field"><label>烤漆 NG</label><input id="qcPackingBakingNg" type="number" min="0" value="0" inputmode="numeric"></div></div>
      <div class="actions"><button id="qcCompletePackingBtn" type="button" class="btn primary">完成包裝檢驗</button><button id="qcClosePackingBtn" type="button" class="btn ghost">取消選擇</button></div>
     </div>
@@ -435,9 +436,9 @@ function qcResumeKey(){return `ipqc_qc_resume_${currentUser?.account||""}`}
 function qcDraftKey(batchId){return `ipqc_qc_draft_${currentUser?.account||""}_${batchId||""}`}
 function qcElapsedText(startedAt){const minutes=Math.max(0,Math.floor((Date.now()-new Date(startedAt||Date.now()).getTime())/60000));return `${Math.floor(minutes/60)} 小時 ${minutes%60} 分`}
 function updateQcSelectedBatchInfo(){const batch=qcBatches.find(x=>String(x.id)===String(currentQcBatchId));if(!batch)return;const nextStep=qcBatchStepsFor(batch.id).length+1;const stage=isPackerUser()?"待包裝檢驗":`目前第 ${nextStep} 道`;$("qcSelectedBatchInfo").innerHTML=`<b>${esc(batch.part_number)}</b>｜批次 ${esc(batch.batch_no)}｜${stage}${batch.printer_name?`｜印刷人員：${esc(batch.printer_name)}`:""}<br><span class="small">開始時間：${esc(localDateTime(batch.started_at))}｜已進行：<b>${qcElapsedText(batch.started_at)}</b></span>`}
-function saveQcStepDraft(){if(!isQcReportOnlyUser()||!currentQcBatchId)return;const draft=isPackerUser()?{packingPrinting:$("qcPackingPrintingNg").value,packingBaking:$("qcPackingBakingNg").value}:{machine:$("qcStepMachine").value,printing:$("qcStepPrintingNg").value,baking:$("qcStepBakingNg").value,material:$("qcStepMaterialNg").value,total:$("qcBatchTotalQty").value};localStorage.setItem(qcDraftKey(currentQcBatchId),JSON.stringify(draft))}
-function fillQcStepDraft(batchId){let draft={};try{draft=JSON.parse(localStorage.getItem(qcDraftKey(batchId))||"{}")||{}}catch(e){}if(isPackerUser()){$("qcPackingPrintingNg").value=draft.packingPrinting??0;$("qcPackingBakingNg").value=draft.packingBaking??0;return}$("qcStepMachine").value=draft.machine||"";$("qcStepPrintingNg").value=draft.printing??0;$("qcStepBakingNg").value=draft.baking??0;$("qcStepMaterialNg").value=draft.material??0;$("qcBatchTotalQty").value=draft.total??0}
-function resetQcStepPanel(){const batchId=currentQcBatchId;if(batchId)localStorage.removeItem(qcDraftKey(batchId));localStorage.removeItem(qcResumeKey());currentQcBatchId=null;$("qcStepPanel").classList.add("hidden");["qcStepMachine","qcStepPrintingNg","qcStepBakingNg","qcStepMaterialNg","qcBatchTotalQty","qcPackingPrintingNg","qcPackingBakingNg"].forEach(id=>$(id).value=id==="qcStepMachine"?"":0)}
+function saveQcStepDraft(){if(!isQcReportOnlyUser()||!currentQcBatchId)return;const draft=isPackerUser()?{packingOperator:$("qcPackingOperatorName").value,packingPrinting:$("qcPackingPrintingNg").value,packingBaking:$("qcPackingBakingNg").value}:{machine:$("qcStepMachine").value,printing:$("qcStepPrintingNg").value,baking:$("qcStepBakingNg").value,material:$("qcStepMaterialNg").value,total:$("qcBatchTotalQty").value};localStorage.setItem(qcDraftKey(currentQcBatchId),JSON.stringify(draft))}
+function fillQcStepDraft(batchId){let draft={};try{draft=JSON.parse(localStorage.getItem(qcDraftKey(batchId))||"{}")||{}}catch(e){}if(isPackerUser()){$("qcPackingOperatorName").value=draft.packingOperator||"";$("qcPackingPrintingNg").value=draft.packingPrinting??0;$("qcPackingBakingNg").value=draft.packingBaking??0;return}$("qcStepMachine").value=draft.machine||"";$("qcStepPrintingNg").value=draft.printing??0;$("qcStepBakingNg").value=draft.baking??0;$("qcStepMaterialNg").value=draft.material??0;$("qcBatchTotalQty").value=draft.total??0}
+function resetQcStepPanel(){const batchId=currentQcBatchId;if(batchId)localStorage.removeItem(qcDraftKey(batchId));localStorage.removeItem(qcResumeKey());currentQcBatchId=null;$("qcStepPanel").classList.add("hidden");["qcStepMachine","qcPackingOperatorName","qcStepPrintingNg","qcStepBakingNg","qcStepMaterialNg","qcBatchTotalQty","qcPackingPrintingNg","qcPackingBakingNg"].forEach(id=>$(id).value=["qcStepMachine","qcPackingOperatorName"].includes(id)?"":0)}
 function restoreQcStepPanel(){if(!isQcReportOnlyUser())return;const selected=currentQcBatchId||localStorage.getItem(qcResumeKey());if(!selected)return;const targetStatus=isPackerUser()?"awaiting_packing":"in_progress";const batch=qcBatches.find(x=>String(x.id)===String(selected)&&x.status===targetStatus);if(!batch){resetQcStepPanel();return}if(!currentQcBatchId)selectQcBatch(batch.id,true);else updateQcSelectedBatchInfo()}
 function selectQcBatch(id,restoring=false){
  const batch=qcBatches.find(x=>String(x.id)===String(id)),targetStatus=isPackerUser()?"awaiting_packing":"in_progress";
@@ -479,8 +480,10 @@ async function saveQcBatchStep(sendToPacking=false){
 }
 async function completeQcPacking(){
  const batch=qcBatches.find(x=>String(x.id)===String(currentQcBatchId));if(!batch||!isPackerUser())return alert("請先選擇待包裝檢驗的批次");
+ const operatorName=$("qcPackingOperatorName").value.trim();if(!operatorName)return alert("請輸入實際包裝人員姓名");
  const printingNg=num($("qcPackingPrintingNg").value),bakingNg=num($("qcPackingBakingNg").value);
- const {error}=await sb.from("qc_batches").update({status:"completed",packing_ng:printingNg+bakingNg,packing_printing_ng:printingNg,packing_baking_ng:bakingNg,completed_by:currentUser.account,completed_date:today(),completed_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq("id",batch.id);
+ if(!confirm(`請再次確認包裝檢驗完成：\n批次：${batch.batch_no}\n料號：${batch.part_number}\n包裝人員：${operatorName}\n印刷 NG：${printingNg}\n烤漆 NG：${bakingNg}\n\n確定完成後送出嗎？`))return;
+ const {error}=await sb.from("qc_batches").update({status:"completed",packing_ng:printingNg+bakingNg,packing_printing_ng:printingNg,packing_baking_ng:bakingNg,completed_by:`${currentUser.account}｜${operatorName}`,completed_date:today(),completed_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq("id",batch.id);
  if(error)return alert(error.message);
  await loadAll();resetQcStepPanel();qcBatchMessage("已完成包裝檢驗並儲存",true);
 }
@@ -491,7 +494,7 @@ if($("qcCompleteBatchBtn"))$("qcCompleteBatchBtn").onclick=()=>saveQcBatchStep(t
 if($("qcCloseStepBtn"))$("qcCloseStepBtn").onclick=resetQcStepPanel;
 if($("qcCompletePackingBtn"))$("qcCompletePackingBtn").onclick=completeQcPacking;
 if($("qcClosePackingBtn"))$("qcClosePackingBtn").onclick=resetQcStepPanel;
-["qcStepMachine","qcStepPrintingNg","qcStepBakingNg","qcStepMaterialNg","qcBatchTotalQty","qcPackingPrintingNg","qcPackingBakingNg"].forEach(id=>{if($(id))$(id).addEventListener("input",saveQcStepDraft)});
+["qcStepMachine","qcPackingOperatorName","qcStepPrintingNg","qcStepBakingNg","qcStepMaterialNg","qcBatchTotalQty","qcPackingPrintingNg","qcPackingBakingNg"].forEach(id=>{if($(id))$(id).addEventListener("input",saveQcStepDraft)});
  if($("qcStatsApplyBtn"))$("qcStatsApplyBtn").onclick=renderQcRangeStats;
  if($("qcStatsResetBtn"))$("qcStatsResetBtn").onclick=()=>{ $("qcStatsStartDate").value=`${today().slice(0,8)}01`;$("qcStatsEndDate").value=today();$("qcStatsPart").value="";renderQcRangeStats() };
  if($("businessApplyBtn"))$("businessApplyBtn").onclick=renderBusinessAnalysis;
