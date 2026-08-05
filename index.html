@@ -188,7 +188,7 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
     <div id="qcRangeStats" class="meta" style="margin-top:12px"></div>
    </div>
    <div id="qcBatchHistoryCard" class="card" style="margin-top:14px">
-    <h3>已完成批次</h3>
+    <h3 id="qcBatchHistoryTitle">已完成批次</h3>
     <div id="qcBatchHistoryList" class="production-list"></div>
    </div>
   </div>
@@ -612,13 +612,15 @@ function renderQcBatchLists(){
   const deleteBtn=isOwner()?`<button class="btn delete-top" onclick="deleteQcBatch('${batch.id}')">🗑 刪除</button>`:"";
   return `<div class="production-card"><div class="production-head"><div><div class="production-no">${esc(batch.batch_no)}</div><div class="production-part">${esc(batch.part_number)}</div></div><div class="production-head-actions"><span class="pill pending">${label}</span>${deleteBtn}</div></div><div class="meta">開始：${esc(localDateTime(batch.started_at))}｜建立：${esc(batch.started_by||"-")}<br>${detail}</div><button class="btn primary" style="margin-top:10px" onclick="selectQcBatch('${batch.id}')">${button}</button></div>`;
  }).join(""):`<div class="muted">${packer?"目前沒有待包裝檢驗的批次":"目前沒有尚未完成的批次"}</div>`;
- const completed=(qcBatches||[]).filter(x=>x.status==="completed").sort((a,b)=>new Date(b.completed_at||0)-new Date(a.completed_at||0));
+ const todayOnly=["3F1","3F2"].includes(currentUser?.account);
+ if($("qcBatchHistoryTitle"))$("qcBatchHistoryTitle").textContent=todayOnly?"已完成批次（今日）":"已完成批次";
+ const completed=(qcBatches||[]).filter(x=>x.status==="completed"&&(!todayOnly||localDate(new Date(x.completed_at||x.updated_at||x.created_at))===today())).sort((a,b)=>new Date(b.completed_at||0)-new Date(a.completed_at||0));
  historyContainer.innerHTML=completed.length?completed.map(batch=>{
   const steps=qcBatchStepsFor(batch.id),ng=qcBatchNg(batch.id),packingPrintingNg=num(batch.packing_printing_ng),packingBakingNg=num(batch.packing_baking_ng),packingNg=packingPrintingNg+packingBakingNg,totalNg=ng.printing+ng.baking+ng.material+packingNg,good=Math.max(0,num(batch.total_quantity)-totalNg);
   const detail=steps.map(step=>`第 ${num(step.step_number)} 道：${esc(step.machine_name)}｜${esc(step.qc_account)}｜NG ${num(step.printing_ng)+num(step.baking_ng)+num(step.material_ng)}`).concat(`包裝印刷 NG：${packingPrintingNg}｜包裝烤漆 NG：${packingBakingNg}｜${esc(batch.completed_by||"-")}`).join("<br>");
   const deleteBtn=isOwner()?`<button class="btn delete-top" onclick="deleteQcBatch('${batch.id}')">🗑 刪除</button>`:"";
   return `<div class="production-card"><div class="production-head"><div><div class="production-no">${esc(batch.batch_no)}</div><div class="production-part">${esc(batch.part_number)}</div></div><div class="production-head-actions"><span class="pill done">已完成</span>${deleteBtn}</div></div><div class="meta">總數（含 NG）：${num(batch.total_quantity)}｜良品：${good}｜NG：${totalNg}<br>完成：${esc(localDateTime(batch.completed_at))}｜最後登記：${esc(batch.completed_by||"-")}<br>${detail}</div></div>`;
- }).join(""):'<div class="muted">目前沒有已完成批次</div>';
+ }).join(""):`<div class="muted">${todayOnly?"今日尚無已完成批次":"目前沒有已完成批次"}</div>`;
 }
 function renderAll(){
  $("partList").innerHTML=parts.map(x=>`<option value="${esc(x.code)}">${esc(x.keywords||"")}</option>`).join("");
