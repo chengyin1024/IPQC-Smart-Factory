@@ -12,6 +12,12 @@ create table if not exists public.packing_reports (
   created_at timestamptz not null default now()
 );
 
+-- 可重複執行：若曾安裝舊版包裝表，自動補上三種 NG 欄位。
+alter table public.packing_reports
+  add column if not exists printing_ng integer not null default 0 check (printing_ng >= 0),
+  add column if not exists baking_ng integer not null default 0 check (baking_ng >= 0),
+  add column if not exists material_ng integer not null default 0 check (material_ng >= 0);
+
 create index if not exists packing_reports_date_created_idx
   on public.packing_reports (report_date, created_at desc);
 
