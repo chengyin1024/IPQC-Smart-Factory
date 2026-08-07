@@ -138,7 +138,7 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
  </section>
 
  <section id="qcReport" class="page hidden">
-  <div class="card">
+  <div id="qcWorkflowCard" class="card">
    <h2>QC 印刷批次</h2>
    <div id="qcBatchMsg"></div>
    <div id="qcNewBatchPanel">
@@ -167,14 +167,9 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
       <div class="field"><label>素材 NG</label><input id="qcStepMaterialNg" type="number" min="0" value="0" inputmode="numeric"></div>
      </div>
      <div class="field"><label>本批生產總數（含 NG，交給包裝前填寫）</label><input id="qcBatchTotalQty" type="number" min="0" value="0" inputmode="numeric"></div>
-     <div class="actions"><button id="qcSaveStepBtn" type="button" class="btn secondary">完成此道，交給下一道</button><button id="qcCompleteBatchBtn" type="button" class="btn primary">完成此道，交給包裝檢驗</button><button id="qcCloseStepBtn" type="button" class="btn ghost">取消選擇</button></div>
+     <div class="actions"><button id="qcSaveStepBtn" type="button" class="btn secondary">完成此道，交給下一道</button><button id="qcCompleteBatchBtn" type="button" class="btn primary">完成此道並結束 QC</button><button id="qcCloseStepBtn" type="button" class="btn ghost">取消選擇</button></div>
     </div>
-    <div id="qcPackingOnlyFields" class="hidden">
-     <div class="field"><label>目前包裝人員</label><input id="qcPackingAccount" readonly></div>
-     <div class="field"><label>包裝人員姓名 *</label><input id="qcPackingOperatorName" placeholder="請輸入實際包裝人員姓名" autocomplete="name"></div>
-     <div class="row"><div class="field"><label>印刷 NG</label><input id="qcPackingPrintingNg" type="number" min="0" value="0" inputmode="numeric"></div><div class="field"><label>烤漆 NG</label><input id="qcPackingBakingNg" type="number" min="0" value="0" inputmode="numeric"></div></div>
-     <div class="actions"><button id="qcCompletePackingBtn" type="button" class="btn primary">完成包裝檢驗</button><button id="qcClosePackingBtn" type="button" class="btn ghost">取消選擇</button></div>
-    </div>
+    <div id="qcPackingOnlyFields" class="hidden"></div>
    </div>
    <div id="qcRangeStatsCard" class="card" style="margin-top:14px">
     <h3>期間生產統計</h3>
@@ -191,6 +186,13 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
     <h3 id="qcBatchHistoryTitle">已完成批次</h3>
     <div id="qcBatchHistoryList" class="production-list"></div>
    </div>
+  </div>
+  <div id="packingReportCard" class="card hidden" style="margin-top:14px">
+   <h3>包裝 NG 獨立登記</h3><p class="muted small">直接輸入料號與最後包裝 NG，不影響 QC 批次進度。</p><div id="packingReportMsg"></div>
+   <div class="row"><div class="field"><label>料號 *</label><input id="packingReportPart" list="partList" placeholder="請輸入料號"></div><div class="field"><label>包裝人員姓名 *</label><input id="packingReportOperator" placeholder="請輸入姓名" autocomplete="name"></div></div>
+   <div class="row"><div class="field"><label>印刷 NG</label><input id="packingReportPrintingNg" type="number" min="0" value="0" inputmode="numeric"></div><div class="field"><label>烤漆 NG</label><input id="packingReportBakingNg" type="number" min="0" value="0" inputmode="numeric"></div></div>
+   <button id="savePackingReportBtn" type="button" class="btn primary">儲存包裝 NG</button>
+   <h3 style="margin-top:18px">今日包裝紀錄</h3><div id="packingReportHistory" class="production-list"></div>
   </div>
  </section>
 
@@ -266,7 +268,7 @@ const SUPABASE_KEY="sb_publishable_cFXdFQJi9cAiBDNXMcHEYw_yYKMKP5D";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const ACCOUNTS={chengyin:{password:"0000",role:"owner",name:"老闆"},"3F":{password:"0000",role:"supervisor",name:"主管"},"3F1":{password:"0000",role:"worker",name:"QC 1"},"3F2":{password:"0000",role:"worker",name:"QC 2"},"3F3":{password:"0000",role:"packer",name:"包裝"}};
 const $=id=>document.getElementById(id);
-let currentUser=null, productions=[], inspections=[], reliability=[], parts=[], employees=[], photos=[], qcReports=[], qcBatches=[], qcBatchSteps=[], v4Ready=true, qcBatchReady=true, qcPackingReady=false, inspectionDraftProductionId='', currentQcBatchId=null;
+let currentUser=null, productions=[], inspections=[], reliability=[], parts=[], employees=[], photos=[], qcReports=[], qcBatches=[], qcBatchSteps=[], packingReports=[], v4Ready=true, qcBatchReady=true, packingReportsReady=true, inspectionDraftProductionId='', currentQcBatchId=null;
 let currentLang=localStorage.getItem("ipqc_v416_lang")||"zh";
 const originalText=new WeakMap();
 const VI={"V4.1.6 多人與紀錄顯示版｜2026-07-22":"Phiên bản V4.1.6 nhiều nhân viên và hiển thị hồ sơ｜2026-07-22","公司帳號":"Tài khoản công ty","密碼":"Mật khẩu","記住登入":"Ghi nhớ đăng nhập","登入":"Đăng nhập","登出":"Đăng xuất","首頁":"Trang chủ","生產管理":"Quản lý sản xuất","IPQC巡檢":"Kiểm tra IPQC","信賴度測試":"Kiểm tra độ tin cậy","巡檢紀錄":"Lịch sử kiểm tra","信賴度紀錄":"Lịch sử độ tin cậy","基礎資料":"Dữ liệu cơ bản","生產中":"Đang sản xuất","今日巡檢":"Kiểm tra hôm nay","待信賴度":"Chờ kiểm tra độ tin cậy","今日良率":"Tỷ lệ đạt hôm nay","今日待辦":"Việc cần làm hôm nay","目前生產狀態":"Trạng thái sản xuất hiện tại","建立生產":"Tạo lệnh sản xuất","料號 *":"Mã hàng *","機台":"Máy","作業員 1 *":"Công nhân 1 *","作業員 2":"Công nhân 2","作業員 3":"Công nhân 3","請選擇作業員":"Chọn công nhân","不選擇":"Không chọn","預計數量（選填）":"Số lượng dự kiến (không bắt buộc)","備註":"Ghi chú","開始生產":"Bắt đầu sản xuất","生產中／暫停":"Đang sản xuất / Tạm dừng","最近完成":"Hoàn thành gần đây","新增 IPQC 巡檢":"Thêm kiểm tra IPQC","生產單 *":"Lệnh sản xuất *","日期時間":"Ngày giờ","巡檢人員 *":"Nhân viên kiểm tra *","請選擇巡檢人員":"Chọn nhân viên kiểm tra","品檢人員 1":"Nhân viên QC 1","品檢人員 2":"Nhân viên QC 2","品檢人員 3":"Nhân viên QC 3","請選擇品檢人員":"Chọn nhân viên QC","印刷 A":"In A","印刷 B":"In B","包裝":"Đóng gói","印刷 A－NG 原因":"In A - Nguyên nhân NG","印刷 B－NG 原因":"In B - Nguyên nhân NG","包裝－NG 原因":"Đóng gói - Nguyên nhân NG","印刷 A－NG 照片":"In A - Ảnh NG","印刷 B－NG 照片":"In B - Ảnh NG","包裝－NG 照片":"Đóng gói - Ảnh NG","無":"Không","漏印":"Thiếu in","偏位":"Lệch vị trí","重影":"Bóng đôi","刮傷":"Trầy xước","溢墨":"Tràn mực","色差":"Sai màu","異物":"Dị vật","包裝異常":"Lỗi đóng gói","其他":"Khác","備註／處理方式":"Ghi chú / Cách xử lý","首件照片（第一筆巡檢可拍）":"Ảnh sản phẩm đầu tiên","其他照片":"Ảnh khác","儲存巡檢":"Lưu kiểm tra","搜尋生產單／料號／人員":"Tìm lệnh sản xuất / mã hàng / nhân viên","日期":"Ngày","處理方式":"Cách xử lý","NG 原因":"Nguyên nhân NG","巡檢／品檢":"Kiểm tra / QC","照片":"Ảnh","操作":"Thao tác","刪除":"Xóa","完成信賴度測試":"Hoàn thành kiểm tra độ tin cậy","測試人員":"Người kiểm tra","信賴度照片":"Ảnh độ tin cậy","完成測試":"Hoàn thành kiểm tra","料號管理":"Quản lý mã hàng","品名／關鍵字":"Tên hàng / từ khóa","新增料號":"Thêm mã hàng","人員管理":"Quản lý nhân viên","姓名 *":"Tên *","職務":"Chức vụ","作業員":"Công nhân","巡檢員":"Nhân viên kiểm tra","品檢員":"Nhân viên QC","主管":"Quản lý","新增人員":"Thêm nhân viên","目前料號":"Mã hàng hiện có","目前人員":"Nhân viên hiện có","查看照片":"Xem ảnh","沒有符合的巡檢紀錄":"Không có hồ sơ kiểm tra phù hợp"};
@@ -342,11 +344,13 @@ function applyPageAccessUi(){
   }
  });
  const packer=isPackerUser();
+ $("qcWorkflowCard")?.classList.toggle("hidden",packer);
+ $("packingReportCard")?.classList.toggle("hidden",!packer);
  $("qcNewBatchPanel")?.classList.toggle("hidden",packer);
  $("qcRangeStatsCard")?.classList.toggle("hidden",packer||!isOwner());
  $("qcBatchHistoryCard")?.classList.toggle("hidden",packer);
- if($("qcActiveBatchTitle"))$("qcActiveBatchTitle").textContent=packer?"待包裝檢驗":"尚未完成的批次";
- if($("qcActiveBatchHint"))$("qcActiveBatchHint").textContent=packer?"前段 QC 交接後，請只登記成品 NG。":"任何 QC 都可以選擇一批接手，系統會自動顯示下一道。";
+ if($("qcActiveBatchTitle"))$("qcActiveBatchTitle").textContent="尚未完成的批次";
+ if($("qcActiveBatchHint"))$("qcActiveBatchHint").textContent="任何 QC 都可以選擇一批接手，系統會自動顯示下一道。";
 }
 function showPage(id){
  const targetId=enforcePageId(id);
@@ -436,12 +440,12 @@ function qcResumeKey(){return `ipqc_qc_resume_${currentUser?.account||""}`}
 function qcDraftKey(batchId){return `ipqc_qc_draft_${currentUser?.account||""}_${batchId||""}`}
 function qcElapsedText(startedAt){const minutes=Math.max(0,Math.floor((Date.now()-new Date(startedAt||Date.now()).getTime())/60000));return `${Math.floor(minutes/60)} 小時 ${minutes%60} 分`}
 function updateQcSelectedBatchInfo(){const batch=qcBatches.find(x=>String(x.id)===String(currentQcBatchId));if(!batch)return;const nextStep=qcBatchStepsFor(batch.id).length+1;const stage=isPackerUser()?"待包裝檢驗":`目前第 ${nextStep} 道`;$("qcSelectedBatchInfo").innerHTML=`<b>${esc(batch.part_number)}</b>｜批次 ${esc(batch.batch_no)}｜${stage}${batch.printer_name?`｜印刷人員：${esc(batch.printer_name)}`:""}<br><span class="small">開始時間：${esc(localDateTime(batch.started_at))}｜已進行：<b>${qcElapsedText(batch.started_at)}</b></span>`}
-function saveQcStepDraft(){if(!isQcReportOnlyUser()||!currentQcBatchId)return;const draft=isPackerUser()?{packingOperator:$("qcPackingOperatorName").value,packingPrinting:$("qcPackingPrintingNg").value,packingBaking:$("qcPackingBakingNg").value}:{machine:$("qcStepMachine").value,printing:$("qcStepPrintingNg").value,baking:$("qcStepBakingNg").value,material:$("qcStepMaterialNg").value,total:$("qcBatchTotalQty").value};localStorage.setItem(qcDraftKey(currentQcBatchId),JSON.stringify(draft))}
-function fillQcStepDraft(batchId){let draft={};try{draft=JSON.parse(localStorage.getItem(qcDraftKey(batchId))||"{}")||{}}catch(e){}if(isPackerUser()){$("qcPackingOperatorName").value=draft.packingOperator||"";$("qcPackingPrintingNg").value=draft.packingPrinting??0;$("qcPackingBakingNg").value=draft.packingBaking??0;return}$("qcStepMachine").value=draft.machine||"";$("qcStepPrintingNg").value=draft.printing??0;$("qcStepBakingNg").value=draft.baking??0;$("qcStepMaterialNg").value=draft.material??0;$("qcBatchTotalQty").value=draft.total??0}
-function resetQcStepPanel(){const batchId=currentQcBatchId;if(batchId)localStorage.removeItem(qcDraftKey(batchId));localStorage.removeItem(qcResumeKey());currentQcBatchId=null;$("qcStepPanel").classList.add("hidden");["qcStepMachine","qcPackingOperatorName","qcStepPrintingNg","qcStepBakingNg","qcStepMaterialNg","qcBatchTotalQty","qcPackingPrintingNg","qcPackingBakingNg"].forEach(id=>$(id).value=["qcStepMachine","qcPackingOperatorName"].includes(id)?"":0)}
-function restoreQcStepPanel(){if(!isQcReportOnlyUser())return;const selected=currentQcBatchId||localStorage.getItem(qcResumeKey());if(!selected)return;const targetStatus=isPackerUser()?"awaiting_packing":"in_progress";const batch=qcBatches.find(x=>String(x.id)===String(selected)&&x.status===targetStatus);if(!batch){resetQcStepPanel();return}if(!currentQcBatchId)selectQcBatch(batch.id,true);else updateQcSelectedBatchInfo()}
+function saveQcStepDraft(){if(!isQcReportOnlyUser()||isPackerUser()||!currentQcBatchId)return;const draft={machine:$("qcStepMachine").value,printing:$("qcStepPrintingNg").value,baking:$("qcStepBakingNg").value,material:$("qcStepMaterialNg").value,total:$("qcBatchTotalQty").value};localStorage.setItem(qcDraftKey(currentQcBatchId),JSON.stringify(draft))}
+function fillQcStepDraft(batchId){let draft={};try{draft=JSON.parse(localStorage.getItem(qcDraftKey(batchId))||"{}")||{}}catch(e){}$("qcStepMachine").value=draft.machine||"";$("qcStepPrintingNg").value=draft.printing??0;$("qcStepBakingNg").value=draft.baking??0;$("qcStepMaterialNg").value=draft.material??0;$("qcBatchTotalQty").value=draft.total??0}
+function resetQcStepPanel(){const batchId=currentQcBatchId;if(batchId)localStorage.removeItem(qcDraftKey(batchId));localStorage.removeItem(qcResumeKey());currentQcBatchId=null;$("qcStepPanel").classList.add("hidden");["qcStepMachine","qcStepPrintingNg","qcStepBakingNg","qcStepMaterialNg","qcBatchTotalQty"].forEach(id=>$(id).value=id==="qcStepMachine"?"":0)}
+function restoreQcStepPanel(){if(!isQcReportOnlyUser()||isPackerUser())return;const selected=currentQcBatchId||localStorage.getItem(qcResumeKey());if(!selected)return;const batch=qcBatches.find(x=>String(x.id)===String(selected)&&x.status==="in_progress");if(!batch){resetQcStepPanel();return}if(!currentQcBatchId)selectQcBatch(batch.id,true);else updateQcSelectedBatchInfo()}
 function selectQcBatch(id,restoring=false){
- const batch=qcBatches.find(x=>String(x.id)===String(id)),targetStatus=isPackerUser()?"awaiting_packing":"in_progress";
+ const batch=qcBatches.find(x=>String(x.id)===String(id)),targetStatus="in_progress";
  if(!batch||batch.status!==targetStatus)return;
  currentQcBatchId=batch.id;
  if(isQcReportOnlyUser())localStorage.setItem(qcResumeKey(),String(batch.id));
@@ -464,37 +468,28 @@ async function createQcBatch(){
 async function saveQcBatchStep(sendToPacking=false){
  const batch=qcBatches.find(x=>String(x.id)===String(currentQcBatchId));
  if(!batch)return alert("請先選擇要登記的批次");
- if(sendToPacking&&!qcPackingReady)return alert("請先在 Supabase 執行 qc_packing_migration.sql，才能交給包裝檢驗");
  const machine=$("qcStepMachine").value.trim();if(!machine)return alert("請輸入機台");
  const stepNg=num($("qcStepPrintingNg").value)+num($("qcStepBakingNg").value)+num($("qcStepMaterialNg").value);
  const totalQty=num($("qcBatchTotalQty").value);
- if(sendToPacking&&totalQty<=0)return alert("交給包裝前，請填寫本批生產總數（含 NG）");
+ if(sendToPacking&&totalQty<=0)return alert("完成 QC 前，請填寫本批生產總數（含 NG）");
  if(sendToPacking){const previous=qcBatchNg(batch.id);if(previous.printing+previous.baking+previous.material+stepNg>totalQty)return alert("各道 NG 加總不可大於本批生產總數")}
  const {error:stepError}=await sb.from("qc_batch_steps").insert({batch_id:batch.id,step_number:qcBatchStepsFor(batch.id).length+1,machine_name:machine,qc_account:currentUser.account,printing_ng:num($("qcStepPrintingNg").value),baking_ng:num($("qcStepBakingNg").value),material_ng:num($("qcStepMaterialNg").value)});
  if(stepError)return alert(stepError.message);
  if(sendToPacking){
-  const {error:batchError}=await sb.from("qc_batches").update({status:"awaiting_packing",total_quantity:totalQty,updated_at:new Date().toISOString()}).eq("id",batch.id);
+  const completedAt=new Date().toISOString();
+  const {error:batchError}=await sb.from("qc_batches").update({status:"completed",total_quantity:totalQty,completed_by:currentUser.account,completed_date:today(),completed_at:completedAt,updated_at:completedAt}).eq("id",batch.id);
   if(batchError)return alert(batchError.message);
  }
- await loadAll();resetQcStepPanel();qcBatchMessage(sendToPacking?"已交給包裝檢驗":"已完成此道，可由下一位 QC 接手",true);
+ await loadAll();resetQcStepPanel();qcBatchMessage(sendToPacking?"本批 QC 已完成":"已完成此道，可由下一位 QC 接手",true);
 }
-async function completeQcPacking(){
- const batch=qcBatches.find(x=>String(x.id)===String(currentQcBatchId));if(!batch||!isPackerUser())return alert("請先選擇待包裝檢驗的批次");
- const operatorName=$("qcPackingOperatorName").value.trim();if(!operatorName)return alert("請輸入實際包裝人員姓名");
- const printingNg=num($("qcPackingPrintingNg").value),bakingNg=num($("qcPackingBakingNg").value);
- if(!confirm(`請再次確認包裝檢驗完成：\n批次：${batch.batch_no}\n料號：${batch.part_number}\n包裝人員：${operatorName}\n印刷 NG：${printingNg}\n烤漆 NG：${bakingNg}\n\n確定完成後送出嗎？`))return;
- const {error}=await sb.from("qc_batches").update({status:"completed",packing_ng:printingNg+bakingNg,packing_printing_ng:printingNg,packing_baking_ng:bakingNg,completed_by:`${currentUser.account}｜${operatorName}`,completed_date:today(),completed_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq("id",batch.id);
- if(error)return alert(error.message);
- await loadAll();resetQcStepPanel();qcBatchMessage("已完成包裝檢驗並儲存",true);
-}
+async function savePackingReport(){if(!packingReportsReady)return msg($("packingReportMsg"),"請先在 Supabase 執行 packing_reports_migration.sql");const part=$("packingReportPart").value.trim(),operator=$("packingReportOperator").value.trim(),printingNg=num($("packingReportPrintingNg").value),bakingNg=num($("packingReportBakingNg").value);if(!part)return msg($("packingReportMsg"),"請輸入料號");if(!operator)return msg($("packingReportMsg"),"請輸入包裝人員姓名");if(!confirm(`確認儲存包裝 NG？\n料號：${part}\n包裝人員：${operator}\n印刷 NG：${printingNg}\n烤漆 NG：${bakingNg}`))return;const {error}=await sb.from("packing_reports").insert({report_date:today(),part_number:part,printing_ng:printingNg,baking_ng:bakingNg,operator_name:operator,created_by:currentUser.account});if(error)return msg($("packingReportMsg"),error.message);await ensurePart(part);$("packingReportPart").value="";$("packingReportPrintingNg").value=0;$("packingReportBakingNg").value=0;msg($("packingReportMsg"),"包裝 NG 已儲存",true);await loadAll()}
 document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{if(b.classList.contains("role-supervisor")&&!canManage())return;showPage(b.dataset.page)});
 if($("qcCreateBatchBtn"))$("qcCreateBatchBtn").onclick=createQcBatch;
 if($("qcSaveStepBtn"))$("qcSaveStepBtn").onclick=()=>saveQcBatchStep(false);
 if($("qcCompleteBatchBtn"))$("qcCompleteBatchBtn").onclick=()=>saveQcBatchStep(true);
 if($("qcCloseStepBtn"))$("qcCloseStepBtn").onclick=resetQcStepPanel;
-if($("qcCompletePackingBtn"))$("qcCompletePackingBtn").onclick=completeQcPacking;
-if($("qcClosePackingBtn"))$("qcClosePackingBtn").onclick=resetQcStepPanel;
-["qcStepMachine","qcPackingOperatorName","qcStepPrintingNg","qcStepBakingNg","qcStepMaterialNg","qcBatchTotalQty","qcPackingPrintingNg","qcPackingBakingNg"].forEach(id=>{if($(id))$(id).addEventListener("input",saveQcStepDraft)});
+if($("savePackingReportBtn"))$("savePackingReportBtn").onclick=savePackingReport;
+["qcStepMachine","qcStepPrintingNg","qcStepBakingNg","qcStepMaterialNg","qcBatchTotalQty"].forEach(id=>{if($(id))$(id).addEventListener("input",saveQcStepDraft)});
  if($("qcStatsApplyBtn"))$("qcStatsApplyBtn").onclick=renderQcRangeStats;
  if($("qcStatsResetBtn"))$("qcStatsResetBtn").onclick=()=>{ $("qcStatsStartDate").value=`${today().slice(0,8)}01`;$("qcStatsEndDate").value=today();$("qcStatsPart").value="";renderQcRangeStats() };
  if($("businessApplyBtn"))$("businessApplyBtn").onclick=renderBusinessAnalysis;
@@ -504,7 +499,7 @@ $("loginBtn").onclick=()=>{const a=$("account").value.trim(),p=$("password").val
 $("logoutBtn").onclick=()=>{localStorage.removeItem("ipqc_v4_login");location.reload()};
 async function enterApp(){document.body.dataset.role=currentUser.role;$("loginPage").classList.add("hidden");$("appPage").classList.remove("hidden");$("userInfo").textContent=`${currentUser.name}｜${currentUser.account}`;await loadAll();const defaultPage=currentUser?.account==="chengyin"?"dashboard":currentUser?.account==="3F"?"production":"qcReport";showPage(defaultPage);}
 async function loadAll(){
- const [p,i,r,pa,e,ph,q,qb,qs,qp]=await Promise.all([
+ const [p,i,r,pa,e,ph,q,qb,qs,pr]=await Promise.all([
   sb.from("production_orders").select("*").order("created_at",{ascending:false}).limit(500),
   sb.from("inspections").select("*").order("created_at",{ascending:false}).limit(1000),
   sb.from("reliability_tests").select("*").order("created_at",{ascending:false}).limit(500),
@@ -514,10 +509,10 @@ async function loadAll(){
   sb.from("qc_reports").select("*").order("created_at",{ascending:false}).limit(1000),
   sb.from("qc_batches").select("*").order("started_at",{ascending:false}).limit(1000),
   sb.from("qc_batch_steps").select("*").order("created_at",{ascending:false}).limit(3000),
-  sb.from("qc_batches").select("packing_printing_ng,packing_baking_ng").limit(1)
+  sb.from("packing_reports").select("*").order("created_at",{ascending:false}).limit(1000)
  ]);
  if(p.error){v4Ready=false;$("setupBanner").classList.remove("hidden");productions=[]}else{v4Ready=true;$("setupBanner").classList.add("hidden");productions=p.data||[]}
- inspections=i.data||[];reliability=r.data||[];parts=pa.data||[];employees=e.data||[];photos=ph.data||[];qcReports=q.error?[]:q.data||[];qcBatchReady=!qb.error&&!qs.error;qcPackingReady=!qp.error;qcBatches=qb.error?[]:qb.data||[];qcBatchSteps=qs.error?[]:qs.data||[];renderAll();restoreQcStepPanel()
+ inspections=i.data||[];reliability=r.data||[];parts=pa.data||[];employees=e.data||[];photos=ph.data||[];qcReports=q.error?[]:q.data||[];qcBatchReady=!qb.error&&!qs.error;packingReportsReady=!pr.error;packingReports=pr.error?[]:pr.data||[];qcBatches=qb.error?[]:qb.data||[];qcBatchSteps=qs.error?[]:qs.data||[];renderAll();restoreQcStepPanel()
 }
 function renderProductionCard(p,actions=true){
  const t=productionTotals(p.id), count=inspections.filter(x=>String(x.production_id)===String(p.id)).length;
@@ -558,12 +553,11 @@ function renderQcActiveSignal(){
  const visible=currentUser?.account==="chengyin";
  card.classList.toggle("hidden",!visible);
  if(!visible){container.innerHTML="";return}
- const active=(qcBatches||[]).filter(batch=>["in_progress","awaiting_packing"].includes(batch.status)).sort((a,b)=>new Date(b.started_at||0)-new Date(a.started_at||0));
+ const active=(qcBatches||[]).filter(batch=>batch.status==="in_progress").sort((a,b)=>new Date(b.started_at||0)-new Date(a.started_at||0));
  container.innerHTML=active.length?active.map(batch=>{
  const steps=qcBatchStepsFor(batch.id),last=steps[steps.length-1],nextStep=steps.length+1;
- const packing=batch.status==="awaiting_packing";
   const deleteBtn=isOwner()?`<button class="btn delete-top" onclick="deleteQcBatch('${batch.id}')">🗑 刪除</button>`:"";
-  return `<div class="production-card"><div class="production-head"><div><div class="production-part">${esc(batch.part_number)}</div><div class="small muted">批次 ${esc(batch.batch_no)}</div></div><div class="production-head-actions"><span class="pill pending">${packing?"🟡 待包裝檢驗":"🟡 目前印刷中"}</span>${deleteBtn}</div></div><div class="meta">🔔 ${packing?"已交給包裝帳號":"QC 已開始印刷"}<br>開始：${esc(localDateTime(batch.started_at))}｜印刷人員：${esc(batch.printer_name||"未填寫")}<br>${packing?"等待 3F3 登記成品 NG":`目前第 ${nextStep} 道待登記${last?`｜上一道：${esc(last.machine_name)}／${esc(last.qc_account)}`:""}`}</div></div>`;
+  return `<div class="production-card"><div class="production-head"><div><div class="production-part">${esc(batch.part_number)}</div><div class="small muted">批次 ${esc(batch.batch_no)}</div></div><div class="production-head-actions"><span class="pill pending">🟡 目前印刷中</span>${deleteBtn}</div></div><div class="meta">🔔 QC 已開始印刷<br>開始：${esc(localDateTime(batch.started_at))}｜印刷人員：${esc(batch.printer_name||"未填寫")}<br>目前第 ${nextStep} 道待登記${last?`｜上一道：${esc(last.machine_name)}／${esc(last.qc_account)}`:""}</div></div>`;
  }).join(""):'<div class="muted">目前沒有 QC 印刷中的批次</div>';
 }
 function setQcStatsMonthDefaults(){
@@ -602,25 +596,29 @@ function renderQcBatchLists(){
   const message='<div class="msg err">QC 批次功能尚未安裝。請先在 Supabase 執行更新 SQL。</div>';
   activeContainer.innerHTML=message;historyContainer.innerHTML="";return;
  }
- if(isPackerUser()&&!qcPackingReady){
-  activeContainer.innerHTML='<div class="msg err">包裝功能尚未安裝。請先在 Supabase 執行 qc_packing_migration.sql。</div>';historyContainer.innerHTML="";return;
- }
- const packer=isPackerUser(),active=(qcBatches||[]).filter(x=>packer?x.status==="awaiting_packing":x.status==="in_progress").sort((a,b)=>new Date(b.started_at||0)-new Date(a.started_at||0));
+ const packer=isPackerUser(),active=(qcBatches||[]).filter(x=>!packer&&x.status==="in_progress").sort((a,b)=>new Date(b.started_at||0)-new Date(a.started_at||0));
  activeContainer.innerHTML=active.length?active.map(batch=>{
  const steps=qcBatchStepsFor(batch.id),detail=steps.length?steps.map(step=>`第 ${num(step.step_number)} 道：${esc(step.machine_name)}｜${esc(step.qc_account)}｜NG ${num(step.printing_ng)+num(step.baking_ng)+num(step.material_ng)}`).join("<br>"):"尚未登記任何道次";
-  const label=packer?"待包裝檢驗":`第 ${steps.length+1} 道待登記`,button=packer?"開始包裝檢驗":"接手下一道";
+  const label=`第 ${steps.length+1} 道待登記`,button="接手下一道";
   const deleteBtn=isOwner()?`<button class="btn delete-top" onclick="deleteQcBatch('${batch.id}')">🗑 刪除</button>`:"";
   return `<div class="production-card"><div class="production-head"><div><div class="production-no">${esc(batch.batch_no)}</div><div class="production-part">${esc(batch.part_number)}</div></div><div class="production-head-actions"><span class="pill pending">${label}</span>${deleteBtn}</div></div><div class="meta">開始：${esc(localDateTime(batch.started_at))}｜建立：${esc(batch.started_by||"-")}<br>${detail}</div><button class="btn primary" style="margin-top:10px" onclick="selectQcBatch('${batch.id}')">${button}</button></div>`;
- }).join(""):`<div class="muted">${packer?"目前沒有待包裝檢驗的批次":"目前沒有尚未完成的批次"}</div>`;
+ }).join(""):'<div class="muted">目前沒有尚未完成的批次</div>';
  const todayOnly=["3F1","3F2"].includes(currentUser?.account);
  if($("qcBatchHistoryTitle"))$("qcBatchHistoryTitle").textContent=todayOnly?"已完成批次（今日）":"已完成批次";
  const completed=(qcBatches||[]).filter(x=>x.status==="completed"&&(!todayOnly||localDate(new Date(x.completed_at||x.updated_at||x.created_at))===today())).sort((a,b)=>new Date(b.completed_at||0)-new Date(a.completed_at||0));
  historyContainer.innerHTML=completed.length?completed.map(batch=>{
-  const steps=qcBatchStepsFor(batch.id),ng=qcBatchNg(batch.id),packingPrintingNg=num(batch.packing_printing_ng),packingBakingNg=num(batch.packing_baking_ng),packingNg=packingPrintingNg+packingBakingNg,totalNg=ng.printing+ng.baking+ng.material+packingNg,good=Math.max(0,num(batch.total_quantity)-totalNg);
-  const detail=steps.map(step=>`第 ${num(step.step_number)} 道：${esc(step.machine_name)}｜${esc(step.qc_account)}｜NG ${num(step.printing_ng)+num(step.baking_ng)+num(step.material_ng)}`).concat(`包裝印刷 NG：${packingPrintingNg}｜包裝烤漆 NG：${packingBakingNg}｜${esc(batch.completed_by||"-")}`).join("<br>");
+  const steps=qcBatchStepsFor(batch.id),ng=qcBatchNg(batch.id),totalNg=ng.printing+ng.baking+ng.material,good=Math.max(0,num(batch.total_quantity)-totalNg);
+  const detail=steps.map(step=>`第 ${num(step.step_number)} 道：${esc(step.machine_name)}｜${esc(step.qc_account)}｜NG ${num(step.printing_ng)+num(step.baking_ng)+num(step.material_ng)}`).join("<br>");
   const deleteBtn=isOwner()?`<button class="btn delete-top" onclick="deleteQcBatch('${batch.id}')">🗑 刪除</button>`:"";
   return `<div class="production-card"><div class="production-head"><div><div class="production-no">${esc(batch.batch_no)}</div><div class="production-part">${esc(batch.part_number)}</div></div><div class="production-head-actions"><span class="pill done">已完成</span>${deleteBtn}</div></div><div class="meta">總數（含 NG）：${num(batch.total_quantity)}｜良品：${good}｜NG：${totalNg}<br>完成：${esc(localDateTime(batch.completed_at))}｜最後登記：${esc(batch.completed_by||"-")}<br>${detail}</div></div>`;
  }).join(""):`<div class="muted">${todayOnly?"今日尚無已完成批次":"目前沒有已完成批次"}</div>`;
+}
+function renderPackingReports(){
+ const card=$("packingReportCard"),container=$("packingReportHistory");if(!card||!container)return;
+ card.classList.toggle("hidden",!isPackerUser());if(!isPackerUser())return;
+ if(!packingReportsReady){container.innerHTML='<div class="msg err">請先在 Supabase 執行 packing_reports_migration.sql</div>';return}
+ const rows=packingReports.filter(x=>x.report_date===today());
+ container.innerHTML=rows.length?rows.map(r=>`<div class="production-card"><div class="production-head"><div><div class="production-part">${esc(r.part_number)}</div><div class="small muted">${esc(localDateTime(r.created_at))}｜${esc(r.operator_name)}</div></div><span class="pill done">NG ${num(r.printing_ng)+num(r.baking_ng)}</span></div><div class="meta">印刷 NG：${num(r.printing_ng)}｜烤漆 NG：${num(r.baking_ng)}</div></div>`).join(""):'<div class="muted">今日尚無包裝 NG 紀錄</div>';
 }
 function renderAll(){
  $("partList").innerHTML=parts.map(x=>`<option value="${esc(x.code)}">${esc(x.keywords||"")}</option>`).join("");
@@ -652,7 +650,7 @@ function renderAll(){
  renderQcBatchLists();
  renderBusinessAnalysis();
  $("pendingReliability").innerHTML=pending.length?pending.map(p=>{const s=reliabilityState(p);return `<div class="production-card"><div class="production-no">${esc(p.production_no)}</div><div class="production-part">${esc(p.part_number_code)}</div><div class="meta">開始：${esc(localDateTime(p.started_at))}｜機台：${esc(p.machine||"-")}<br>${s.needsRetest?'<span class="ngtxt"><b>上次 NG，待改善後重測</b></span>':`應測時段：${esc(slotLabel(s.required))}`}</div><button class="btn primary" style="margin-top:10px" onclick="startReliability('${p.id}')">${s.needsRetest?'開始重測':'開始測試'}</button></div>`}).join(""):'<div class="muted">目前沒有待測項目</div>';
- renderRecords();renderReliabilityRecords();
+ renderRecords();renderReliabilityRecords();renderPackingReports();
  $("partsTable").innerHTML=`<table><tr><th>料號</th><th>品名／關鍵字</th><th>操作</th></tr>${parts.map(x=>`<tr><td>${esc(x.code)}</td><td>${esc(x.keywords||"")}</td><td class="delete-cell">${canManage()?`<button class="btn danger" onclick="deletePart('${x.id}')">刪除</button>`:"-"}</td></tr>`).join("")}</table>`;
  $("employeesTable").innerHTML=`<table><tr><th>姓名</th><th>職務</th><th>操作</th></tr>${employees.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(employeeRoleLabel(x.role))}</td><td class="delete-cell">${canManage()?`<button class="btn danger" onclick="deleteEmployee('${x.id}')">刪除</button>`:"-"}</td></tr>`).join("")}</table>`;
  applyLanguage();
@@ -848,7 +846,7 @@ $("addEmployeeBtn").onclick=async()=>{if(!canManage())return;const name=$("newEm
 $("langBtnLogin").onclick=toggleLanguage;
 $("langBtnHeader").onclick=toggleLanguage;
 function setupZeroClearInputs(){
- ["aOk","aNg","bOk","bNg","pOk","pNg","qcStepPrintingNg","qcStepBakingNg","qcStepMaterialNg","qcBatchTotalQty","qcPackingPrintingNg","qcPackingBakingNg"].forEach(id=>{
+ ["aOk","aNg","bOk","bNg","pOk","pNg","qcStepPrintingNg","qcStepBakingNg","qcStepMaterialNg","qcBatchTotalQty","packingReportPrintingNg","packingReportBakingNg"].forEach(id=>{
   const el=$(id);
   if(!el||el.dataset.zeroClearReady==="1")return;
   el.dataset.zeroClearReady="1";
