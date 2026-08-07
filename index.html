@@ -188,9 +188,8 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
    </div>
   </div>
   <div id="packingReportCard" class="card hidden" style="margin-top:14px">
-   <h3>包裝 NG 獨立登記</h3><p class="muted small">直接輸入料號與最後包裝 NG，不影響 QC 批次進度。</p><div id="packingReportMsg"></div>
-   <div class="row"><div class="field"><label>料號 *</label><input id="packingReportPart" list="partList" placeholder="請輸入料號"></div><div class="field"><label>包裝人員姓名 *</label><input id="packingReportOperator" placeholder="請輸入姓名" autocomplete="name"></div></div>
-   <div class="row"><div class="field"><label>印刷 NG</label><input id="packingReportPrintingNg" type="number" min="0" value="0" inputmode="numeric"></div><div class="field"><label>烤漆 NG</label><input id="packingReportBakingNg" type="number" min="0" value="0" inputmode="numeric"></div></div>
+   <h3>包裝 NG 獨立登記</h3><p class="muted small">搜尋料號並輸入 NG 數量，不影響 QC 批次進度。</p><div id="packingReportMsg"></div>
+   <div class="row"><div class="field"><label>料號 *</label><input id="packingReportPart" list="partList" placeholder="搜尋或輸入料號"></div><div class="field"><label>NG 數量 *</label><input id="packingReportNg" type="number" min="0" value="0" inputmode="numeric"></div></div>
    <button id="savePackingReportBtn" type="button" class="btn primary">儲存包裝 NG</button>
    <h3 style="margin-top:18px">今日包裝紀錄</h3><div id="packingReportHistory" class="production-list"></div>
   </div>
@@ -482,7 +481,7 @@ async function saveQcBatchStep(sendToPacking=false){
  }
  await loadAll();resetQcStepPanel();qcBatchMessage(sendToPacking?"本批 QC 已完成":"已完成此道，可由下一位 QC 接手",true);
 }
-async function savePackingReport(){if(!packingReportsReady)return msg($("packingReportMsg"),"請先在 Supabase 執行 packing_reports_migration.sql");const part=$("packingReportPart").value.trim(),operator=$("packingReportOperator").value.trim(),printingNg=num($("packingReportPrintingNg").value),bakingNg=num($("packingReportBakingNg").value);if(!part)return msg($("packingReportMsg"),"請輸入料號");if(!operator)return msg($("packingReportMsg"),"請輸入包裝人員姓名");if(!confirm(`確認儲存包裝 NG？\n料號：${part}\n包裝人員：${operator}\n印刷 NG：${printingNg}\n烤漆 NG：${bakingNg}`))return;const {error}=await sb.from("packing_reports").insert({report_date:today(),part_number:part,printing_ng:printingNg,baking_ng:bakingNg,operator_name:operator,created_by:currentUser.account});if(error)return msg($("packingReportMsg"),error.message);await ensurePart(part);$("packingReportPart").value="";$("packingReportPrintingNg").value=0;$("packingReportBakingNg").value=0;msg($("packingReportMsg"),"包裝 NG 已儲存",true);await loadAll()}
+async function savePackingReport(){if(!packingReportsReady)return msg($("packingReportMsg"),"請先在 Supabase 執行 packing_reports_migration.sql");const part=$("packingReportPart").value.trim(),ng=num($("packingReportNg").value);if(!part)return msg($("packingReportMsg"),"請輸入料號");if(!confirm(`確認儲存包裝 NG？\n料號：${part}\nNG 數量：${ng}`))return;const {error}=await sb.from("packing_reports").insert({report_date:today(),part_number:part,ng_quantity:ng,created_by:currentUser.account});if(error)return msg($("packingReportMsg"),error.message);await ensurePart(part);$("packingReportPart").value="";$("packingReportNg").value=0;msg($("packingReportMsg"),"包裝 NG 已儲存",true);await loadAll()}
 document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{if(b.classList.contains("role-supervisor")&&!canManage())return;showPage(b.dataset.page)});
 if($("qcCreateBatchBtn"))$("qcCreateBatchBtn").onclick=createQcBatch;
 if($("qcSaveStepBtn"))$("qcSaveStepBtn").onclick=()=>saveQcBatchStep(false);
@@ -618,7 +617,7 @@ function renderPackingReports(){
  card.classList.toggle("hidden",!isPackerUser());if(!isPackerUser())return;
  if(!packingReportsReady){container.innerHTML='<div class="msg err">請先在 Supabase 執行 packing_reports_migration.sql</div>';return}
  const rows=packingReports.filter(x=>x.report_date===today());
- container.innerHTML=rows.length?rows.map(r=>`<div class="production-card"><div class="production-head"><div><div class="production-part">${esc(r.part_number)}</div><div class="small muted">${esc(localDateTime(r.created_at))}｜${esc(r.operator_name)}</div></div><span class="pill done">NG ${num(r.printing_ng)+num(r.baking_ng)}</span></div><div class="meta">印刷 NG：${num(r.printing_ng)}｜烤漆 NG：${num(r.baking_ng)}</div></div>`).join(""):'<div class="muted">今日尚無包裝 NG 紀錄</div>';
+ container.innerHTML=rows.length?rows.map(r=>`<div class="production-card"><div class="production-head"><div><div class="production-part">${esc(r.part_number)}</div><div class="small muted">${esc(localDateTime(r.created_at))}｜${esc(r.created_by||"3F3")}</div></div><span class="pill ng">NG ${num(r.ng_quantity)}</span></div></div>`).join(""):'<div class="muted">今日尚無包裝 NG 紀錄</div>';
 }
 function renderAll(){
  $("partList").innerHTML=parts.map(x=>`<option value="${esc(x.code)}">${esc(x.keywords||"")}</option>`).join("");
@@ -846,7 +845,7 @@ $("addEmployeeBtn").onclick=async()=>{if(!canManage())return;const name=$("newEm
 $("langBtnLogin").onclick=toggleLanguage;
 $("langBtnHeader").onclick=toggleLanguage;
 function setupZeroClearInputs(){
- ["aOk","aNg","bOk","bNg","pOk","pNg","qcStepPrintingNg","qcStepBakingNg","qcStepMaterialNg","qcBatchTotalQty","packingReportPrintingNg","packingReportBakingNg"].forEach(id=>{
+ ["aOk","aNg","bOk","bNg","pOk","pNg","qcStepPrintingNg","qcStepBakingNg","qcStepMaterialNg","qcBatchTotalQty","packingReportNg"].forEach(id=>{
   const el=$(id);
   if(!el||el.dataset.zeroClearReady==="1")return;
   el.dataset.zeroClearReady="1";

@@ -5,9 +5,7 @@ create table if not exists public.packing_reports (
   id bigint generated always as identity primary key,
   report_date date not null default current_date,
   part_number text not null check (length(trim(part_number)) > 0),
-  printing_ng integer not null default 0 check (printing_ng >= 0),
-  baking_ng integer not null default 0 check (baking_ng >= 0),
-  operator_name text not null check (length(trim(operator_name)) > 0),
+  ng_quantity integer not null default 0 check (ng_quantity >= 0),
   created_by text not null default '3F3',
   created_at timestamptz not null default now()
 );
@@ -41,4 +39,3 @@ set status = 'completed',
     completed_at = coalesce(completed_at, updated_at, now()),
     updated_at = now()
 where status = 'awaiting_packing';
-
