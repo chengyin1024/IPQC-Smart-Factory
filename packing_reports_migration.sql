@@ -47,3 +47,6 @@ set status = 'completed',
     completed_at = coalesce(completed_at, updated_at, now()),
     updated_at = now()
 where status = 'awaiting_packing';
+
+-- 要求 Supabase REST API 立即重新載入新資料表與欄位。
+notify pgrst, 'reload schema';
