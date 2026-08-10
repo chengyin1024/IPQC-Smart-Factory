@@ -62,14 +62,13 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
  <div class="nav">
   <button class="btn primary" data-page="dashboard">首頁</button>
   <button class="btn secondary" data-page="production">生產管理</button>
-  <button class="btn secondary" data-page="inspection">IPQC巡檢</button>
-  <button class="btn secondary" data-page="qcReport">QC Report</button>
+  <button class="btn secondary" data-page="inspection">IPQC</button>
   <button class="btn secondary" data-page="reliability">信賴度測試</button>
   <button class="btn secondary" data-page="records">巡檢紀錄</button>
-  <button class="btn secondary" data-page="relRecords">信賴度紀錄</button>
-  <button class="btn secondary" data-page="completedProductions">已完成生產</button>
+  <button class="btn secondary" data-page="qcReport">QC REPORT</button>
+  <button class="btn secondary" data-page="completedProductions">已生產完成</button>
+  <button class="btn secondary role-owner" data-page="businessAnalysis">經營分析</button>
   <button class="btn secondary role-supervisor" data-page="master">基礎資料</button>
-  <button class="btn secondary role-owner" data-page="businessAnalysis">經營分析（Beta）</button>
  </div>
 
  <section id="dashboard" class="page">
@@ -276,6 +275,7 @@ Object.assign(VI,{"QC Report":"Báo cáo QC","已完成生產":"Sản xuất đ�
 Object.assign(VI,{"QC 目前印刷中":"QC đang in","QC 按下「開始新一批印刷」後，這裡會在 30 秒內自動顯示。":"Sau khi QC bấm bắt đầu lô in mới, thông tin sẽ tự động hiện ở đây trong 30 giây.","目前沒有 QC 印刷中的批次":"Hiện không có lô QC đang in","目前印刷中":"Đang in","QC 已開始印刷":"QC đã bắt đầu in","目前第 ":"Hiện công đoạn "," 道待登記":" chờ ghi","上一道：":"Công đoạn trước: ","未填寫":"Chưa điền"});
 Object.assign(VI,{"印刷手":"Thợ in","印刷手 1 *":"Thợ in 1 *","印刷手 2":"Thợ in 2","印刷手 3":"Thợ in 3","請選擇印刷手":"Chọn thợ in","印刷手：":"Thợ in: ","請選擇至少一位印刷手":"Hãy chọn ít nhất một thợ in","請選擇主管":"Chọn quản lý"});
 Object.assign(VI,{"待包裝檢驗":"Chờ kiểm tra đóng gói","前段 QC 交接後，請只登記成品 NG。":"Sau khi QC bàn giao, chỉ ghi NG thành phẩm.","記錄成品 NG":"Ghi NG thành phẩm","目前包裝人員":"Nhân viên đóng gói hiện tại","成品 NG":"NG thành phẩm","完成包裝檢驗":"Hoàn thành kiểm tra đóng gói","完成此道，交給包裝檢驗":"Hoàn thành công đoạn này, chuyển kiểm tra đóng gói","開始包裝檢驗":"Bắt đầu kiểm tra đóng gói","待包裝檢驗的批次":"Lô chờ kiểm tra đóng gói","目前沒有待包裝檢驗的批次":"Hiện không có lô chờ kiểm tra đóng gói","已交給包裝檢驗":"Đã chuyển kiểm tra đóng gói","等待 3F3 登記成品 NG":"Chờ 3F3 ghi NG thành phẩm","包裝成品 NG：":"NG thành phẩm đóng gói: "});
+Object.assign(VI,{"IPQC":"Kiểm tra IPQC","QC REPORT":"Báo cáo QC","已生產完成":"Sản xuất đã hoàn thành","經營分析":"Phân tích kinh doanh"});
 const VI_KEYS=Object.keys(VI).sort((a,b)=>b.length-a.length);
 function t(text){if(currentLang!=="vi")return text;return VI_KEYS.reduce((value,key)=>value.split(key).join(VI[key]),String(text))}
 function applyLanguage(){document.documentElement.lang=currentLang==="vi"?"vi":"zh-Hant";document.querySelectorAll("body *").forEach(el=>{for(const node of el.childNodes){if(node.nodeType===Node.TEXT_NODE&&node.nodeValue.trim()){if(!originalText.has(node))originalText.set(node,node.nodeValue);const raw=originalText.get(node),trim=raw.trim();node.nodeValue=raw.replace(trim,t(trim))}}["placeholder","title","aria-label","alt"].forEach(attr=>{if(!el.hasAttribute(attr))return;const dataKey=`original${attr.replace(/-([a-z])/g,(_,c)=>c.toUpperCase()).replace(/^./,c=>c.toUpperCase())}`;if(!el.dataset[dataKey])el.dataset[dataKey]=el.getAttribute(attr);el.setAttribute(attr,t(el.dataset[dataKey]))})});["langBtnLogin","langBtnHeader"].forEach(id=>{if($(id))$(id).textContent=currentLang==="zh"?"VI":"中文"});if(currentUser&&$("userInfo"))$("userInfo").textContent=`${t(currentUser.name)}｜${currentUser.account}`}
