@@ -8,13 +8,13 @@
 <link rel="manifest" href="manifest.json">
 <title>IPQC Smart Factory V4.1.6</title>
 <style>
-:root{--p:#173f31;--p2:#255d49;--bg:#f2f6f4;--line:#d8e2de;--ok:#16733b;--ng:#b42318;--warn:#9a6700;--pause:#8a5b00}
+:root{--p:#173f31;--p2:#255d49;--bg:#f2f6f4;--line:#d8e2de;--field-line:#78908a;--ok:#16733b;--ng:#b42318;--warn:#9a6700;--pause:#8a5b00}
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI","Noto Sans TC",sans-serif;background:var(--bg);color:#17332a}
 button,input,select,textarea{font:inherit}.hidden{display:none!important}
 .login{min-height:100vh;display:grid;place-items:center;padding:20px}.login-card{width:min(430px,100%);background:#fff;border-radius:22px;padding:24px;box-shadow:0 12px 40px #0002}
 h1,h2,h3{margin-top:0}.muted{color:#6d7f78}.small{font-size:12px}
 .field{margin-bottom:12px}.field label{display:block;font-weight:800;margin-bottom:6px}
-input,select,textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff}textarea{min-height:90px}
+input,select,textarea{width:100%;padding:12px;border:2px solid var(--field-line);border-radius:12px;background:#fff;font-weight:650;color:#17332a}input::placeholder,textarea::placeholder{font-weight:500;color:#75847e;opacity:1}textarea{min-height:90px}
 .btn{border:0;border-radius:12px;padding:11px 14px;font-weight:850;cursor:pointer}.btn:disabled{opacity:.55}
 .primary{background:var(--p);color:#fff}.secondary{background:#e7efec;color:var(--p)}.danger{background:#fee7e7;color:#8b1e1e}.warning{background:#fff1cd;color:#7d5600}.ghost{background:#fff;border:1px solid var(--line)}
 header{position:sticky;top:0;z-index:30;background:var(--p);color:#fff;padding:12px}
