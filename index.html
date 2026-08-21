@@ -282,7 +282,7 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
 const SUPABASE_URL="https://huhenjkybvzkqczkvmkh.supabase.co";
 const SUPABASE_KEY="sb_publishable_cFXdFQJi9cAiBDNXMcHEYw_yYKMKP5D";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-const ACCOUNTS={chengyin:{password:"0000",role:"owner",name:"老闆"},"3F":{password:"0000",role:"supervisor",name:"主管"},"3F1":{password:"0000",role:"worker",name:"阿霞"},"3F2":{password:"0000",role:"worker",name:"阿翠"},"3F3":{password:"0000",role:"packer",name:"包裝"}};
+const ACCOUNTS={chengyin:{password:"0000",role:"owner",name:"老闆"},"3F":{password:"0000",role:"supervisor",name:"主管"},"3F1":{password:"0000",role:"worker",name:"阿霞"},"3F2":{password:"0000",role:"worker",name:"阿翠"},"3F3":{password:"0000",role:"packer",name:"阿英"}};
 const $=id=>document.getElementById(id);
 let currentUser=null, productions=[], inspections=[], reliability=[], parts=[], employees=[], photos=[], qcReports=[], qcBatches=[], qcBatchSteps=[], packingReports=[], v4Ready=true, qcBatchReady=true, packingReportsReady=true, inspectionDraftProductionId='', currentQcBatchId=null, qcReportView='today';
 let currentLang=localStorage.getItem("ipqc_v416_lang")||"zh";
