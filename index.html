@@ -184,6 +184,10 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
      <h3>今日完成批次</h3>
      <div id="qcTodayBatchList" class="production-list"></div>
     </div>
+    <div id="qcTodayPackingCard" class="card hidden" style="margin-top:14px">
+     <h3>今日包裝不良（阿英）</h3>
+     <div id="qcTodayPackingList" class="production-list"></div>
+    </div>
    </div>
    <div id="qcHistoryView" class="hidden">
    <div id="qcRangeStatsCard" class="card" style="margin-top:14px">
@@ -200,6 +204,10 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
    <div id="qcBatchHistoryCard" class="card" style="margin-top:14px">
     <h3 id="qcBatchHistoryTitle">歷史完成批次</h3>
     <div id="qcBatchHistoryList" class="production-list"></div>
+   </div>
+   <div id="qcHistoryPackingCard" class="card hidden" style="margin-top:14px">
+    <h3>歷史包裝不良</h3>
+    <div id="qcHistoryPackingList" class="production-list"></div>
    </div>
    </div>
   </div>
@@ -598,16 +606,18 @@ function renderQcRangeStats(){
   const completed=qcCompletedDate(x);
   return x.status==="completed"&&completed&&(!start||completed>=start)&&(!end||completed<=end)&&(!part||String(x.part_number||"").trim().toLowerCase()===part);
  });
+ const packingRows=(packingReports||[]).filter(x=>(!start||x.report_date>=start)&&(!end||x.report_date<=end)&&(!part||String(x.part_number||"").trim().toLowerCase()===part));
  const totalQty=rows.reduce((sum,x)=>sum+num(x.total_quantity),0);
  const printingNg=rows.reduce((sum,x)=>sum+qcBatchNg(x.id).printing,0);
  const bakingNg=rows.reduce((sum,x)=>sum+qcBatchNg(x.id).baking,0);
  const materialNg=rows.reduce((sum,x)=>sum+qcBatchNg(x.id).material,0);
  const totalNg=printingNg+bakingNg+materialNg;
+ const packingPrintingNg=packingRows.reduce((sum,x)=>sum+num(x.printing_ng),0),packingBakingNg=packingRows.reduce((sum,x)=>sum+num(x.baking_ng),0),packingMaterialNg=packingRows.reduce((sum,x)=>sum+num(x.material_ng),0),packingTotalNg=packingPrintingNg+packingBakingNg+packingMaterialNg;
  const goodQty=Math.max(0,totalQty-totalNg);
  const rate=totalQty?goodQty/totalQty*100:0;
  const range=`${start||"最早紀錄"} 至 ${end||"今天"}`;
  const scope=part?`｜料號：${esc($("qcStatsPart").value.trim())}`:"｜全部料號";
- container.innerHTML=`<div class="small muted">${range}${scope}</div><div class="grid" style="margin-top:10px"><div class="card stat"><span class="muted">完成批次</span><b>${rows.length}</b></div><div class="card stat"><span class="muted">生產總數</span><b>${totalQty}</b></div><div class="card stat"><span class="muted">良品數</span><b class="oktxt">${goodQty}</b></div><div class="card stat"><span class="muted">QC 良率</span><b>${rate.toFixed(1)}%</b></div></div><div class="meta">NG 合計：<b class="ngtxt">${totalNg}</b>（印刷 ${printingNg}｜烤漆 ${bakingNg}｜素材 ${materialNg}）</div>`;
+ container.innerHTML=`<div class="small muted">${range}${scope}</div><div class="grid" style="margin-top:10px"><div class="card stat"><span class="muted">完成批次</span><b>${rows.length}</b></div><div class="card stat"><span class="muted">生產總數</span><b>${totalQty}</b></div><div class="card stat"><span class="muted">QC 良品數</span><b class="oktxt">${goodQty}</b></div><div class="card stat"><span class="muted">QC 良率</span><b>${rate.toFixed(1)}%</b></div></div><div class="meta">QC NG：<b class="ngtxt">${totalNg}</b>（印刷 ${printingNg}｜烤漆 ${bakingNg}｜素材 ${materialNg}）<br>阿英包裝 NG：<b class="ngtxt">${packingTotalNg}</b>（印刷 ${packingPrintingNg}｜烤漆 ${packingBakingNg}｜素材 ${packingMaterialNg}）<br><b>統合 NG：<span class="ngtxt">${totalNg+packingTotalNg}</span></b></div>`;
 }
 function setQcReportView(view){
  qcReportView=view==="history"?"history":"today";
@@ -622,9 +632,17 @@ function qcBatchCard(batch){
  const deleteBtn=isOwner()?`<button class="btn delete-top" onclick="deleteQcBatch('${batch.id}')">🗑 刪除</button>`:"";
  return `<div class="production-card"><div class="production-head"><div><div class="production-no">${esc(batch.batch_no)}</div><div class="production-part">${esc(batch.part_number)}</div></div><div class="production-head-actions"><span class="pill done">已完成</span>${deleteBtn}</div></div><div class="meta">總數（含 NG）：${num(batch.total_quantity)}｜良品：${good}｜NG：${totalNg}<br>完成：${esc(localDateTime(batch.completed_at))}｜最後登記：${esc(accountDisplayName(batch.completed_by))}<br>${detail}</div></div>`;
 }
+function packingOperatorName(report){
+ const pieces=String(report?.created_by||"").split("｜");
+ return pieces[1]||accountDisplayName(pieces[0]||"3F3");
+}
+function qcPackingCard(report){
+ const total=num(report.printing_ng)+num(report.baking_ng)+num(report.material_ng);
+ return `<div class="production-card"><div class="production-head"><div><div class="production-part">${esc(report.part_number)}</div><div class="small muted">${esc(report.report_date)}｜登記：${esc(packingOperatorName(report))}</div></div><span class="pill ng">NG ${total}</span></div><div class="meta">印刷 NG：${num(report.printing_ng)}｜烤漆 NG：${num(report.baking_ng)}｜素材不良：${num(report.material_ng)}</div></div>`;
+}
 function renderQcBatchLists(){
- const activeContainer=$("qcActiveBatchList"),todayContainer=$("qcTodayBatchList"),historyContainer=$("qcBatchHistoryList"),todayStats=$("qcTodayStats");
- if(!activeContainer||!todayContainer||!historyContainer||!todayStats)return;
+ const activeContainer=$("qcActiveBatchList"),todayContainer=$("qcTodayBatchList"),historyContainer=$("qcBatchHistoryList"),todayStats=$("qcTodayStats"),todayPackingCard=$("qcTodayPackingCard"),todayPackingList=$("qcTodayPackingList"),historyPackingCard=$("qcHistoryPackingCard"),historyPackingList=$("qcHistoryPackingList");
+ if(!activeContainer||!todayContainer||!historyContainer||!todayStats||!todayPackingCard||!todayPackingList||!historyPackingCard||!historyPackingList)return;
  if(!qcBatchReady){
   const message='<div class="msg err">QC 批次功能尚未安裝。請先在 Supabase 執行更新 SQL。</div>';
   activeContainer.innerHTML=message;todayContainer.innerHTML="";historyContainer.innerHTML="";todayStats.innerHTML="";return;
@@ -638,12 +656,18 @@ function renderQcBatchLists(){
  }).join(""):'<div class="muted">目前沒有尚未完成的批次</div>';
  const allCompleted=(qcBatches||[]).filter(x=>x.status==="completed").sort((a,b)=>new Date(b.completed_at||0)-new Date(a.completed_at||0));
  const todayRows=allCompleted.filter(x=>qcCompletedDate(x)===today());
- const totalQty=todayRows.reduce((sum,x)=>sum+num(x.total_quantity),0),totalNg=todayRows.reduce((sum,x)=>{const ng=qcBatchNg(x.id);return sum+ng.printing+ng.baking+ng.material},0);
- todayStats.innerHTML=`今日完成批次：<b>${todayRows.length}</b>｜今日印刷總數：<b>${totalQty}</b>｜良品：<b class="oktxt">${Math.max(0,totalQty-totalNg)}</b>｜NG：<b class="ngtxt">${totalNg}</b>`;
+ const totalQty=todayRows.reduce((sum,x)=>sum+num(x.total_quantity),0),totalNg=todayRows.reduce((sum,x)=>{const ng=qcBatchNg(x.id);return sum+ng.printing+ng.baking+ng.material},0),todayPackingRows=(packingReports||[]).filter(x=>x.report_date===today()),todayPackingNg=todayPackingRows.reduce((sum,x)=>sum+num(x.printing_ng)+num(x.baking_ng)+num(x.material_ng),0);
+ todayStats.innerHTML=`今日完成批次：<b>${todayRows.length}</b>｜今日印刷總數：<b>${totalQty}</b>｜QC 良品：<b class="oktxt">${Math.max(0,totalQty-totalNg)}</b><br>QC NG：<b class="ngtxt">${totalNg}</b>｜阿英包裝 NG：<b class="ngtxt">${todayPackingNg}</b>｜統合 NG：<b class="ngtxt">${totalNg+todayPackingNg}</b>`;
  todayContainer.innerHTML=todayRows.length?todayRows.map(qcBatchCard).join(""):'<div class="muted">今日尚無已完成批次</div>';
  const start=$("qcStatsStartDate")?.value||"",end=$("qcStatsEndDate")?.value||"",part=$("qcStatsPart")?.value.trim().toLowerCase()||"";
  const historyRows=(isOwner()?allCompleted.filter(x=>{const completed=qcCompletedDate(x);return (!start||completed>=start)&&(!end||completed<=end)&&(!part||String(x.part_number||"").trim().toLowerCase()===part)}):todayRows);
  historyContainer.innerHTML=historyRows.length?historyRows.map(qcBatchCard).join(""):'<div class="muted">查詢期間沒有已完成批次</div>';
+ todayPackingCard.classList.toggle("hidden",!isOwner());historyPackingCard.classList.toggle("hidden",!isOwner());
+ if(isOwner()){
+  todayPackingList.innerHTML=todayPackingRows.length?todayPackingRows.map(qcPackingCard).join(""):'<div class="muted">阿英今天尚未登記包裝不良</div>';
+  const historyPackingRows=(packingReports||[]).filter(x=>(!start||x.report_date>=start)&&(!end||x.report_date<=end)&&(!part||String(x.part_number||"").trim().toLowerCase()===part));
+  historyPackingList.innerHTML=historyPackingRows.length?historyPackingRows.map(qcPackingCard).join(""):'<div class="muted">查詢期間沒有包裝不良紀錄</div>';
+ }
  setQcReportView(qcReportView);
 }
 function renderPackingReports(){
