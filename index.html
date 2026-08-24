@@ -293,6 +293,8 @@ const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const ACCOUNTS={chengyin:{password:"0000",role:"owner",name:"老闆"},"3F":{password:"0000",role:"supervisor",name:"主管"},"3F1":{password:"0000",role:"worker",name:"阿霞"},"3F2":{password:"0000",role:"worker",name:"阿翠"},"3F3":{password:"0000",role:"packer",name:"阿英"}};
 const $=id=>document.getElementById(id);
 let currentUser=null, productions=[], inspections=[], reliability=[], parts=[], employees=[], photos=[], qcReports=[], qcBatches=[], qcBatchSteps=[], packingReports=[], v4Ready=true, qcBatchReady=true, packingReportsReady=true, inspectionDraftProductionId='', currentQcBatchId=null, qcReportView='today';
+const CLOUD_CACHE_KEY="ipqc_v416_master_cache";
+let cloudLoadRunning=false,cloudRetryTimer=null;
 let currentLang=localStorage.getItem("ipqc_v416_lang")||"zh";
 const originalText=new WeakMap();
 const VI={"V4.1.6 多人與紀錄顯示版｜2026-07-22":"Phiên bản V4.1.6 nhiều nhân viên và hiển thị hồ sơ｜2026-07-22","公司帳號":"Tài khoản công ty","密碼":"Mật khẩu","記住登入":"Ghi nhớ đăng nhập","登入":"Đăng nhập","登出":"Đăng xuất","首頁":"Trang chủ","生產管理":"Quản lý sản xuất","IPQC巡檢":"Kiểm tra IPQC","信賴度測試":"Kiểm tra độ tin cậy","巡檢紀錄":"Lịch sử kiểm tra","信賴度紀錄":"Lịch sử độ tin cậy","基礎資料":"Dữ liệu cơ bản","生產中":"Đang sản xuất","今日巡檢":"Kiểm tra hôm nay","待信賴度":"Chờ kiểm tra độ tin cậy","今日良率":"Tỷ lệ đạt hôm nay","今日待辦":"Việc cần làm hôm nay","目前生產狀態":"Trạng thái sản xuất hiện tại","建立生產":"Tạo lệnh sản xuất","料號 *":"Mã hàng *","機台":"Máy","作業員 1 *":"Công nhân 1 *","作業員 2":"Công nhân 2","作業員 3":"Công nhân 3","請選擇作業員":"Chọn công nhân","不選擇":"Không chọn","預計數量（選填）":"Số lượng dự kiến (không bắt buộc)","備註":"Ghi chú","開始生產":"Bắt đầu sản xuất","生產中／暫停":"Đang sản xuất / Tạm dừng","最近完成":"Hoàn thành gần đây","新增 IPQC 巡檢":"Thêm kiểm tra IPQC","生產單 *":"Lệnh sản xuất *","日期時間":"Ngày giờ","巡檢人員 *":"Nhân viên kiểm tra *","請選擇巡檢人員":"Chọn nhân viên kiểm tra","品檢人員 1":"Nhân viên QC 1","品檢人員 2":"Nhân viên QC 2","品檢人員 3":"Nhân viên QC 3","請選擇品檢人員":"Chọn nhân viên QC","印刷 A":"In A","印刷 B":"In B","包裝":"Đóng gói","印刷 A－NG 原因":"In A - Nguyên nhân NG","印刷 B－NG 原因":"In B - Nguyên nhân NG","包裝－NG 原因":"Đóng gói - Nguyên nhân NG","印刷 A－NG 照片":"In A - Ảnh NG","印刷 B－NG 照片":"In B - Ảnh NG","包裝－NG 照片":"Đóng gói - Ảnh NG","無":"Không","漏印":"Thiếu in","偏位":"Lệch vị trí","重影":"Bóng đôi","刮傷":"Trầy xước","溢墨":"Tràn mực","色差":"Sai màu","異物":"Dị vật","包裝異常":"Lỗi đóng gói","其他":"Khác","備註／處理方式":"Ghi chú / Cách xử lý","首件照片（第一筆巡檢可拍）":"Ảnh sản phẩm đầu tiên","其他照片":"Ảnh khác","儲存巡檢":"Lưu kiểm tra","搜尋生產單／料號／人員":"Tìm lệnh sản xuất / mã hàng / nhân viên","日期":"Ngày","處理方式":"Cách xử lý","NG 原因":"Nguyên nhân NG","巡檢／品檢":"Kiểm tra / QC","照片":"Ảnh","操作":"Thao tác","刪除":"Xóa","完成信賴度測試":"Hoàn thành kiểm tra độ tin cậy","測試人員":"Người kiểm tra","信賴度照片":"Ảnh độ tin cậy","完成測試":"Hoàn thành kiểm tra","料號管理":"Quản lý mã hàng","品名／關鍵字":"Tên hàng / từ khóa","新增料號":"Thêm mã hàng","人員管理":"Quản lý nhân viên","姓名 *":"Tên *","職務":"Chức vụ","作業員":"Công nhân","巡檢員":"Nhân viên kiểm tra","品檢員":"Nhân viên QC","主管":"Quản lý","新增人員":"Thêm nhân viên","目前料號":"Mã hàng hiện có","目前人員":"Nhân viên hiện có","查看照片":"Xem ảnh","沒有符合的巡檢紀錄":"Không có hồ sơ kiểm tra phù hợp"};
@@ -526,21 +528,47 @@ if($("qcHistoryViewBtn"))$("qcHistoryViewBtn").onclick=()=>setQcReportView("hist
 $("loginBtn").onclick=()=>{const a=$("account").value.trim(),p=$("password").value,f=ACCOUNTS[a];if(!f||f.password!==p)return msg($("loginMsg"),"帳號或密碼錯誤");currentUser={account:a,...f};if($("remember").checked)localStorage.setItem("ipqc_v4_login",JSON.stringify(currentUser));enterApp()};
 $("logoutBtn").onclick=()=>{localStorage.removeItem("ipqc_v4_login");location.reload()};
 async function enterApp(){document.body.dataset.role=currentUser.role;$("loginPage").classList.add("hidden");$("appPage").classList.remove("hidden");$("userInfo").textContent=`${currentUser.name}｜${currentUser.account}`;await loadAll();const defaultPage=currentUser?.account==="chengyin"?"dashboard":currentUser?.account==="3F"?"production":"qcReport";showPage(defaultPage);}
+function readMasterCache(){try{return JSON.parse(localStorage.getItem(CLOUD_CACHE_KEY)||"null")||{}}catch{return {}}}
+function saveMasterCache(){try{localStorage.setItem(CLOUD_CACHE_KEY,JSON.stringify({savedAt:new Date().toISOString(),parts,employees}))}catch{}}
+function showCloudStatus(cache){
+ const banner=$("setupBanner"),saved=cache.savedAt?localDateTime(cache.savedAt):"";
+ banner.innerHTML=`<b>雲端資料暫時無法連線，系統每 10 秒自動重試。</b>${saved?`<br>目前顯示上次同步資料：${esc(saved)}`:"<br>請勿重複新增資料，連線恢復後會自動顯示。"} <button class="btn ghost" type="button" onclick="loadAll()">立即重試</button>`;
+ banner.classList.remove("hidden");
+}
 async function loadAll(){
- const [p,i,r,pa,e,ph,q,qb,qs,pr]=await Promise.all([
-  sb.from("production_orders").select("*").order("created_at",{ascending:false}).limit(500),
-  sb.from("inspections").select("*").order("created_at",{ascending:false}).limit(1000),
-  sb.from("reliability_tests").select("*").order("created_at",{ascending:false}).limit(500),
-  sb.from("part_numbers").select("*").eq("active",true).order("code"),
-  sb.from("employees").select("*").eq("active",true).order("name"),
-  sb.from("inspection_photos").select("*").order("created_at",{ascending:false}).limit(1500),
-  sb.from("qc_reports").select("*").order("created_at",{ascending:false}).limit(1000),
-  sb.from("qc_batches").select("*").order("started_at",{ascending:false}).limit(1000),
-  sb.from("qc_batch_steps").select("*").order("created_at",{ascending:false}).limit(3000),
-  sb.from("packing_reports").select("*").order("created_at",{ascending:false}).limit(1000)
- ]);
- if(p.error){v4Ready=false;$("setupBanner").classList.remove("hidden");productions=[]}else{v4Ready=true;$("setupBanner").classList.add("hidden");productions=p.data||[]}
- inspections=i.data||[];reliability=r.data||[];parts=pa.data||[];employees=e.data||[];photos=ph.data||[];qcReports=q.error?[]:q.data||[];qcBatchReady=!qb.error&&!qs.error;packingReportsReady=!pr.error;packingReports=pr.error?[]:pr.data||[];qcBatches=qb.error?[]:qb.data||[];qcBatchSteps=qs.error?[]:qs.data||[];renderAll();restoreQcStepPanel()
+ if(cloudLoadRunning)return;
+ cloudLoadRunning=true;clearTimeout(cloudRetryTimer);
+ const cache=readMasterCache(),controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),12000);
+ let results;
+ try{
+  results=await Promise.all([
+   sb.from("production_orders").select("*").order("created_at",{ascending:false}).limit(500).abortSignal(controller.signal),
+   sb.from("inspections").select("*").order("created_at",{ascending:false}).limit(1000).abortSignal(controller.signal),
+   sb.from("reliability_tests").select("*").order("created_at",{ascending:false}).limit(500).abortSignal(controller.signal),
+   sb.from("part_numbers").select("*").eq("active",true).order("code").abortSignal(controller.signal),
+   sb.from("employees").select("*").eq("active",true).order("name").abortSignal(controller.signal),
+   sb.from("inspection_photos").select("*").order("created_at",{ascending:false}).limit(1500).abortSignal(controller.signal),
+   sb.from("qc_reports").select("*").order("created_at",{ascending:false}).limit(1000).abortSignal(controller.signal),
+   sb.from("qc_batches").select("*").order("started_at",{ascending:false}).limit(1000).abortSignal(controller.signal),
+   sb.from("qc_batch_steps").select("*").order("created_at",{ascending:false}).limit(3000).abortSignal(controller.signal),
+   sb.from("packing_reports").select("*").order("created_at",{ascending:false}).limit(1000).abortSignal(controller.signal)
+  ]);
+ }catch(error){results=Array.from({length:10},()=>({error}))}
+ clearTimeout(timeout);cloudLoadRunning=false;
+ const [p,i,r,pa,e,ph,q,qb,qs,pr]=results,hasError=results.some(x=>x?.error);
+ if(!p.error)productions=p.data||[];
+ if(!i.error)inspections=i.data||[];
+ if(!r.error)reliability=r.data||[];
+ if(!pa.error)parts=pa.data||[];else if(!parts.length&&Array.isArray(cache.parts))parts=cache.parts;
+ if(!e.error)employees=e.data||[];else if(!employees.length&&Array.isArray(cache.employees))employees=cache.employees;
+ if(!ph.error)photos=ph.data||[];
+ if(!q.error)qcReports=q.data||[];
+ qcBatchReady=!qb.error&&!qs.error;if(!qb.error)qcBatches=qb.data||[];if(!qs.error)qcBatchSteps=qs.data||[];
+ packingReportsReady=!pr.error;if(!pr.error)packingReports=pr.data||[];
+ v4Ready=!p.error;
+ if(!pa.error&&!e.error)saveMasterCache();
+ if(hasError){showCloudStatus(readMasterCache());cloudRetryTimer=setTimeout(loadAll,10000)}else{$("setupBanner").classList.add("hidden")}
+ renderAll();restoreQcStepPanel()
 }
 function renderProductionCard(p,actions=true){
  const t=productionTotals(p.id), count=inspections.filter(x=>String(x.production_id)===String(p.id)).length;
