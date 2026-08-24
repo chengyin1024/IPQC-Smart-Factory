@@ -342,11 +342,11 @@ function requiredReliabilitySlot(p,now=new Date()){
 function reliabilityState(p){
  const latest=relFor(p.id),required=requiredReliabilitySlot(p),latestAt=latest?new Date(latest.created_at||`${latest.test_date||today()}T00:00:00`):null;
  const needsRetest=reliabilityIsNg(latest);
- const pending=needsRetest||(p.status!=="completed"&&(!latestAt||latestAt<required));
+ const pending=p.status==="active"&&(needsRetest||!latestAt||latestAt<required);
  return {latest,required,latestAt,pending,needsRetest};
 }
 function slotLabel(d){return `${localDate(d)} ${String(d.getHours()).padStart(2,"0")}:00`}
-function relPill(pid){const p=productions.find(x=>String(x.id)===String(pid));if(!p)return '<span class="pill pending">🟡 待測</span>';const s=reliabilityState(p);if(s.needsRetest)return '<span class="pill ng">🔴 NG／待重測</span>';if(s.pending)return `<span class="pill pending">🟡 待測（${esc(slotLabel(s.required))}）</span>`;return '<span class="pill ok">🟢 已完成</span>'}
+function relPill(pid){const p=productions.find(x=>String(x.id)===String(pid));if(!p)return '<span class="pill pending">🟡 待測</span>';if(p.status==="paused")return '<span class="pill">暫停／不列入待測</span>';const s=reliabilityState(p);if(s.needsRetest)return '<span class="pill ng">🔴 NG／待重測</span>';if(s.pending)return `<span class="pill pending">🟡 待測（${esc(slotLabel(s.required))}）</span>`;return '<span class="pill ok">🟢 已完成</span>'}
 function canDeleteProduction(p){return isOwner()||(currentUser?.role==="supervisor"&&p.status!=="completed")}
 function openPhotoViewer(url){const viewer=$("photoViewer"),img=$("photoViewerImage");img.src=url;viewer.classList.remove("hidden")}
 function closePhotoViewer(){const viewer=$("photoViewer"),img=$("photoViewerImage");viewer.classList.add("hidden");img.removeAttribute("src")}
@@ -804,7 +804,7 @@ function startInspectionFor(id){
  resetInspectionForm(true);
 }
 $("inspectionProduction").onchange=()=>{inspectionDraftProductionId=$("inspectionProduction").value};
-function startReliability(id){const p=productions.find(x=>String(x.id)===String(id));if(!p)return;const previous=relFor(id),isRetest=reliabilityIsNg(previous),attempt=relRecordsFor(id).length+1;showPage("reliability");$("relProductionId").value=id;$("reliabilityFormTitle").textContent=isRetest?`信賴度重測（第 ${attempt} 次）`:`完成信賴度測試（第 ${attempt} 次）`;$("relProductionInfo").textContent=isRetest?`${p.production_no}｜${p.part_number_code}｜上次結果 NG，請在改善後重測並填寫改善說明`:`${p.production_no}｜${p.part_number_code}｜烤漆完成後進行測試`;$("reliabilityFormCard").classList.remove("hidden");window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"})}
+function startReliability(id){const p=productions.find(x=>String(x.id)===String(id));if(!p)return;if(p.status==="paused")return alert("此生產單目前暫停，不列入信賴度待測；恢復生產後才能測試。");const previous=relFor(id),isRetest=reliabilityIsNg(previous),attempt=relRecordsFor(id).length+1;showPage("reliability");$("relProductionId").value=id;$("reliabilityFormTitle").textContent=isRetest?`信賴度重測（第 ${attempt} 次）`:`完成信賴度測試（第 ${attempt} 次）`;$("relProductionInfo").textContent=isRetest?`${p.production_no}｜${p.part_number_code}｜上次結果 NG，請在改善後重測並填寫改善說明`:`${p.production_no}｜${p.part_number_code}｜烤漆完成後進行測試`;$("reliabilityFormCard").classList.remove("hidden");window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"})}
 document.querySelectorAll(".result-buttons").forEach(g=>g.querySelectorAll(".result-btn").forEach(b=>b.onclick=()=>{const target=$(g.dataset.resultTarget);target.value=b.dataset.value;g.querySelectorAll(".result-btn").forEach(x=>x.classList.remove("active-ok","active-ng"));b.classList.add(b.dataset.value==="OK"?"active-ok":"active-ng")}));
 function setupPreview(inputId,imgId){$(inputId).onchange=()=>{inspectionDraftProductionId=$("inspectionProduction").value||inspectionDraftProductionId;const f=$(inputId).files[0];if(!f)return;const img=$(imgId);if(img.src&&img.src.startsWith("blob:"))URL.revokeObjectURL(img.src);img.src=URL.createObjectURL(f);img.classList.remove("hidden")}}
 [["firstPhoto","firstPreview"],["aNgPhoto","aNgPreview"],["bNgPhoto","bNgPreview"],["pNgPhoto","pNgPreview"],["otherPhoto","otherPreview"],["relPhoto","relPreview"]].forEach(x=>setupPreview(...x));
