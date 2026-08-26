@@ -32,6 +32,7 @@ create table if not exists public.qc_batch_steps (
 );
 
 alter table public.qc_batches add column if not exists completed_date date;
+alter table public.qc_batch_steps add column if not exists printer_name text;
 
 create index if not exists qc_batches_status_started_at_idx on public.qc_batches (status, started_at desc);
 create index if not exists qc_batches_part_completed_date_idx on public.qc_batches (part_number, completed_date desc);
