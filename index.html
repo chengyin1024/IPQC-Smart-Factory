@@ -37,6 +37,7 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
 .record-part{font-size:24px;font-weight:950;letter-spacing:.2px;color:#102f25}.record-entry{border:1px solid var(--line);border-radius:13px;padding:12px;margin-bottom:10px;background:#fff}.record-entry-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:9px}.record-stations{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}.record-station{border:1px solid #e4ece8;border-radius:10px;padding:9px;background:#f9fbfa}.record-station b{display:block;margin-bottom:4px}.record-ng-info{background:#fff1f0;border:1px solid #ffd0cc;border-radius:10px;padding:9px;margin-top:8px}.record-solution{background:#eef6f2;border:1px solid #d2e5dc;border-radius:10px;padding:9px;margin-top:8px;white-space:pre-wrap}.head-actions{display:flex;gap:8px;align-items:center}@media(max-width:760px){.record-part{font-size:21px}.record-stations{grid-template-columns:1fr}.record-entry-head{display:block}}
 .station-quality{display:flex;align-items:center;gap:7px;margin-top:7px}.station-quality strong{font-weight:950;line-height:1.1}.station-ok strong{font-size:24px;color:#147343}.station-ng strong{font-size:17px;color:#b42318}.station-quality small{font-size:.58em}.quality-dot{width:10px;height:10px;border-radius:50%;flex:0 0 10px}.station-ok .quality-dot{background:#23a35b}.station-ng .quality-dot{background:#d92d20}
 .table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:700px}th,td{text-align:left;padding:10px;border-bottom:1px solid #e8eeeb;font-size:14px}
+.monthly-chart{display:flex;align-items:flex-end;gap:12px;min-height:280px;padding:22px 10px 8px;overflow-x:auto;border-bottom:1px solid var(--line)}.month-column{flex:1 0 82px;min-width:82px;text-align:center}.month-bars{height:190px;display:flex;align-items:flex-end;justify-content:center;gap:6px}.month-bar{width:28px;min-height:2px;border-radius:8px 8px 3px 3px;position:relative}.month-bar.total{background:linear-gradient(#2d8a68,#14513e)}.month-bar.ng{background:linear-gradient(#f98a83,#d53a31)}.month-bar span{position:absolute;left:50%;top:-21px;transform:translateX(-50%);font-size:11px;font-weight:800;white-space:nowrap}.month-label{font-weight:900;margin-top:9px}.month-rate{font-size:12px;color:var(--muted);margin-top:3px}.chart-legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px}.chart-legend span:before{content:"";display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;background:#14513e}.chart-legend span:last-child:before{background:#d53a31}.monthly-table{margin-top:12px}
 .delete-cell{white-space:nowrap}.setup-banner{background:#fff3d6;border:1px solid #ebcf88;border-radius:14px;padding:13px;margin-bottom:14px;color:#6b4b00}
 @media(max-width:760px){.grid{grid-template-columns:repeat(2,1fr)}.row,.row3,.photo-grid{grid-template-columns:1fr}.wrap{padding:10px}.card{padding:14px}.production-head{display:flex}.production-head-actions{max-width:55%;gap:6px}.production-head-actions .btn{padding:7px 9px}.production-head .pill{margin-top:0}.nav{padding-bottom:3px}}
 </style>
@@ -257,6 +258,11 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
   </div>
   <div id="businessSummary" class="grid"></div>
   <div class="card">
+   <h3>月份對比分析</h3>
+   <p class="muted small">依上方日期範圍按月比較生產量、NG、良率與有效工時；沒有生產的月份也會顯示為 0。</p>
+   <div id="businessMonthlyChart"></div>
+  </div>
+  <div class="card">
    <h3>料號生產統計</h3>
    <div id="businessPartStats" class="table-wrap"></div>
   </div>
@@ -305,6 +311,7 @@ Object.assign(VI,{"待包裝檢驗":"Chờ kiểm tra đóng gói","前段 QC �
 Object.assign(VI,{"IPQC":"Kiểm tra IPQC","QC REPORT":"Báo cáo QC","已生產完成":"Sản xuất đã hoàn thành","經營分析":"Phân tích kinh doanh","今日 QC":"QC hôm nay","歷史紀錄":"Lịch sử","今日印刷統計":"Thống kê in hôm nay","今日完成批次":"Lô hoàn thành hôm nay","歷史完成批次":"Lịch sử lô hoàn thành","今日印刷總數：":"Tổng số in hôm nay: "});
 Object.assign(VI,{"完成此道並結束 QC":"Hoàn thành công đoạn này và kết thúc QC","完成 QC 前，請填寫本批生產總數（含 NG）":"Trước khi hoàn thành QC, hãy nhập tổng số lượng của lô (bao gồm NG)","本批 QC 已完成":"Lô QC này đã hoàn thành","確定要刪除此筆 QC 紀錄？":"Bạn có chắc muốn xóa bản ghi QC này không?","完成時間：":"Thời gian hoàn thành: ","此動作無法復原。":"Thao tác này không thể hoàn tác.","本批生產總數（含 NG，交給包裝前填寫）":"Tổng số lượng lô (bao gồm NG, nhập trước khi chuyển sang đóng gói)","今日尚無已完成批次":"Hôm nay chưa có lô hoàn thành","阿英包裝 NG：":"NG đóng gói của 阿英: ","統合 NG：":"NG tổng hợp: ","QC 良品：":"Hàng tốt QC: ","料號":"Mã hàng"});
 Object.assign(VI,{"依 QC Report 已完成批次統計；有效工時自動排除午休、晚餐、下班與隔夜。平日 08:00–11:50、13:00–17:20；有操作才計平日加班 18:00–20:50；星期六有操作才計 08:00–11:50、13:00–17:00。":"Thống kê theo các lô đã hoàn thành trong QC Report; giờ làm hiệu quả tự động loại trừ giờ nghỉ trưa, giờ ăn tối, ngoài giờ và qua đêm. Ngày thường 08:00–11:50, 13:00–17:20; chỉ tính tăng ca 18:00–20:50 khi có thao tác; thứ Bảy chỉ tính 08:00–11:50, 13:00–17:00 khi có thao tác.","平日正常工時":"Giờ làm thường ngày","平日加班工時":"Giờ tăng ca ngày thường","星期六加班工時":"Giờ tăng ca thứ Bảy","有效總工時":"Tổng giờ hiệu quả","有效工時":"Giờ hiệu quả"});
+Object.assign(VI,{"月份對比分析":"Phân tích so sánh theo tháng","依上方日期範圍按月比較生產量、NG、良率與有效工時；沒有生產的月份也會顯示為 0。":"So sánh sản lượng, NG, tỷ lệ đạt và giờ làm hiệu quả theo từng tháng trong khoảng ngày đã chọn; tháng không sản xuất vẫn hiển thị 0.","月份":"Tháng","生產總數（依生產量比例）":"Tổng sản lượng (theo tỷ lệ sản lượng)","NG（依 NG 比例）":"NG (theo tỷ lệ NG)"});
 const VI_KEYS=Object.keys(VI).sort((a,b)=>b.length-a.length);
 function t(text){if(currentLang!=="vi")return text;return VI_KEYS.reduce((value,key)=>value.split(key).join(VI[key]),String(text))}
 function applyLanguage(){document.documentElement.lang=currentLang==="vi"?"vi":"zh-Hant";document.querySelectorAll("body *").forEach(el=>{for(const node of el.childNodes){if(node.nodeType===Node.TEXT_NODE&&node.nodeValue.trim()){if(!originalText.has(node))originalText.set(node,node.nodeValue);const raw=originalText.get(node),trim=raw.trim();node.nodeValue=raw.replace(trim,t(trim))}}["placeholder","title","aria-label","alt"].forEach(attr=>{if(!el.hasAttribute(attr))return;const dataKey=`original${attr.replace(/-([a-z])/g,(_,c)=>c.toUpperCase()).replace(/^./,c=>c.toUpperCase())}`;if(!el.dataset[dataKey])el.dataset[dataKey]=el.getAttribute(attr);el.setAttribute(attr,t(el.dataset[dataKey]))})});["langBtnLogin","langBtnHeader"].forEach(id=>{if($(id))$(id).textContent=currentLang==="zh"?"VI":"中文"});if(currentUser&&$("userInfo"))$("userInfo").textContent=`${t(currentUser.name)}｜${currentUser.account}`}
@@ -436,15 +443,33 @@ function setBusinessAnalysisDefaults(force=false){
  if(start&&(force||!start.value))start.value=`${today().slice(0,8)}01`;
  if(end&&(force||!end.value))end.value=today()
 }
+function renderBusinessMonthlyComparison(rows,start,end){
+ const target=$("businessMonthlyChart");if(!target)return;
+ const first=new Date(`${start||today().slice(0,8)+"01"}T00:00:00`),last=new Date(`${end||today()}T00:00:00`);
+ if(Number.isNaN(first.getTime())||Number.isNaN(last.getTime())||first>last){target.innerHTML="";return}
+ const months=[];
+ for(let cursor=new Date(first.getFullYear(),first.getMonth(),1),limit=new Date(last.getFullYear(),last.getMonth(),1);cursor<=limit;cursor.setMonth(cursor.getMonth()+1)){
+  const key=`${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,"0")}`;
+  months.push({key,label:`${cursor.getFullYear()}年${cursor.getMonth()+1}月`,batches:0,quantity:0,good:0,ng:0,hours:0})
+ }
+ const byMonth=Object.fromEntries(months.map(item=>[item.key,item]));
+ rows.forEach(batch=>{
+  const item=byMonth[String(qcCompletedDate(batch)||"").slice(0,7)];if(!item)return;
+  const ng=qcBatchNg(batch.id),totalNg=ng.printing+ng.baking+ng.material;
+  item.batches++;item.quantity+=num(batch.total_quantity);item.good+=Math.max(0,num(batch.total_quantity)-totalNg);item.ng+=totalNg;item.hours+=qcBatchHours(batch)
+ });
+ const maxQuantity=Math.max(1,...months.map(item=>item.quantity)),maxNg=Math.max(1,...months.map(item=>item.ng));
+ target.innerHTML=`<div class="monthly-chart">${months.map(item=>{const totalHeight=item.quantity?Math.max(8,item.quantity/maxQuantity*180):2,ngHeight=item.ng?Math.max(8,item.ng/maxNg*180):2,rate=item.quantity?item.good/item.quantity*100:0;return `<div class="month-column"><div class="month-bars"><div class="month-bar total" style="height:${totalHeight}px" title="生產總數 ${item.quantity.toLocaleString('zh-TW')}"><span>${item.quantity.toLocaleString('zh-TW')}</span></div><div class="month-bar ng" style="height:${ngHeight}px" title="NG ${item.ng.toLocaleString('zh-TW')}"><span>${item.ng.toLocaleString('zh-TW')}</span></div></div><div class="month-label">${item.label}</div><div class="month-rate">良率 ${rate.toFixed(1)}%</div></div>`}).join("")}</div><div class="chart-legend"><span>生產總數（依生產量比例）</span><span>NG（依 NG 比例）</span></div><div class="table-wrap monthly-table"><table><tr><th>月份</th><th>完成批次</th><th>生產總數</th><th>良品</th><th>NG</th><th>良率</th><th>有效工時</th></tr>${months.map(item=>`<tr><td><b>${item.label}</b></td><td>${item.batches}</td><td>${item.quantity.toLocaleString("zh-TW")}</td><td class="oktxt">${item.good.toLocaleString("zh-TW")}</td><td class="${item.ng?"ngtxt":""}">${item.ng.toLocaleString("zh-TW")}</td><td>${(item.quantity?item.good/item.quantity*100:0).toFixed(1)}%</td><td>${formatWorkHours(item.hours)}</td></tr>`).join("")}</table></div>`
+}
 function renderBusinessAnalysis(){
  if(currentUser?.account!=="chengyin")return;
- const summary=$("businessSummary"),partStats=$("businessPartStats"),printerStats=$("businessPrinterStats"),dailyStats=$("businessDailyStats"),message=$("businessAnalysisMessage");
- if(!summary||!partStats||!printerStats||!dailyStats||!message)return;
+ const summary=$("businessSummary"),partStats=$("businessPartStats"),printerStats=$("businessPrinterStats"),dailyStats=$("businessDailyStats"),monthlyChart=$("businessMonthlyChart"),message=$("businessAnalysisMessage");
+ if(!summary||!partStats||!printerStats||!dailyStats||!monthlyChart||!message)return;
  setBusinessAnalysisDefaults();
  const start=$("businessStartDate").value,end=$("businessEndDate").value,keyword=$("businessKeyword").value.trim().toLowerCase();
  if(start&&end&&start>end){
   message.innerHTML='<div class="msg err">開始日期不可晚於結束日期</div>';
-  summary.innerHTML="";partStats.innerHTML="";printerStats.innerHTML="";dailyStats.innerHTML="";
+  summary.innerHTML="";monthlyChart.innerHTML="";partStats.innerHTML="";printerStats.innerHTML="";dailyStats.innerHTML="";
   return
  }
  message.innerHTML="";
@@ -464,6 +489,7 @@ function renderBusinessAnalysis(){
  const totalNg=totals.printingNg+totals.bakingNg+totals.materialNg,good=Math.max(0,totals.quantity-totalNg),yieldRate=totals.quantity?good/totals.quantity*100:0;
  const singleRows=rows.filter(batch=>qcBatchStepsFor(batch.id).length===1),singleHours=singleRows.reduce((sum,batch)=>sum+qcBatchHours(batch),0),singleQty=singleRows.reduce((sum,batch)=>sum+num(batch.total_quantity),0),singleSpeed=singleHours?singleQty/singleHours:0;
  summary.innerHTML=`<div class="card stat"><span class="muted">完成批次</span><b>${rows.length.toLocaleString("zh-TW")}</b></div><div class="card stat"><span class="muted">生產總數</span><b>${totals.quantity.toLocaleString("zh-TW")}</b></div><div class="card stat"><span class="muted">良品數</span><b class="oktxt">${good.toLocaleString("zh-TW")}</b></div><div class="card stat"><span class="muted">QC 良率</span><b>${yieldRate.toFixed(1)}%</b></div><div class="card stat"><span class="muted">平日正常工時</span><b>${formatWorkHours(totals.normalHours)}</b></div><div class="card stat"><span class="muted">平日加班工時</span><b>${formatWorkHours(totals.overtimeHours)}</b></div><div class="card stat"><span class="muted">星期六加班工時</span><b>${formatWorkHours(totals.saturdayHours)}</b></div><div class="card stat"><span class="muted">有效總工時</span><b>${formatWorkHours(totals.hours)}</b></div><div class="card stat"><span class="muted">一道印刷平均速度</span><b>${singleSpeed?`${Math.round(singleSpeed).toLocaleString("zh-TW")} 支／小時`:"-"}</b></div>`;
+ renderBusinessMonthlyComparison(rows,start,end);
  const byPart={};
  rows.forEach(batch=>{
   const key=batch.part_number||"未填寫",ng=qcBatchNg(batch.id);
