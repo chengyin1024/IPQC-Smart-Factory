@@ -243,7 +243,7 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
  <section id="businessAnalysis" class="page hidden">
   <div class="card">
    <h2>經營分析（Beta）</h2>
-   <p class="muted small">依 QC Report 已完成批次統計；一道印刷速度與印刷人績效只計算「只有一道印刷紀錄」的批次。</p>
+   <p class="muted small">依 QC Report 已完成批次統計；有效工時自動排除午休、晚餐、下班與隔夜。平日 08:00–11:50、13:00–17:20；有操作才計平日加班 18:00–20:50；星期六有操作才計 08:00–11:50、13:00–17:00。</p>
    <div class="row3">
     <div class="field"><label>開始日期</label><input id="businessStartDate" type="date"></div>
     <div class="field"><label>結束日期</label><input id="businessEndDate" type="date"></div>
@@ -304,6 +304,7 @@ Object.assign(VI,{"印刷手":"Thợ in","印刷手 1 *":"Thợ in 1 *","印刷�
 Object.assign(VI,{"待包裝檢驗":"Chờ kiểm tra đóng gói","前段 QC 交接後，請只登記成品 NG。":"Sau khi QC bàn giao, chỉ ghi NG thành phẩm.","記錄成品 NG":"Ghi NG thành phẩm","目前包裝人員":"Nhân viên đóng gói hiện tại","成品 NG":"NG thành phẩm","完成包裝檢驗":"Hoàn thành kiểm tra đóng gói","完成此道，交給包裝檢驗":"Hoàn thành công đoạn này, chuyển kiểm tra đóng gói","開始包裝檢驗":"Bắt đầu kiểm tra đóng gói","待包裝檢驗的批次":"Lô chờ kiểm tra đóng gói","目前沒有待包裝檢驗的批次":"Hiện không có lô chờ kiểm tra đóng gói","已交給包裝檢驗":"Đã chuyển kiểm tra đóng gói","等待 3F3 登記成品 NG":"Chờ 3F3 ghi NG thành phẩm","包裝成品 NG：":"NG thành phẩm đóng gói: "});
 Object.assign(VI,{"IPQC":"Kiểm tra IPQC","QC REPORT":"Báo cáo QC","已生產完成":"Sản xuất đã hoàn thành","經營分析":"Phân tích kinh doanh","今日 QC":"QC hôm nay","歷史紀錄":"Lịch sử","今日印刷統計":"Thống kê in hôm nay","今日完成批次":"Lô hoàn thành hôm nay","歷史完成批次":"Lịch sử lô hoàn thành","今日印刷總數：":"Tổng số in hôm nay: "});
 Object.assign(VI,{"完成此道並結束 QC":"Hoàn thành công đoạn này và kết thúc QC","完成 QC 前，請填寫本批生產總數（含 NG）":"Trước khi hoàn thành QC, hãy nhập tổng số lượng của lô (bao gồm NG)","本批 QC 已完成":"Lô QC này đã hoàn thành","確定要刪除此筆 QC 紀錄？":"Bạn có chắc muốn xóa bản ghi QC này không?","完成時間：":"Thời gian hoàn thành: ","此動作無法復原。":"Thao tác này không thể hoàn tác.","本批生產總數（含 NG，交給包裝前填寫）":"Tổng số lượng lô (bao gồm NG, nhập trước khi chuyển sang đóng gói)","今日尚無已完成批次":"Hôm nay chưa có lô hoàn thành","阿英包裝 NG：":"NG đóng gói của 阿英: ","統合 NG：":"NG tổng hợp: ","QC 良品：":"Hàng tốt QC: ","料號":"Mã hàng"});
+Object.assign(VI,{"依 QC Report 已完成批次統計；有效工時自動排除午休、晚餐、下班與隔夜。平日 08:00–11:50、13:00–17:20；有操作才計平日加班 18:00–20:50；星期六有操作才計 08:00–11:50、13:00–17:00。":"Thống kê theo các lô đã hoàn thành trong QC Report; giờ làm hiệu quả tự động loại trừ giờ nghỉ trưa, giờ ăn tối, ngoài giờ và qua đêm. Ngày thường 08:00–11:50, 13:00–17:20; chỉ tính tăng ca 18:00–20:50 khi có thao tác; thứ Bảy chỉ tính 08:00–11:50, 13:00–17:00 khi có thao tác.","平日正常工時":"Giờ làm thường ngày","平日加班工時":"Giờ tăng ca ngày thường","星期六加班工時":"Giờ tăng ca thứ Bảy","有效總工時":"Tổng giờ hiệu quả","有效工時":"Giờ hiệu quả"});
 const VI_KEYS=Object.keys(VI).sort((a,b)=>b.length-a.length);
 function t(text){if(currentLang!=="vi")return text;return VI_KEYS.reduce((value,key)=>value.split(key).join(VI[key]),String(text))}
 function applyLanguage(){document.documentElement.lang=currentLang==="vi"?"vi":"zh-Hant";document.querySelectorAll("body *").forEach(el=>{for(const node of el.childNodes){if(node.nodeType===Node.TEXT_NODE&&node.nodeValue.trim()){if(!originalText.has(node))originalText.set(node,node.nodeValue);const raw=originalText.get(node),trim=raw.trim();node.nodeValue=raw.replace(trim,t(trim))}}["placeholder","title","aria-label","alt"].forEach(attr=>{if(!el.hasAttribute(attr))return;const dataKey=`original${attr.replace(/-([a-z])/g,(_,c)=>c.toUpperCase()).replace(/^./,c=>c.toUpperCase())}`;if(!el.dataset[dataKey])el.dataset[dataKey]=el.getAttribute(attr);el.setAttribute(attr,t(el.dataset[dataKey]))})});["langBtnLogin","langBtnHeader"].forEach(id=>{if($(id))$(id).textContent=currentLang==="zh"?"VI":"中文"});if(currentUser&&$("userInfo"))$("userInfo").textContent=`${t(currentUser.name)}｜${currentUser.account}`}
@@ -396,10 +397,35 @@ function showPage(id){
 function qcBatchStepsFor(batchId){return qcBatchSteps.filter(step=>String(step.batch_id)===String(batchId)).sort((a,b)=>num(a.step_number)-num(b.step_number))}
 function qcBatchNg(batchId){return qcBatchStepsFor(batchId).reduce((total,step)=>({printing:total.printing+num(step.printing_ng),baking:total.baking+num(step.baking_ng),material:total.material+num(step.material_ng)}),{printing:0,baking:0,material:0})}
 function qcCompletedDate(batch){return batch.completed_date||localDate(new Date(batch.completed_at||0))}
-function qcBatchHours(batch){
+function qcBatchActivityTimes(batch){
+ return [batch.started_at,batch.completed_at,...qcBatchStepsFor(batch.id).flatMap(step=>[step.created_at,step.updated_at])].map(value=>new Date(value||0)).filter(date=>!Number.isNaN(date.getTime()))
+}
+function workTime(day,hour,minute){return new Date(day.getFullYear(),day.getMonth(),day.getDate(),hour,minute,0,0)}
+function overlapHours(start,end,windowStart,windowEnd){
+ const from=Math.max(start.getTime(),windowStart.getTime()),to=Math.min(end.getTime(),windowEnd.getTime());
+ return Math.max(0,to-from)/3600000
+}
+function qcBatchWorkBreakdown(batch){
  const started=new Date(batch.started_at||0),completed=new Date(batch.completed_at||0);
- const hours=(completed-started)/3600000;
- return Number.isFinite(hours)&&hours>=1/60?hours:0
+ if(Number.isNaN(started.getTime())||Number.isNaN(completed.getTime())||completed<=started)return {normal:0,overtime:0,saturday:0,total:0};
+ const activities=qcBatchActivityTimes(batch),result={normal:0,overtime:0,saturday:0,total:0};
+ for(let day=new Date(started.getFullYear(),started.getMonth(),started.getDate());day<=completed;day.setDate(day.getDate()+1)){
+  const weekday=day.getDay(),dayKey=localDate(day),dayActivities=activities.filter(date=>localDate(date)===dayKey).sort((a,b)=>a-b),lastActivity=dayActivities[dayActivities.length-1];
+  if(weekday>=1&&weekday<=5){
+   result.normal+=overlapHours(started,completed,workTime(day,8,0),workTime(day,11,50));
+   result.normal+=overlapHours(started,completed,workTime(day,13,0),workTime(day,17,20));
+   if(lastActivity&&lastActivity>=workTime(day,18,0))result.overtime+=overlapHours(started,new Date(Math.min(completed,lastActivity)),workTime(day,18,0),workTime(day,20,50));
+  }else if(weekday===6&&lastActivity){
+   const saturdayEnd=new Date(Math.min(completed,lastActivity));
+   result.saturday+=overlapHours(started,saturdayEnd,workTime(day,8,0),workTime(day,11,50));
+   result.saturday+=overlapHours(started,saturdayEnd,workTime(day,13,0),workTime(day,17,0));
+  }
+ }
+ result.total=result.normal+result.overtime+result.saturday;
+ return result
+}
+function qcBatchHours(batch){
+ return qcBatchWorkBreakdown(batch).total
 }
 function formatWorkHours(hours){
  const minutes=Math.max(0,Math.round(num(hours)*60));
@@ -432,12 +458,12 @@ function renderBusinessAnalysis(){
   result.printingNg+=ng.printing;
   result.bakingNg+=ng.baking;
   result.materialNg+=ng.material;
-  result.hours+=qcBatchHours(batch);
+  const work=qcBatchWorkBreakdown(batch);result.hours+=work.total;result.normalHours+=work.normal;result.overtimeHours+=work.overtime;result.saturdayHours+=work.saturday;
   return result
- },{quantity:0,printingNg:0,bakingNg:0,materialNg:0,hours:0});
+ },{quantity:0,printingNg:0,bakingNg:0,materialNg:0,hours:0,normalHours:0,overtimeHours:0,saturdayHours:0});
  const totalNg=totals.printingNg+totals.bakingNg+totals.materialNg,good=Math.max(0,totals.quantity-totalNg),yieldRate=totals.quantity?good/totals.quantity*100:0;
  const singleRows=rows.filter(batch=>qcBatchStepsFor(batch.id).length===1),singleHours=singleRows.reduce((sum,batch)=>sum+qcBatchHours(batch),0),singleQty=singleRows.reduce((sum,batch)=>sum+num(batch.total_quantity),0),singleSpeed=singleHours?singleQty/singleHours:0;
- summary.innerHTML=`<div class="card stat"><span class="muted">完成批次</span><b>${rows.length.toLocaleString("zh-TW")}</b></div><div class="card stat"><span class="muted">生產總數</span><b>${totals.quantity.toLocaleString("zh-TW")}</b></div><div class="card stat"><span class="muted">良品數</span><b class="oktxt">${good.toLocaleString("zh-TW")}</b></div><div class="card stat"><span class="muted">QC 良率</span><b>${yieldRate.toFixed(1)}%</b></div><div class="card stat"><span class="muted">批次總經過工時</span><b>${formatWorkHours(totals.hours)}</b></div><div class="card stat"><span class="muted">一道印刷平均速度</span><b>${singleSpeed?`${Math.round(singleSpeed).toLocaleString("zh-TW")} 支／小時`:"-"}</b></div>`;
+ summary.innerHTML=`<div class="card stat"><span class="muted">完成批次</span><b>${rows.length.toLocaleString("zh-TW")}</b></div><div class="card stat"><span class="muted">生產總數</span><b>${totals.quantity.toLocaleString("zh-TW")}</b></div><div class="card stat"><span class="muted">良品數</span><b class="oktxt">${good.toLocaleString("zh-TW")}</b></div><div class="card stat"><span class="muted">QC 良率</span><b>${yieldRate.toFixed(1)}%</b></div><div class="card stat"><span class="muted">平日正常工時</span><b>${formatWorkHours(totals.normalHours)}</b></div><div class="card stat"><span class="muted">平日加班工時</span><b>${formatWorkHours(totals.overtimeHours)}</b></div><div class="card stat"><span class="muted">星期六加班工時</span><b>${formatWorkHours(totals.saturdayHours)}</b></div><div class="card stat"><span class="muted">有效總工時</span><b>${formatWorkHours(totals.hours)}</b></div><div class="card stat"><span class="muted">一道印刷平均速度</span><b>${singleSpeed?`${Math.round(singleSpeed).toLocaleString("zh-TW")} 支／小時`:"-"}</b></div>`;
  const byPart={};
  rows.forEach(batch=>{
   const key=batch.part_number||"未填寫",ng=qcBatchNg(batch.id);
@@ -445,7 +471,7 @@ function renderBusinessAnalysis(){
   const item=byPart[key];item.batches++;item.quantity+=num(batch.total_quantity);item.printingNg+=ng.printing;item.bakingNg+=ng.baking;item.materialNg+=ng.material;item.hours+=qcBatchHours(batch)
  });
  const partRows=Object.entries(byPart).sort((a,b)=>b[1].quantity-a[1].quantity);
- partStats.innerHTML=partRows.length?`<table><tr><th>料號</th><th>完成批次</th><th>生產總數</th><th>良品</th><th>印刷 NG</th><th>烤漆 NG</th><th>素材 NG</th><th>經過工時</th></tr>${partRows.map(([part,item])=>{const ng=item.printingNg+item.bakingNg+item.materialNg;return `<tr><td><b>${esc(part)}</b></td><td>${item.batches}</td><td>${item.quantity.toLocaleString("zh-TW")}</td><td class="oktxt">${Math.max(0,item.quantity-ng).toLocaleString("zh-TW")}</td><td class="${item.printingNg?"ngtxt":""}">${item.printingNg}</td><td class="${item.bakingNg?"ngtxt":""}">${item.bakingNg}</td><td class="${item.materialNg?"ngtxt":""}">${item.materialNg}</td><td>${formatWorkHours(item.hours)}</td></tr>`}).join("")}</table>`:'<div class="muted">這個日期區間沒有符合的已完成紀錄</div>';
+ partStats.innerHTML=partRows.length?`<table><tr><th>料號</th><th>完成批次</th><th>生產總數</th><th>良品</th><th>印刷 NG</th><th>烤漆 NG</th><th>素材 NG</th><th>有效工時</th></tr>${partRows.map(([part,item])=>{const ng=item.printingNg+item.bakingNg+item.materialNg;return `<tr><td><b>${esc(part)}</b></td><td>${item.batches}</td><td>${item.quantity.toLocaleString("zh-TW")}</td><td class="oktxt">${Math.max(0,item.quantity-ng).toLocaleString("zh-TW")}</td><td class="${item.printingNg?"ngtxt":""}">${item.printingNg}</td><td class="${item.bakingNg?"ngtxt":""}">${item.bakingNg}</td><td class="${item.materialNg?"ngtxt":""}">${item.materialNg}</td><td>${formatWorkHours(item.hours)}</td></tr>`}).join("")}</table>`:'<div class="muted">這個日期區間沒有符合的已完成紀錄</div>';
  const byPrinter={};
  singleRows.forEach(batch=>{
   const key=batch.printer_name||"未填寫",hours=qcBatchHours(batch),ng=qcBatchNg(batch.id),totalNg=ng.printing+ng.baking+ng.material;
