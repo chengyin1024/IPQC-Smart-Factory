@@ -269,7 +269,7 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
   </div>
   <div class="card">
    <h3>印刷人員 KPI</h3>
-   <p class="muted small">所有道次都納入；最後完成數量會計給每位參與印刷手，同一人在同批只計一次，公司總產量不重複。NG 依各道印刷手歸屬，個人重疊工時只計一次。</p>
+   <p class="muted small">所有道次都納入；最後完成數量會計給每位參與印刷手，同一人在同批只計一次，公司總產量不重複。烤漆 NG 不計入印刷人員 KPI 與個人良率；個人重疊工時只計一次。</p>
    <div id="businessPrinterStats" class="table-wrap"></div>
   </div>
   <div class="card">
@@ -318,6 +318,7 @@ Object.assign(VI,{"KPI：效率 40%＋品質 40%＋完成量 20%。個人實際�
 Object.assign(VI,{"個人實際工時":"Giờ làm thực tế cá nhân"});
 Object.assign(VI,{"本道印刷手":"Thợ in công đoạn này","請選擇印刷手":"Vui lòng chọn thợ in","參與完成量":"Sản lượng tham gia hoàn thành","參與批次":"Lô tham gia"});
 Object.assign(VI,{"印刷人員 KPI":"KPI nhân viên in","所有道次都納入；最後完成數量會計給每位參與印刷手，同一人在同批只計一次，公司總產量不重複。NG 依各道印刷手歸屬，個人重疊工時只計一次。":"Bao gồm tất cả công đoạn; số lượng hoàn thành cuối cùng được tính cho mỗi thợ in tham gia, cùng một người trong cùng một lô chỉ tính một lần và tổng sản lượng công ty không bị lặp. NG thuộc về thợ in của từng công đoạn, giờ cá nhân bị chồng chỉ tính một lần.","個人 NG":"NG cá nhân","個人良率":"Tỷ lệ đạt cá nhân","這個日期區間沒有印刷完成紀錄":"Không có bản ghi in hoàn thành trong khoảng ngày này"});
+Object.assign(VI,{"所有道次都納入；最後完成數量會計給每位參與印刷手，同一人在同批只計一次，公司總產量不重複。烤漆 NG 不計入印刷人員 KPI 與個人良率；個人重疊工時只計一次。":"Bao gồm tất cả công đoạn; số lượng hoàn thành cuối cùng được tính cho mỗi thợ in tham gia, cùng một người trong cùng một lô chỉ tính một lần và tổng sản lượng công ty không bị lặp. NG sơn không tính vào KPI hoặc tỷ lệ đạt cá nhân của thợ in; giờ cá nhân bị chồng chỉ tính một lần.","KPI NG（不含烤漆）":"NG KPI (không gồm NG sơn)"});
 const VI_KEYS=Object.keys(VI).sort((a,b)=>b.length-a.length);
 function t(text){if(currentLang!=="vi")return text;return VI_KEYS.reduce((value,key)=>value.split(key).join(VI[key]),String(text))}
 function applyLanguage(){document.documentElement.lang=currentLang==="vi"?"vi":"zh-Hant";document.querySelectorAll("body *").forEach(el=>{for(const node of el.childNodes){if(node.nodeType===Node.TEXT_NODE&&node.nodeValue.trim()){if(!originalText.has(node))originalText.set(node,node.nodeValue);const raw=originalText.get(node),trim=raw.trim();node.nodeValue=raw.replace(trim,t(trim))}}["placeholder","title","aria-label","alt"].forEach(attr=>{if(!el.hasAttribute(attr))return;const dataKey=`original${attr.replace(/-([a-z])/g,(_,c)=>c.toUpperCase()).replace(/^./,c=>c.toUpperCase())}`;if(!el.dataset[dataKey])el.dataset[dataKey]=el.getAttribute(attr);el.setAttribute(attr,t(el.dataset[dataKey]))})});["langBtnLogin","langBtnHeader"].forEach(id=>{if($(id))$(id).textContent=currentLang==="zh"?"VI":"中文"});if(currentUser&&$("userInfo"))$("userInfo").textContent=`${t(currentUser.name)}｜${currentUser.account}`}
@@ -554,7 +555,7 @@ function renderBusinessAnalysis(){
    const participant=participantMap[key];participant.printingNg+=record.printingNg;participant.bakingNg+=record.bakingNg;participant.materialNg+=record.materialNg;participant.intervals.push(...record.intervals)
   });
   Object.entries(participantMap).forEach(([key,participant])=>{
-   const participantNg=participant.printingNg+participant.bakingNg+participant.materialNg;
+   const participantNg=participant.printingNg+participant.materialNg;
    if(!byPrinter[key])byPrinter[key]={batches:0,quantity:0,good:0,ng:0,hours:0,intervals:[]};
    const item=byPrinter[key];item.batches++;item.quantity+=num(batch.total_quantity);item.good+=Math.max(0,num(batch.total_quantity)-participantNg);item.ng+=participantNg;item.intervals.push(...participant.intervals)
   })
@@ -562,7 +563,7 @@ function renderBusinessAnalysis(){
  Object.values(byPrinter).forEach(item=>item.hours=mergedWorkIntervalHours(item.intervals));
  const printerBase=Object.entries(byPrinter).map(([printer,item])=>({printer,item,speed:item.hours?item.quantity/item.hours:0,rate:item.quantity?item.good/item.quantity*100:0})),maxPrinterSpeed=Math.max(1,...printerBase.map(row=>row.speed)),maxPrinterQuantity=Math.max(1,...printerBase.map(row=>row.item.quantity));
  const printerRows=printerBase.map(row=>({...row,kpi:row.speed/maxPrinterSpeed*40+row.rate/100*40+row.item.quantity/maxPrinterQuantity*20})).sort((a,b)=>b.kpi-a.kpi);
- printerStats.innerHTML=printerRows.length?`<table><tr><th>排名</th><th>印刷人員</th><th>KPI</th><th>等級</th><th>參與批次</th><th>參與完成量</th><th>個人實際工時</th><th>平均速度</th><th>個人 NG</th><th>個人良率</th></tr>${printerRows.map((row,index)=>{const {printer,item,speed,rate,kpi}=row,grade=kpi>=90?"A":kpi>=80?"B":kpi>=70?"C":"D",pillClass=grade==="A"?"ok":grade==="B"?"pending":grade==="C"?"pause":"ng";return `<tr><td><b>${index+1}</b></td><td><b>${esc(printer)}</b></td><td><b>${kpi.toFixed(1)}</b></td><td><span class="pill ${pillClass}">${grade}</span></td><td>${item.batches}</td><td>${item.quantity.toLocaleString("zh-TW")}</td><td>${formatWorkHours(item.hours)}</td><td><b>${speed?`${Math.round(speed).toLocaleString("zh-TW")} 支／小時`:"-"}</b></td><td class="${item.ng?"ngtxt":""}">${item.ng}</td><td>${rate.toFixed(1)}%</td></tr>`}).join("")}</table>`:'<div class="muted">這個日期區間沒有印刷完成紀錄</div>';
+ printerStats.innerHTML=printerRows.length?`<table><tr><th>排名</th><th>印刷人員</th><th>KPI</th><th>等級</th><th>參與批次</th><th>參與完成量</th><th>個人實際工時</th><th>平均速度</th><th>KPI NG（不含烤漆）</th><th>個人良率</th></tr>${printerRows.map((row,index)=>{const {printer,item,speed,rate,kpi}=row,grade=kpi>=90?"A":kpi>=80?"B":kpi>=70?"C":"D",pillClass=grade==="A"?"ok":grade==="B"?"pending":grade==="C"?"pause":"ng";return `<tr><td><b>${index+1}</b></td><td><b>${esc(printer)}</b></td><td><b>${kpi.toFixed(1)}</b></td><td><span class="pill ${pillClass}">${grade}</span></td><td>${item.batches}</td><td>${item.quantity.toLocaleString("zh-TW")}</td><td>${formatWorkHours(item.hours)}</td><td><b>${speed?`${Math.round(speed).toLocaleString("zh-TW")} 支／小時`:"-"}</b></td><td class="${item.ng?"ngtxt":""}">${item.ng}</td><td>${rate.toFixed(1)}%</td></tr>`}).join("")}</table>`:'<div class="muted">這個日期區間沒有印刷完成紀錄</div>';
  const byDay={};
  rows.forEach(batch=>{
   const day=qcCompletedDate(batch),ng=qcBatchNg(batch.id),totalNg=ng.printing+ng.baking+ng.material;
