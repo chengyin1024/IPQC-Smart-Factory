@@ -599,7 +599,10 @@ function selectQcBatch(id,restoring=false){
 async function createQcBatch(){
  if(!qcBatchReady)return qcBatchMessage("QC 批次資料表尚未建立，請先執行更新 SQL");
  const part=$("qcBatchPartNumber").value.trim();if(!part)return qcBatchMessage("請輸入料號");
- const payload={batch_no:createQcBatchNo(),part_number:part,printer_name:$("qcBatchPrinter").value.trim()||null,status:"in_progress",started_by:currentUser.account};
+ const printer=$("qcBatchPrinter").value.trim();
+ const confirmation=currentLang==="vi"?`Xác nhận bắt đầu lô in mới?\nMã hàng: ${part}\nThợ in: ${printer||"Chưa chọn"}\nSau khi xác nhận, hệ thống sẽ tạo một lô QC mới.`:`請確認是否開始新的一批印刷？\n料號：${part}\n印刷手：${printer||"未選擇"}\n確認後會建立新的 QC 批次。`;
+ if(!confirm(confirmation))return;
+ const payload={batch_no:createQcBatchNo(),part_number:part,printer_name:printer||null,status:"in_progress",started_by:currentUser.account};
  const {data,error}=await sb.from("qc_batches").insert(payload).select().single();
  if(error)return qcBatchMessage(error.message);
  await ensurePart(part);$("qcBatchPartNumber").value="";$("qcBatchPrinter").value="";qcBatchMessage(`已建立 ${payload.part_number} 的新批次`,true);await loadAll();selectQcBatch(data.id);
