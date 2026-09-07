@@ -81,6 +81,7 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
    <div class="card stat"><span class="muted">今日良率</span><b id="statYield">0%</b></div>
   </div>
   <div class="card"><h2>今日待辦</h2><div id="todoList"></div></div>
+  <div id="difficultyQueueCard" class="card role-owner"><h2>⭐ 待評印刷難度</h2><p class="muted small">新料號完成 QC 後在這裡評級；評過一次後，同料號未來批次會自動沿用。</p><div id="difficultyQueue" class="production-list"></div></div>
   <div id="qcActiveSignalCard" class="card hidden"><h2>🔔 QC 目前印刷中</h2><p class="muted small">QC 按下「開始新一批印刷」後，這裡會在 30 秒內自動顯示。</p><div id="qcActiveSignalList" class="production-list"></div></div>
   <div class="card"><h2>目前生產狀態</h2><div id="dashboardProductions" class="production-list"></div></div>
   <div id="qcProductionStatsCard" class="card hidden"><h2>QC 生產統計（今日）</h2><div id="qcProductionStats" class="meta"></div></div>
@@ -147,6 +148,7 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
      <div class="field"><label>料號</label><input id="qcBatchPartNumber" list="partList" placeholder="請輸入料號"></div>
      <div class="field"><label>印刷人員（選填）</label><select id="qcBatchPrinter"><option value="">請選擇印刷手</option></select></div>
     </div>
+    <div id="qcPartDifficulty" class="muted small" style="margin:-4px 0 10px">請輸入料號查看印刷難度</div>
     <button id="qcCreateBatchBtn" type="button" class="btn primary" style="width:100%;padding:13px 14px">開始新一批印刷</button>
    </div>
    <div class="card" style="margin-top:14px">
@@ -269,7 +271,7 @@ body[data-role="owner"] .role-owner,body[data-role="owner"] .role-supervisor,bod
   </div>
   <div class="card">
    <h3>印刷人員 KPI</h3>
-   <p class="muted small">所有道次都納入；最後完成數量會計給每位參與印刷手，同一人在同批只計一次，公司總產量不重複。烤漆 NG 不計入印刷人員 KPI 與個人良率；個人重疊工時只計一次。</p>
+   <p class="muted small">所有道次都納入；⭐×1.0、⭐⭐×1.25、⭐⭐⭐×1.5。尚未評級的批次暫不列入個人 KPI，評級後自動納入；公司總產量不受影響。烤漆 NG 不計入印刷人員 KPI 與個人良率。</p>
    <div id="businessPrinterStats" class="table-wrap"></div>
   </div>
   <div class="card">
@@ -319,6 +321,7 @@ Object.assign(VI,{"個人實際工時":"Giờ làm thực tế cá nhân"});
 Object.assign(VI,{"本道印刷手":"Thợ in công đoạn này","請選擇印刷手":"Vui lòng chọn thợ in","參與完成量":"Sản lượng tham gia hoàn thành","參與批次":"Lô tham gia"});
 Object.assign(VI,{"印刷人員 KPI":"KPI nhân viên in","所有道次都納入；最後完成數量會計給每位參與印刷手，同一人在同批只計一次，公司總產量不重複。NG 依各道印刷手歸屬，個人重疊工時只計一次。":"Bao gồm tất cả công đoạn; số lượng hoàn thành cuối cùng được tính cho mỗi thợ in tham gia, cùng một người trong cùng một lô chỉ tính một lần và tổng sản lượng công ty không bị lặp. NG thuộc về thợ in của từng công đoạn, giờ cá nhân bị chồng chỉ tính một lần.","個人 NG":"NG cá nhân","個人良率":"Tỷ lệ đạt cá nhân","這個日期區間沒有印刷完成紀錄":"Không có bản ghi in hoàn thành trong khoảng ngày này"});
 Object.assign(VI,{"所有道次都納入；最後完成數量會計給每位參與印刷手，同一人在同批只計一次，公司總產量不重複。烤漆 NG 不計入印刷人員 KPI 與個人良率；個人重疊工時只計一次。":"Bao gồm tất cả công đoạn; số lượng hoàn thành cuối cùng được tính cho mỗi thợ in tham gia, cùng một người trong cùng một lô chỉ tính một lần và tổng sản lượng công ty không bị lặp. NG sơn không tính vào KPI hoặc tỷ lệ đạt cá nhân của thợ in; giờ cá nhân bị chồng chỉ tính một lần.","KPI NG（不含烤漆）":"NG KPI (không gồm NG sơn)"});
+Object.assign(VI,{"⭐ 待評印刷難度":"⭐ Chờ đánh giá độ khó in","新料號完成 QC 後在這裡評級；評過一次後，同料號未來批次會自動沿用。":"Đánh giá mã hàng mới tại đây sau khi hoàn thành QC; các lô sau của cùng mã sẽ tự động áp dụng.","請輸入料號查看印刷難度":"Nhập mã hàng để xem độ khó in","尚未評級，完成 QC 後會交給老闆評定":"Chưa đánh giá; sau khi hoàn thành QC sẽ gửi chủ đánh giá","印刷難度":"Độ khó in","待評星級":"Chờ đánh giá sao","難度換算量":"Sản lượng quy đổi độ khó","所有道次都納入；⭐×1.0、⭐⭐×1.25、⭐⭐⭐×1.5。尚未評級的批次暫不列入個人 KPI，評級後自動納入；公司總產量不受影響。烤漆 NG 不計入印刷人員 KPI 與個人良率。":"Bao gồm mọi công đoạn; ⭐×1.0, ⭐⭐×1.25, ⭐⭐⭐×1.5. Lô chưa đánh giá tạm thời không tính KPI cá nhân và sẽ tự động được tính sau khi đánh giá; tổng sản lượng công ty không đổi. NG sơn không tính vào KPI và tỷ lệ đạt cá nhân."});
 const VI_KEYS=Object.keys(VI).sort((a,b)=>b.length-a.length);
 function t(text){if(currentLang!=="vi")return text;return VI_KEYS.reduce((value,key)=>value.split(key).join(VI[key]),String(text))}
 function applyLanguage(){document.documentElement.lang=currentLang==="vi"?"vi":"zh-Hant";document.querySelectorAll("body *").forEach(el=>{for(const node of el.childNodes){if(node.nodeType===Node.TEXT_NODE&&node.nodeValue.trim()){if(!originalText.has(node))originalText.set(node,node.nodeValue);const raw=originalText.get(node),trim=raw.trim();node.nodeValue=raw.replace(trim,t(trim))}}["placeholder","title","aria-label","alt"].forEach(attr=>{if(!el.hasAttribute(attr))return;const dataKey=`original${attr.replace(/-([a-z])/g,(_,c)=>c.toUpperCase()).replace(/^./,c=>c.toUpperCase())}`;if(!el.dataset[dataKey])el.dataset[dataKey]=el.getAttribute(attr);el.setAttribute(attr,t(el.dataset[dataKey]))})});["langBtnLogin","langBtnHeader"].forEach(id=>{if($(id))$(id).textContent=currentLang==="zh"?"VI":"中文"});if(currentUser&&$("userInfo"))$("userInfo").textContent=`${t(currentUser.name)}｜${currentUser.account}`}
@@ -330,6 +333,10 @@ function employeeRoleLabel(role){return ({"作業員":"印刷手","巡檢員":"�
 
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const num=v=>Number(v)||0;
+const difficultyFactor=level=>({1:1,2:1.25,3:1.5}[num(level)]||null);
+const difficultyStars=level=>difficultyFactor(level)?"⭐".repeat(num(level)):"待評星級";
+function partDifficulty(partNumber){return parts.find(x=>String(x.code||"").trim().toLowerCase()===String(partNumber||"").trim().toLowerCase())}
+function updateQcPartDifficulty(){const el=$("qcPartDifficulty");if(!el)return;const part=partDifficulty($("qcBatchPartNumber")?.value),level=num(part?.difficulty_level);el.textContent=level?`印刷難度：${difficultyStars(level)}（×${difficultyFactor(level)}）`:"尚未評級，完成 QC 後會交給老闆評定"}
 const localDate=d=>{d=d||new Date();const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),day=String(d.getDate()).padStart(2,"0");return `${y}-${m}-${day}`};
 const localDateTime=value=>{const d=value instanceof Date?value:new Date(value);return Number.isNaN(d.getTime())?"":`${localDate(d)} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`};
 const today=()=>localDate(new Date());
@@ -547,7 +554,7 @@ function renderBusinessAnalysis(){
  const partRows=Object.entries(byPart).sort((a,b)=>b[1].quantity-a[1].quantity);
  partStats.innerHTML=partRows.length?`<table><tr><th>料號</th><th>完成批次</th><th>生產總數</th><th>良品</th><th>印刷 NG</th><th>烤漆 NG</th><th>素材 NG</th><th>有效工時</th></tr>${partRows.map(([part,item])=>{const ng=item.printingNg+item.bakingNg+item.materialNg;return `<tr><td><b>${esc(part)}</b></td><td>${item.batches}</td><td>${item.quantity.toLocaleString("zh-TW")}</td><td class="oktxt">${Math.max(0,item.quantity-ng).toLocaleString("zh-TW")}</td><td class="${item.printingNg?"ngtxt":""}">${item.printingNg}</td><td class="${item.bakingNg?"ngtxt":""}">${item.bakingNg}</td><td class="${item.materialNg?"ngtxt":""}">${item.materialNg}</td><td>${formatWorkHours(item.hours)}</td></tr>`}).join("")}</table>`:'<div class="muted">這個日期區間沒有符合的已完成紀錄</div>';
  const byPrinter={};
- rows.forEach(batch=>{
+ rows.filter(batch=>difficultyFactor(batch.difficulty_level)&&num(batch.difficulty_factor)>0).forEach(batch=>{
   const participantMap={};
   qcBatchParticipantRecords(batch).forEach(record=>{
    const key=record.printer||"未填寫";
@@ -556,14 +563,14 @@ function renderBusinessAnalysis(){
   });
   Object.entries(participantMap).forEach(([key,participant])=>{
    const participantNg=participant.printingNg+participant.materialNg;
-   if(!byPrinter[key])byPrinter[key]={batches:0,quantity:0,good:0,ng:0,hours:0,intervals:[]};
-   const item=byPrinter[key];item.batches++;item.quantity+=num(batch.total_quantity);item.good+=Math.max(0,num(batch.total_quantity)-participantNg);item.ng+=participantNg;item.intervals.push(...participant.intervals)
+   if(!byPrinter[key])byPrinter[key]={batches:0,quantity:0,weightedQuantity:0,good:0,ng:0,hours:0,intervals:[]};
+   const item=byPrinter[key];item.batches++;item.quantity+=num(batch.total_quantity);item.weightedQuantity+=num(batch.total_quantity)*num(batch.difficulty_factor);item.good+=Math.max(0,num(batch.total_quantity)-participantNg);item.ng+=participantNg;item.intervals.push(...participant.intervals)
   })
  });
  Object.values(byPrinter).forEach(item=>item.hours=mergedWorkIntervalHours(item.intervals));
- const printerBase=Object.entries(byPrinter).map(([printer,item])=>({printer,item,speed:item.hours?item.quantity/item.hours:0,rate:item.quantity?item.good/item.quantity*100:0})),maxPrinterSpeed=Math.max(1,...printerBase.map(row=>row.speed)),maxPrinterQuantity=Math.max(1,...printerBase.map(row=>row.item.quantity));
- const printerRows=printerBase.map(row=>({...row,kpi:row.speed/maxPrinterSpeed*40+row.rate/100*40+row.item.quantity/maxPrinterQuantity*20})).sort((a,b)=>b.kpi-a.kpi);
- printerStats.innerHTML=printerRows.length?`<table><tr><th>排名</th><th>印刷人員</th><th>KPI</th><th>等級</th><th>參與批次</th><th>參與完成量</th><th>個人實際工時</th><th>平均速度</th><th>KPI NG（不含烤漆）</th><th>個人良率</th></tr>${printerRows.map((row,index)=>{const {printer,item,speed,rate,kpi}=row,grade=kpi>=90?"A":kpi>=80?"B":kpi>=70?"C":"D",pillClass=grade==="A"?"ok":grade==="B"?"pending":grade==="C"?"pause":"ng";return `<tr><td><b>${index+1}</b></td><td><b>${esc(printer)}</b></td><td><b>${kpi.toFixed(1)}</b></td><td><span class="pill ${pillClass}">${grade}</span></td><td>${item.batches}</td><td>${item.quantity.toLocaleString("zh-TW")}</td><td>${formatWorkHours(item.hours)}</td><td><b>${speed?`${Math.round(speed).toLocaleString("zh-TW")} 支／小時`:"-"}</b></td><td class="${item.ng?"ngtxt":""}">${item.ng}</td><td>${rate.toFixed(1)}%</td></tr>`}).join("")}</table>`:'<div class="muted">這個日期區間沒有印刷完成紀錄</div>';
+ const printerBase=Object.entries(byPrinter).map(([printer,item])=>({printer,item,speed:item.hours?item.weightedQuantity/item.hours:0,rate:item.quantity?item.good/item.quantity*100:0})),maxPrinterSpeed=Math.max(1,...printerBase.map(row=>row.speed)),maxPrinterQuantity=Math.max(1,...printerBase.map(row=>row.item.weightedQuantity));
+ const printerRows=printerBase.map(row=>({...row,kpi:row.speed/maxPrinterSpeed*40+row.rate/100*40+row.item.weightedQuantity/maxPrinterQuantity*20})).sort((a,b)=>b.kpi-a.kpi);
+ printerStats.innerHTML=printerRows.length?`<table><tr><th>排名</th><th>印刷人員</th><th>KPI</th><th>等級</th><th>參與批次</th><th>參與完成量</th><th>難度換算量</th><th>個人實際工時</th><th>平均速度</th><th>KPI NG（不含烤漆）</th><th>個人良率</th></tr>${printerRows.map((row,index)=>{const {printer,item,speed,rate,kpi}=row,grade=kpi>=90?"A":kpi>=80?"B":kpi>=70?"C":"D",pillClass=grade==="A"?"ok":grade==="B"?"pending":grade==="C"?"pause":"ng";return `<tr><td><b>${index+1}</b></td><td><b>${esc(printer)}</b></td><td><b>${kpi.toFixed(1)}</b></td><td><span class="pill ${pillClass}">${grade}</span></td><td>${item.batches}</td><td>${item.quantity.toLocaleString("zh-TW")}</td><td><b>${Math.round(item.weightedQuantity).toLocaleString("zh-TW")}</b></td><td>${formatWorkHours(item.hours)}</td><td><b>${speed?`${Math.round(speed).toLocaleString("zh-TW")} 支／小時`:"-"}</b></td><td class="${item.ng?"ngtxt":""}">${item.ng}</td><td>${rate.toFixed(1)}%</td></tr>`}).join("")}</table>`:'<div class="muted">這個日期區間沒有已評級的印刷完成紀錄</div>';
  const byDay={};
  rows.forEach(batch=>{
   const day=qcCompletedDate(batch),ng=qcBatchNg(batch.id),totalNg=ng.printing+ng.baking+ng.material;
@@ -578,7 +585,7 @@ function qcBatchMessage(text,ok=false){const el=$("qcBatchMsg");if(el)msg(el,tex
 function qcResumeKey(){return `ipqc_qc_resume_${currentUser?.account||""}`}
 function qcDraftKey(batchId){return `ipqc_qc_draft_${currentUser?.account||""}_${batchId||""}`}
 function qcElapsedText(startedAt){const minutes=Math.max(0,Math.floor((Date.now()-new Date(startedAt||Date.now()).getTime())/60000));return `${Math.floor(minutes/60)} 小時 ${minutes%60} 分`}
-function updateQcSelectedBatchInfo(){const batch=qcBatches.find(x=>String(x.id)===String(currentQcBatchId));if(!batch)return;const nextStep=qcBatchStepsFor(batch.id).length+1;const stage=isPackerUser()?"待包裝檢驗":`目前第 ${nextStep} 道`;$("qcSelectedBatchInfo").innerHTML=`<b>${esc(batch.part_number)}</b>｜批次 ${esc(batch.batch_no)}｜${stage}${batch.printer_name?`｜印刷人員：${esc(batch.printer_name)}`:""}<br><span class="small">開始時間：${esc(localDateTime(batch.started_at))}｜已進行：<b>${qcElapsedText(batch.started_at)}</b></span>`}
+function updateQcSelectedBatchInfo(){const batch=qcBatches.find(x=>String(x.id)===String(currentQcBatchId));if(!batch)return;const nextStep=qcBatchStepsFor(batch.id).length+1;const stage=isPackerUser()?"待包裝檢驗":`目前第 ${nextStep} 道`;$("qcSelectedBatchInfo").innerHTML=`<b>${esc(batch.part_number)}</b>｜批次 ${esc(batch.batch_no)}｜${stage}${batch.printer_name?`｜印刷人員：${esc(batch.printer_name)}`:""}｜印刷難度：${difficultyStars(batch.difficulty_level)}<br><span class="small">開始時間：${esc(localDateTime(batch.started_at))}｜已進行：<b>${qcElapsedText(batch.started_at)}</b></span>`}
 function saveQcStepDraft(){if(!isQcReportOnlyUser()||isPackerUser()||!currentQcBatchId)return;const draft={printer:$("qcStepPrinter").value,machine:$("qcStepMachine").value,printing:$("qcStepPrintingNg").value,baking:$("qcStepBakingNg").value,material:$("qcStepMaterialNg").value,total:$("qcBatchTotalQty").value};localStorage.setItem(qcDraftKey(currentQcBatchId),JSON.stringify(draft))}
 function fillQcStepDraft(batchId){let draft={};try{draft=JSON.parse(localStorage.getItem(qcDraftKey(batchId))||"{}")||{}}catch(e){}$("qcStepPrinter").value=draft.printer||"";$("qcStepMachine").value=draft.machine||"";$("qcStepPrintingNg").value=draft.printing??0;$("qcStepBakingNg").value=draft.baking??0;$("qcStepMaterialNg").value=draft.material??0;$("qcBatchTotalQty").value=draft.total??0}
 function resetQcStepPanel(){const batchId=currentQcBatchId;if(batchId)localStorage.removeItem(qcDraftKey(batchId));localStorage.removeItem(qcResumeKey());currentQcBatchId=null;$("qcStepPanel").classList.add("hidden");["qcStepPrinter","qcStepMachine","qcStepPrintingNg","qcStepBakingNg","qcStepMaterialNg","qcBatchTotalQty"].forEach(id=>$(id).value=id==="qcStepPrinter"||id==="qcStepMachine"?"":0)}
@@ -602,10 +609,21 @@ async function createQcBatch(){
  const printer=$("qcBatchPrinter").value.trim();
  const confirmation=currentLang==="vi"?`Xác nhận bắt đầu lô in mới?\nMã hàng: ${part}\nThợ in: ${printer||"Chưa chọn"}\nSau khi xác nhận, hệ thống sẽ tạo một lô QC mới.`:`請確認是否開始新的一批印刷？\n料號：${part}\n印刷手：${printer||"未選擇"}\n確認後會建立新的 QC 批次。`;
  if(!confirm(confirmation))return;
- const payload={batch_no:createQcBatchNo(),part_number:part,printer_name:printer||null,status:"in_progress",started_by:currentUser.account};
+ const difficulty=partDifficulty(part),level=num(difficulty?.difficulty_level)||null;
+ const payload={batch_no:createQcBatchNo(),part_number:part,printer_name:printer||null,status:"in_progress",started_by:currentUser.account,difficulty_level:level,difficulty_factor:difficultyFactor(level)};
  const {data,error}=await sb.from("qc_batches").insert(payload).select().single();
  if(error)return qcBatchMessage(error.message);
- await ensurePart(part);$("qcBatchPartNumber").value="";$("qcBatchPrinter").value="";qcBatchMessage(`已建立 ${payload.part_number} 的新批次`,true);await loadAll();selectQcBatch(data.id);
+ await ensurePart(part);$("qcBatchPartNumber").value="";$("qcBatchPrinter").value="";updateQcPartDifficulty();qcBatchMessage(`已建立 ${payload.part_number} 的新批次`,true);await loadAll();selectQcBatch(data.id);
+}
+async function ratePartDifficulty(code,level){
+ if(currentUser?.account!=="chengyin")return alert("只有老闆帳號可以設定印刷難度");
+ const factor=difficultyFactor(level);if(!factor)return;
+ if(!confirm(`確定將料號 ${code} 評為 ${difficultyStars(level)}（×${factor}）？\n設定後，未評級批次與未來新批次都會使用此星級。`))return;
+ const now=new Date().toISOString(),{error:partError}=await sb.from("part_numbers").update({difficulty_level:num(level),difficulty_set_by:currentUser.account,difficulty_set_at:now}).eq("code",code);
+ if(partError)return alert(partError.message);
+ const {error:batchError}=await sb.from("qc_batches").update({difficulty_level:num(level),difficulty_factor:factor,updated_at:now}).eq("part_number",code).is("difficulty_level",null);
+ if(batchError)return alert(batchError.message);
+ await loadAll();alert(`料號 ${code} 已設定為 ${difficultyStars(level)}`)
 }
 async function saveQcBatchStep(sendToPacking=false){
  const batch=qcBatches.find(x=>String(x.id)===String(currentQcBatchId));
@@ -629,6 +647,7 @@ async function savePackingReport(){if(!packingReportsReady)return msg($("packing
 const FULL_REFRESH_PAGES=new Set(["records","relRecords","qcReport","completedProductions","businessAnalysis","master"]);
 document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{if(b.classList.contains("role-supervisor")&&!canManage())return;showPage(b.dataset.page);if(FULL_REFRESH_PAGES.has(b.dataset.page))loadAll()});
 if($("qcCreateBatchBtn"))$("qcCreateBatchBtn").onclick=createQcBatch;
+if($("qcBatchPartNumber"))$("qcBatchPartNumber").addEventListener("input",updateQcPartDifficulty);
 if($("qcSaveStepBtn"))$("qcSaveStepBtn").onclick=()=>saveQcBatchStep(false);
 if($("qcCompleteBatchBtn"))$("qcCompleteBatchBtn").onclick=()=>saveQcBatchStep(true);
 if($("qcCloseStepBtn"))$("qcCloseStepBtn").onclick=resetQcStepPanel;
@@ -805,7 +824,7 @@ function qcBatchCard(batch){
  const steps=qcBatchStepsFor(batch.id),ng=qcBatchNg(batch.id),totalNg=ng.printing+ng.baking+ng.material,good=Math.max(0,num(batch.total_quantity)-totalNg);
  const detail=steps.map(step=>`第 ${num(step.step_number)} 道：${esc(step.machine_name)}｜印刷手：${esc(step.printer_name||batch.printer_name||"未填寫")}｜QC：${esc(accountDisplayName(step.qc_account))}｜NG ${num(step.printing_ng)+num(step.baking_ng)+num(step.material_ng)}`).join("<br>");
  const deleteBtn=isOwner()?`<button class="btn delete-top" onclick="deleteQcBatch('${batch.id}')">🗑 刪除</button>`:"";
- return `<div class="production-card"><div class="production-head"><div><div class="production-no">${esc(batch.batch_no)}</div><div class="production-part">${esc(batch.part_number)}</div></div><div class="production-head-actions"><span class="pill done">已完成</span>${deleteBtn}</div></div><div class="meta">總數（含 NG）：${num(batch.total_quantity)}｜良品：${good}｜NG：${totalNg}<br>完成：${esc(localDateTime(batch.completed_at))}｜最後登記：${esc(accountDisplayName(batch.completed_by))}<br>${detail}</div></div>`;
+ return `<div class="production-card"><div class="production-head"><div><div class="production-no">${esc(batch.batch_no)}</div><div class="production-part">${esc(batch.part_number)}</div></div><div class="production-head-actions"><span class="pill done">已完成</span>${deleteBtn}</div></div><div class="meta">印刷難度：<b>${difficultyStars(batch.difficulty_level)}</b>${difficultyFactor(batch.difficulty_level)?`（×${num(batch.difficulty_factor)}）`:""}<br>總數（含 NG）：${num(batch.total_quantity)}｜良品：${good}｜NG：${totalNg}<br>完成：${esc(localDateTime(batch.completed_at))}｜最後登記：${esc(accountDisplayName(batch.completed_by))}<br>${detail}</div></div>`;
 }
 function packingOperatorName(report){
  const pieces=String(report?.created_by||"").split("｜");
@@ -876,6 +895,9 @@ function renderAll(){
  $("statActive").textContent=active.length;$("statInspections").textContent=todayRows.length;$("statPendingRel").textContent=productions.filter(x=>reliabilityState(x).pending).length;$("statYield").textContent=(ok+ng?ok/(ok+ng)*100:0).toFixed(1)+"%";
  const pending=productions.filter(x=>reliabilityState(x).pending);
  $("todoList").innerHTML=`<div class="meta">🧪 待信賴度：<b>${pending.length}</b> 件<br>🔴 今日 NG：<b>${ng}</b> 件<br>📝 今日巡檢：<b>${todayRows.length}</b> 次</div>`;
+ const pendingDifficulty=[...new Set((qcBatches||[]).filter(x=>x.status==="completed"&&!difficultyFactor(x.difficulty_level)).map(x=>x.part_number))];
+ $("todoList").innerHTML+=`<div class="meta">⭐ 待評星級：<b>${pendingDifficulty.length}</b> 個料號</div>`;
+ const queue=$("difficultyQueue");if(queue)queue.innerHTML=pendingDifficulty.length?pendingDifficulty.map(code=>{const batches=qcBatches.filter(x=>x.status==="completed"&&x.part_number===code&&!difficultyFactor(x.difficulty_level)),latest=batches[0],ng=latest?qcBatchNg(latest.id):{printing:0,material:0};return `<div class="production-card"><div class="production-part">${esc(code)}</div><div class="meta">待評批次：${batches.length}｜最近完成量：${num(latest?.total_quantity).toLocaleString("zh-TW")}｜印刷／素材 NG：${num(ng.printing)+num(ng.material)}</div><div class="actions"><button class="btn secondary" onclick="ratePartDifficulty('${esc(code)}',1)">⭐ ×1.0</button><button class="btn secondary" onclick="ratePartDifficulty('${esc(code)}',2)">⭐⭐ ×1.25</button><button class="btn secondary" onclick="ratePartDifficulty('${esc(code)}',3)">⭐⭐⭐ ×1.5</button></div></div>`}).join(""):'<div class="muted">目前沒有待評級的新料號</div>';
  renderQcProductionStats();
  renderQcActiveSignal();
  renderQcRangeStats();
@@ -883,7 +905,7 @@ function renderAll(){
  renderBusinessAnalysis();
  $("pendingReliability").innerHTML=pending.length?pending.map(p=>{const s=reliabilityState(p);return `<div class="production-card"><div class="production-no">${esc(p.production_no)}</div><div class="production-part">${esc(p.part_number_code)}</div><div class="meta">開始：${esc(localDateTime(p.started_at))}｜機台：${esc(p.machine||"-")}<br>${s.needsRetest?'<span class="ngtxt"><b>上次 NG，待改善後重測</b></span>':`應測時段：${esc(slotLabel(s.required))}`}</div><button class="btn primary" style="margin-top:10px" onclick="startReliability('${p.id}')">${s.needsRetest?'開始重測':'開始測試'}</button></div>`}).join(""):'<div class="muted">目前沒有待測項目</div>';
  renderRecords();renderReliabilityRecords();renderPackingReports();
- $("partsTable").innerHTML=`<table><tr><th>料號</th><th>品名／關鍵字</th><th>操作</th></tr>${parts.map(x=>`<tr><td>${esc(x.code)}</td><td>${esc(x.keywords||"")}</td><td class="delete-cell">${canManage()?`<button class="btn danger" onclick="deletePart('${x.id}')">刪除</button>`:"-"}</td></tr>`).join("")}</table>`;
+ $("partsTable").innerHTML=`<table><tr><th>料號</th><th>品名／關鍵字</th><th>印刷難度</th><th>操作</th></tr>${parts.map(x=>`<tr><td>${esc(x.code)}</td><td>${esc(x.keywords||"")}</td><td><b>${difficultyStars(x.difficulty_level)}</b>${difficultyFactor(x.difficulty_level)?`（×${difficultyFactor(x.difficulty_level)}）`:""}</td><td class="delete-cell">${currentUser?.account==="chengyin"?`<button class="btn secondary" onclick="ratePartDifficulty('${esc(x.code)}',1)">⭐</button> <button class="btn secondary" onclick="ratePartDifficulty('${esc(x.code)}',2)">⭐⭐</button> <button class="btn secondary" onclick="ratePartDifficulty('${esc(x.code)}',3)">⭐⭐⭐</button> `:""}${canManage()?`<button class="btn danger" onclick="deletePart('${x.id}')">刪除</button>`:"-"}</td></tr>`).join("")}</table>`;
  $("employeesTable").innerHTML=`<table><tr><th>姓名</th><th>職務</th><th>操作</th></tr>${employees.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(employeeRoleLabel(x.role))}</td><td class="delete-cell">${canManage()?`<button class="btn danger" onclick="deleteEmployee('${x.id}')">刪除</button>`:"-"}</td></tr>`).join("")}</table>`;
  applyLanguage();
 }
@@ -1100,7 +1122,7 @@ function setupZeroClearInputs(){
 setupZeroClearInputs();
 applyLanguage();
 
-window.changeProduction=changeProduction;window.completeProduction=completeProduction;window.startInspectionFor=startInspectionFor;window.startReliability=startReliability;window.deleteProduction=deleteProduction;window.deleteInspection=deleteInspection;window.deleteReliability=deleteReliability;window.deletePart=deletePart;window.deleteEmployee=deleteEmployee;window.selectQcBatch=selectQcBatch;window.deleteQcBatch=deleteQcBatch;
+window.changeProduction=changeProduction;window.completeProduction=completeProduction;window.startInspectionFor=startInspectionFor;window.startReliability=startReliability;window.deleteProduction=deleteProduction;window.deleteInspection=deleteInspection;window.deleteReliability=deleteReliability;window.deletePart=deletePart;window.deleteEmployee=deleteEmployee;window.selectQcBatch=selectQcBatch;window.deleteQcBatch=deleteQcBatch;window.ratePartDifficulty=ratePartDifficulty;
 setInterval(loadLiveData,30000);setInterval(()=>{if(currentUser&&!document.hidden)loadAll()},900000);setInterval(updateQcSelectedBatchInfo,60000);document.addEventListener("visibilitychange",()=>{if(!document.hidden){loadLiveData();updateQcSelectedBatchInfo()}});
 (async()=>{try{const saved=JSON.parse(localStorage.getItem("ipqc_v4_login")||"null");if(saved&&ACCOUNTS[saved.account]){currentUser=saved;await enterApp()}}catch(e){}})();
 </script>
