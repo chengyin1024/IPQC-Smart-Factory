@@ -33,6 +33,7 @@ body[data-role="owner"] .card.role-owner{display:block}
 .production-list{display:grid;gap:12px}.production-card{border:1px solid var(--line);border-radius:16px;padding:14px;background:#fff}.production-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.production-head-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}.delete-top{background:#fff5f5!important;color:#a51f1f!important;border:1px solid #efbcbc!important;padding:7px 11px!important}.delete-top:hover{background:#fee2e2!important}.production-no{font-weight:900;font-size:17px}.production-part{font-size:22px;font-weight:900;margin:5px 0}.meta{font-size:13px;color:#66766f;line-height:1.7}
 .process{border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}.process h3{margin-bottom:10px}
 .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.photo-box{border:1px dashed #aebdb7;border-radius:14px;padding:10px}.photo-box img,.field>img[id$="Preview"]{width:100%;aspect-ratio:4/3;object-fit:contain;border-radius:10px;margin-top:8px;background:#eef2f0}.photo-link{border:0;background:transparent;color:#176335;text-decoration:underline;font-weight:800;padding:0;cursor:pointer}.photo-viewer{position:fixed;inset:0;z-index:100;background:#000d;display:flex;align-items:center;justify-content:center;padding:58px 16px 16px}.photo-viewer img{display:block;max-width:100%;max-height:100%;object-fit:contain;border-radius:10px;background:#fff}.photo-viewer-close{position:absolute;top:14px;right:16px;background:#fff;color:#17332a;border:0;border-radius:10px;padding:9px 12px;font-weight:850;cursor:pointer}
+.edit-part-dialog{width:min(460px,100%);background:#fff;border-radius:18px;padding:20px;color:#17332a;box-shadow:0 16px 45px #0005}.edit-part-dialog .actions{justify-content:flex-end}
 .result-buttons{display:flex;gap:8px;flex-wrap:wrap}.result-btn{min-width:92px;border:1px solid var(--line);background:#fff;color:#17332a}.result-btn.active-ok{background:var(--ok);color:#fff}.result-btn.active-ng{background:var(--ng);color:#fff}
 .group-card{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:10px}.group-summary{width:100%;display:flex;justify-content:space-between;gap:10px;align-items:center;padding:13px;border:0;background:#f8fbfa;text-align:left}.group-detail{display:none;padding:12px}.group-card.open .group-detail{display:block}
 .record-part{font-size:24px;font-weight:950;letter-spacing:.2px;color:#102f25}.record-entry{border:1px solid var(--line);border-radius:13px;padding:12px;margin-bottom:10px;background:#fff}.record-entry-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:9px}.record-stations{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}.record-station{border:1px solid #e4ece8;border-radius:10px;padding:9px;background:#f9fbfa}.record-station b{display:block;margin-bottom:4px}.record-ng-info{background:#fff1f0;border:1px solid #ffd0cc;border-radius:10px;padding:9px;margin-top:8px}.record-solution{background:#eef6f2;border:1px solid #d2e5dc;border-radius:10px;padding:9px;margin-top:8px;white-space:pre-wrap}.head-actions{display:flex;gap:8px;align-items:center}@media(max-width:760px){.record-part{font-size:21px}.record-stations{grid-template-columns:1fr}.record-entry-head{display:block}}
@@ -291,6 +292,8 @@ body[data-role="owner"] .card.role-owner{display:block}
 </main>
 </section>
 
+<div id="editQcPartModal" class="photo-viewer hidden" role="dialog" aria-modal="true" aria-labelledby="editQcPartTitle" onclick="if(event.target===this)closeEditQcPartModal()"><div class="edit-part-dialog"><h2 id="editQcPartTitle">✏️ 修改料號</h2><div id="editQcPartBatchInfo" class="msg warn"></div><div class="field"><label for="editQcPartInput">請輸入正確料號</label><input id="editQcPartInput" list="partList" autocomplete="off"></div><div class="actions"><button type="button" class="btn secondary" onclick="closeEditQcPartModal()">取消</button><button id="saveQcPartEditBtn" type="button" class="btn primary">確認修改</button></div></div></div>
+
 <div id="photoViewer" class="photo-viewer hidden" role="dialog" aria-label="照片檢視" onclick="if(event.target===this)closePhotoViewer()"><button class="photo-viewer-close" type="button" onclick="closePhotoViewer()">關閉照片</button><img id="photoViewerImage" alt="巡檢照片"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -302,7 +305,7 @@ const SUPABASE_KEY="sb_publishable_cFXdFQJi9cAiBDNXMcHEYw_yYKMKP5D";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const ACCOUNTS={chengyin:{password:"0000",role:"owner",name:"老闆"},"3F":{password:"0000",role:"supervisor",name:"主管"},"3F1":{password:"0000",role:"worker",name:"阿霞"},"3F2":{password:"0000",role:"worker",name:"阿翠"},"3F3":{password:"0000",role:"packer",name:"阿英"}};
 const $=id=>document.getElementById(id);
-let currentUser=null, productions=[], inspections=[], reliability=[], parts=[], employees=[], photos=[], qcReports=[], qcBatches=[], qcBatchSteps=[], packingReports=[], v4Ready=true, qcBatchReady=true, packingReportsReady=true, inspectionDraftProductionId='', currentQcBatchId=null, qcReportView='today';
+let currentUser=null, productions=[], inspections=[], reliability=[], parts=[], employees=[], photos=[], qcReports=[], qcBatches=[], qcBatchSteps=[], packingReports=[], v4Ready=true, qcBatchReady=true, packingReportsReady=true, inspectionDraftProductionId='', currentQcBatchId=null, editingQcBatchId=null, qcReportView='today';
 const CLOUD_CACHE_KEY="ipqc_v416_master_cache";
 let cloudLoadRunning=false,cloudRetryTimer=null;
 let currentLang=localStorage.getItem("ipqc_v416_lang")||"zh";
@@ -323,6 +326,7 @@ Object.assign(VI,{"本道印刷手":"Thợ in công đoạn này","請選擇印�
 Object.assign(VI,{"印刷人員 KPI":"KPI nhân viên in","所有道次都納入；最後完成數量會計給每位參與印刷手，同一人在同批只計一次，公司總產量不重複。NG 依各道印刷手歸屬，個人重疊工時只計一次。":"Bao gồm tất cả công đoạn; số lượng hoàn thành cuối cùng được tính cho mỗi thợ in tham gia, cùng một người trong cùng một lô chỉ tính một lần và tổng sản lượng công ty không bị lặp. NG thuộc về thợ in của từng công đoạn, giờ cá nhân bị chồng chỉ tính một lần.","個人 NG":"NG cá nhân","個人良率":"Tỷ lệ đạt cá nhân","這個日期區間沒有印刷完成紀錄":"Không có bản ghi in hoàn thành trong khoảng ngày này"});
 Object.assign(VI,{"所有道次都納入；最後完成數量會計給每位參與印刷手，同一人在同批只計一次，公司總產量不重複。烤漆 NG 不計入印刷人員 KPI 與個人良率；個人重疊工時只計一次。":"Bao gồm tất cả công đoạn; số lượng hoàn thành cuối cùng được tính cho mỗi thợ in tham gia, cùng một người trong cùng một lô chỉ tính một lần và tổng sản lượng công ty không bị lặp. NG sơn không tính vào KPI hoặc tỷ lệ đạt cá nhân của thợ in; giờ cá nhân bị chồng chỉ tính một lần.","KPI NG（不含烤漆）":"NG KPI (không gồm NG sơn)"});
 Object.assign(VI,{"⭐ 待評印刷難度":"⭐ Chờ đánh giá độ khó in","新料號完成 QC 後在這裡評級；評過一次後，同料號未來批次會自動沿用。":"Đánh giá mã hàng mới tại đây sau khi hoàn thành QC; các lô sau của cùng mã sẽ tự động áp dụng.","請輸入料號查看印刷難度":"Nhập mã hàng để xem độ khó in","尚未評級，完成 QC 後會交給老闆評定":"Chưa đánh giá; sau khi hoàn thành QC sẽ gửi chủ đánh giá","印刷難度":"Độ khó in","待評星級":"Chờ đánh giá sao","難度換算量":"Sản lượng quy đổi độ khó","所有道次都納入；⭐×1.0、⭐⭐×1.25、⭐⭐⭐×1.5。尚未評級的批次暫不列入個人 KPI，評級後自動納入；公司總產量不受影響。烤漆 NG 不計入印刷人員 KPI 與個人良率。":"Bao gồm mọi công đoạn; ⭐×1.0, ⭐⭐×1.25, ⭐⭐⭐×1.5. Lô chưa đánh giá tạm thời không tính KPI cá nhân và sẽ tự động được tính sau khi đánh giá; tổng sản lượng công ty không đổi. NG sơn không tính vào KPI và tỷ lệ đạt cá nhân."});
+Object.assign(VI,{"修改料號":"Sửa mã hàng","請輸入正確料號":"Nhập mã hàng chính xác","料號修改成功":"Đã sửa mã hàng","只有 3F1、3F2 可以修改未完成批次的料號":"Chỉ 3F1 và 3F2 được sửa mã hàng của lô chưa hoàn thành","確定修改料號？":"Xác nhận sửa mã hàng?","原料號：":"Mã cũ: ","新料號：":"Mã mới: ","確認修改":"Xác nhận sửa","取消":"Hủy"});
 const VI_KEYS=Object.keys(VI).sort((a,b)=>b.length-a.length);
 function t(text){if(currentLang!=="vi")return text;return VI_KEYS.reduce((value,key)=>value.split(key).join(VI[key]),String(text))}
 function applyLanguage(){document.documentElement.lang=currentLang==="vi"?"vi":"zh-Hant";document.querySelectorAll("body *").forEach(el=>{for(const node of el.childNodes){if(node.nodeType===Node.TEXT_NODE&&node.nodeValue.trim()){if(!originalText.has(node))originalText.set(node,node.nodeValue);const raw=originalText.get(node),trim=raw.trim();node.nodeValue=raw.replace(trim,t(trim))}}["placeholder","title","aria-label","alt"].forEach(attr=>{if(!el.hasAttribute(attr))return;const dataKey=`original${attr.replace(/-([a-z])/g,(_,c)=>c.toUpperCase()).replace(/^./,c=>c.toUpperCase())}`;if(!el.dataset[dataKey])el.dataset[dataKey]=el.getAttribute(attr);el.setAttribute(attr,t(el.dataset[dataKey]))})});["langBtnLogin","langBtnHeader"].forEach(id=>{if($(id))$(id).textContent=currentLang==="zh"?"VI":"中文"});if(currentUser&&$("userInfo"))$("userInfo").textContent=`${t(currentUser.name)}｜${currentUser.account}`}
@@ -377,6 +381,7 @@ function closePhotoViewer(){const viewer=$("photoViewer"),img=$("photoViewerImag
 function photoLinks(type,id){const ps=photos.filter(p=>p.parent_type===type&&String(p.parent_id)===String(id));return ps.length?ps.map(p=>`<button type="button" class="photo-link" data-url="${esc(p.public_url)}" onclick="openPhotoViewer(this.dataset.url)">查看照片</button>`).join("｜"):"-"}
 function isPackerUser(){return currentUser?.role==="packer"}
 function isQcReportOnlyUser(){return ["3F1","3F2","3F3"].includes(currentUser?.account)}
+function canEditQcBatchPart(){return ["3F1","3F2"].includes(currentUser?.account)}
 function enforcePageId(id){
  if(id==="businessAnalysis"&&currentUser?.account!=="chengyin")return null;
  return isQcReportOnlyUser()&&id!=="qcReport"?null:id
@@ -626,6 +631,27 @@ async function ratePartDifficulty(code,level){
  if(batchError)return alert(batchError.message);
  await loadAll();alert(`料號 ${code} 已設定為 ${difficultyStars(level)}`)
 }
+function editQcBatchPart(id){
+ const batch=qcBatches.find(x=>String(x.id)===String(id));
+ if(!batch||batch.status!=="in_progress"||!canEditQcBatchPart())return alert("只有 3F1、3F2 可以修改未完成批次的料號");
+ editingQcBatchId=batch.id;$("editQcPartInput").value=batch.part_number||"";$("editQcPartBatchInfo").innerHTML=`批次：<b>${esc(batch.batch_no)}</b><br>原料號：<b>${esc(batch.part_number)}</b>`;$("editQcPartModal").classList.remove("hidden");$("editQcPartInput").focus();applyLanguage()
+}
+function closeEditQcPartModal(){editingQcBatchId=null;$("editQcPartModal").classList.add("hidden");$("editQcPartInput").value=""}
+async function saveQcBatchPartEdit(){
+ const batch=qcBatches.find(x=>String(x.id)===String(editingQcBatchId));
+ if(!batch||batch.status!=="in_progress"||!canEditQcBatchPart()){closeEditQcPartModal();return alert("只有 3F1、3F2 可以修改未完成批次的料號")}
+ const oldPart=String(batch.part_number||"").trim(),newPart=$("editQcPartInput").value.trim();if(!newPart)return alert("請輸入正確料號");if(newPart===oldPart)return closeEditQcPartModal();
+ if(!confirm(`確定修改料號？\n原料號：${oldPart}\n新料號：${newPart}`))return;
+ try{
+  await ensurePart(newPart);
+  const part=partDifficulty(newPart),level=num(part?.difficulty_level)||null;
+  const {error}=await sb.from("qc_batches").update({part_number:newPart,difficulty_level:level,difficulty_factor:difficultyFactor(level),updated_at:new Date().toISOString()}).eq("id",batch.id).eq("status","in_progress");
+  if(error)throw error;
+  const oldStillUsed=qcBatches.some(x=>String(x.id)!==String(batch.id)&&String(x.part_number||"").trim().toLowerCase()===oldPart.toLowerCase())||productions.some(x=>String(x.part_number_code||"").trim().toLowerCase()===oldPart.toLowerCase())||qcReports.some(x=>String(x.part_number||"").trim().toLowerCase()===oldPart.toLowerCase())||packingReports.some(x=>String(x.part_number||"").trim().toLowerCase()===oldPart.toLowerCase())||reliability.some(x=>String(x.part_number_code||"").trim().toLowerCase()===oldPart.toLowerCase());
+  if(!oldStillUsed){const oldRow=partDifficulty(oldPart);if(oldRow){const {error:cleanupError}=await sb.from("part_numbers").delete().eq("id",oldRow.id);if(cleanupError)console.warn("舊料號清理失敗",cleanupError.message)}}
+  closeEditQcPartModal();await loadAll();qcBatchMessage(`料號修改成功：${oldPart} → ${newPart}`,true)
+ }catch(e){alert(e.message||"料號修改失敗")}
+}
 async function saveQcBatchStep(sendToPacking=false){
  const batch=qcBatches.find(x=>String(x.id)===String(currentQcBatchId));
  if(!batch)return alert("請先選擇要登記的批次");
@@ -648,6 +674,7 @@ async function savePackingReport(){if(!packingReportsReady)return msg($("packing
 const FULL_REFRESH_PAGES=new Set(["records","relRecords","qcReport","completedProductions","businessAnalysis","master"]);
 document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{if(b.classList.contains("role-supervisor")&&!canManage())return;showPage(b.dataset.page);if(FULL_REFRESH_PAGES.has(b.dataset.page))loadAll()});
 if($("qcCreateBatchBtn"))$("qcCreateBatchBtn").onclick=createQcBatch;
+if($("saveQcPartEditBtn"))$("saveQcPartEditBtn").onclick=saveQcBatchPartEdit;
 if($("qcBatchPartNumber"))$("qcBatchPartNumber").addEventListener("input",updateQcPartDifficulty);
 if($("qcSaveStepBtn"))$("qcSaveStepBtn").onclick=()=>saveQcBatchStep(false);
 if($("qcCompleteBatchBtn"))$("qcCompleteBatchBtn").onclick=()=>saveQcBatchStep(true);
@@ -847,7 +874,8 @@ function renderQcBatchLists(){
  const steps=qcBatchStepsFor(batch.id),detail=steps.length?steps.map(step=>`第 ${num(step.step_number)} 道：${esc(step.machine_name)}｜印刷手：${esc(step.printer_name||batch.printer_name||"未填寫")}｜QC：${esc(accountDisplayName(step.qc_account))}｜NG ${num(step.printing_ng)+num(step.baking_ng)+num(step.material_ng)}`).join("<br>"):"尚未登記任何道次";
   const label=`第 ${steps.length+1} 道待登記`,button="接手下一道";
   const deleteBtn=isOwner()?`<button class="btn delete-top" onclick="deleteQcBatch('${batch.id}')">🗑 刪除</button>`:"";
-  return `<div class="production-card"><div class="production-head"><div><div class="production-no">${esc(batch.batch_no)}</div><div class="production-part">${esc(batch.part_number)}</div></div><div class="production-head-actions"><span class="pill pending">${label}</span>${deleteBtn}</div></div><div class="meta">開始：${esc(localDateTime(batch.started_at))}｜建立：${esc(accountDisplayName(batch.started_by))}<br>${detail}</div><button class="btn primary" style="margin-top:10px" onclick="selectQcBatch('${batch.id}')">${button}</button></div>`;
+  const editBtn=canEditQcBatchPart()?`<button class="btn secondary" onclick="editQcBatchPart('${batch.id}')">✏️ 修改料號</button>`:"";
+  return `<div class="production-card"><div class="production-head"><div><div class="production-no">${esc(batch.batch_no)}</div><div class="production-part">${esc(batch.part_number)}</div></div><div class="production-head-actions"><span class="pill pending">${label}</span>${deleteBtn}</div></div><div class="meta">開始：${esc(localDateTime(batch.started_at))}｜建立：${esc(accountDisplayName(batch.started_by))}<br>${detail}</div><div class="actions" style="margin-top:10px"><button class="btn primary" onclick="selectQcBatch('${batch.id}')">${button}</button>${editBtn}</div></div>`;
  }).join(""):'<div class="muted">目前沒有尚未完成的批次</div>';
  const allCompleted=(qcBatches||[]).filter(x=>x.status==="completed").sort((a,b)=>new Date(b.completed_at||0)-new Date(a.completed_at||0));
  const todayRows=allCompleted.filter(x=>qcCompletedDate(x)===today());
@@ -1123,7 +1151,7 @@ function setupZeroClearInputs(){
 setupZeroClearInputs();
 applyLanguage();
 
-window.changeProduction=changeProduction;window.completeProduction=completeProduction;window.startInspectionFor=startInspectionFor;window.startReliability=startReliability;window.deleteProduction=deleteProduction;window.deleteInspection=deleteInspection;window.deleteReliability=deleteReliability;window.deletePart=deletePart;window.deleteEmployee=deleteEmployee;window.selectQcBatch=selectQcBatch;window.deleteQcBatch=deleteQcBatch;window.ratePartDifficulty=ratePartDifficulty;
+window.changeProduction=changeProduction;window.completeProduction=completeProduction;window.startInspectionFor=startInspectionFor;window.startReliability=startReliability;window.deleteProduction=deleteProduction;window.deleteInspection=deleteInspection;window.deleteReliability=deleteReliability;window.deletePart=deletePart;window.deleteEmployee=deleteEmployee;window.selectQcBatch=selectQcBatch;window.deleteQcBatch=deleteQcBatch;window.ratePartDifficulty=ratePartDifficulty;window.editQcBatchPart=editQcBatchPart;window.closeEditQcPartModal=closeEditQcPartModal;
 setInterval(loadLiveData,30000);setInterval(()=>{if(currentUser&&!document.hidden)loadAll()},900000);setInterval(updateQcSelectedBatchInfo,60000);document.addEventListener("visibilitychange",()=>{if(!document.hidden){loadLiveData();updateQcSelectedBatchInfo()}});
 (async()=>{try{const saved=JSON.parse(localStorage.getItem("ipqc_v4_login")||"null");if(saved&&ACCOUNTS[saved.account]){currentUser=saved;await enterApp()}}catch(e){}})();
 </script>
