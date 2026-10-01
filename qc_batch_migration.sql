@@ -32,11 +32,11 @@ create table if not exists public.qc_batch_steps (
 );
 
 alter table public.qc_batches add column if not exists completed_date date;
-alter table public.qc_batches add column if not exists difficulty_level smallint check (difficulty_level between 1 and 3);
-alter table public.qc_batches add column if not exists difficulty_factor numeric(4,2);
+alter table public.qc_batches add column if not exists difficulty_level numeric(2,1) check (difficulty_level in (1, 1.5, 2, 3));
+alter table public.qc_batches add column if not exists difficulty_factor numeric(5,3);
 alter table public.qc_batch_steps add column if not exists printer_name text;
 
-alter table public.part_numbers add column if not exists difficulty_level smallint check (difficulty_level between 1 and 3);
+alter table public.part_numbers add column if not exists difficulty_level numeric(2,1) check (difficulty_level in (1, 1.5, 2, 3));
 alter table public.part_numbers add column if not exists difficulty_set_by text;
 alter table public.part_numbers add column if not exists difficulty_set_at timestamptz;
 
