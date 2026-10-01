@@ -1,10 +1,10 @@
 -- QC 印刷難度星級：請在 Supabase SQL Editor 執行一次。
 
-alter table public.part_numbers add column if not exists difficulty_level numeric(2,1) check (difficulty_level in (1, 1.5, 2, 3));
+alter table public.part_numbers add column if not exists difficulty_level numeric(2,1) check (difficulty_level in (0.5, 1, 2, 3));
 alter table public.part_numbers add column if not exists difficulty_set_by text;
 alter table public.part_numbers add column if not exists difficulty_set_at timestamptz;
 
-alter table public.qc_batches add column if not exists difficulty_level numeric(2,1) check (difficulty_level in (1, 1.5, 2, 3));
+alter table public.qc_batches add column if not exists difficulty_level numeric(2,1) check (difficulty_level in (0.5, 1, 2, 3));
 alter table public.qc_batches add column if not exists difficulty_factor numeric(5,3);
 
 -- 既有歷史批次採一星基準；本次更新後的新料號才會進入待評清單。
