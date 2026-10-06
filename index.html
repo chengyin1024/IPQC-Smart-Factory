@@ -385,7 +385,7 @@ function closePhotoViewer(){const viewer=$("photoViewer"),img=$("photoViewerImag
 function photoLinks(type,id){const ps=photos.filter(p=>p.parent_type===type&&String(p.parent_id)===String(id));return ps.length?ps.map(p=>`<button type="button" class="photo-link" data-url="${esc(p.public_url)}" onclick="openPhotoViewer(this.dataset.url)">查看照片</button>`).join("｜"):"-"}
 function isPackerUser(){return currentUser?.role==="packer"}
 function isQcReportOnlyUser(){return ["3F1","3F2","3F3"].includes(currentUser?.account)}
-function canEditQcBatchPart(){return ["3F1","3F2"].includes(currentUser?.account)}
+function canEditQcBatchPart(){return isOwner()||["3F1","3F2"].includes(currentUser?.account)}
 function enforcePageId(id){
  if(id==="businessAnalysis"&&currentUser?.account!=="chengyin")return null;
  return isQcReportOnlyUser()&&id!=="qcReport"?null:id
@@ -640,13 +640,13 @@ async function ratePartDifficulty(code,level){
 }
 function editQcBatchPart(id){
  const batch=qcBatches.find(x=>String(x.id)===String(id));
- if(!batch||batch.status!=="in_progress"||!canEditQcBatchPart())return alert("只有 3F1、3F2 可以修改未完成批次的料號");
+ if(!batch||batch.status!=="in_progress"||!canEditQcBatchPart())return alert("只有老闆、3F1、3F2 可以修改未完成批次的料號");
  editingQcBatchId=batch.id;$("editQcPartInput").value=batch.part_number||"";$("editQcPartBatchInfo").innerHTML=`批次：<b>${esc(batch.batch_no)}</b><br>原料號：<b>${esc(batch.part_number)}</b>`;$("editQcPartModal").classList.remove("hidden");$("editQcPartInput").focus();applyLanguage()
 }
 function closeEditQcPartModal(){editingQcBatchId=null;$("editQcPartModal").classList.add("hidden");$("editQcPartInput").value=""}
 async function saveQcBatchPartEdit(){
  const batch=qcBatches.find(x=>String(x.id)===String(editingQcBatchId));
- if(!batch||batch.status!=="in_progress"||!canEditQcBatchPart()){closeEditQcPartModal();return alert("只有 3F1、3F2 可以修改未完成批次的料號")}
+ if(!batch||batch.status!=="in_progress"||!canEditQcBatchPart()){closeEditQcPartModal();return alert("只有老闆、3F1、3F2 可以修改未完成批次的料號")}
  const oldPart=String(batch.part_number||"").trim(),newPart=$("editQcPartInput").value.trim();if(!newPart)return alert("請輸入正確料號");if(newPart===oldPart)return closeEditQcPartModal();
  if(!confirm(`確定修改料號？\n原料號：${oldPart}\n新料號：${newPart}`))return;
  try{
@@ -882,7 +882,7 @@ function renderQcBatchLists(){
   const label=`第 ${steps.length+1} 道待登記`,button="接手下一道";
   const deleteBtn=isOwner()?`<button class="btn delete-top" onclick="deleteQcBatch('${batch.id}')">🗑 刪除</button>`:"";
   const editBtn=canEditQcBatchPart()?`<button class="btn secondary" onclick="editQcBatchPart('${batch.id}')">✏️ 修改料號</button>`:"";
-  return `<div class="production-card"><div class="production-head"><div><div class="production-no">${esc(batch.batch_no)}</div><div class="production-part">${esc(batch.part_number)}</div></div><div class="production-head-actions"><span class="pill pending">${label}</span>${deleteBtn}</div></div><div class="meta">開始：${esc(localDateTime(batch.started_at))}｜建立：${esc(accountDisplayName(batch.started_by))}<br>${detail}</div><div class="actions" style="margin-top:10px"><button class="btn primary" onclick="selectQcBatch('${batch.id}')">${button}</button><button class="btn warning" onclick="selectQcBatch('${batch.id}',false,true)">完成</button>${editBtn}</div></div>`;
+  return `<div class="production-card"><div class="production-head"><div><div class="production-no">${esc(batch.batch_no)}</div><div class="production-part">${esc(batch.part_number)}</div></div><div class="production-head-actions"><span class="pill pending">${label}</span>${editBtn}${deleteBtn}</div></div><div class="meta">開始：${esc(localDateTime(batch.started_at))}｜建立：${esc(accountDisplayName(batch.started_by))}<br>${detail}</div><div class="actions" style="margin-top:10px"><button class="btn primary" onclick="selectQcBatch('${batch.id}')">${button}</button><button class="btn warning" onclick="selectQcBatch('${batch.id}',false,true)">完成</button></div></div>`;
  }).join(""):'<div class="muted">目前沒有尚未完成的批次</div>';
  const allCompleted=(qcBatches||[]).filter(x=>x.status==="completed").sort((a,b)=>new Date(b.completed_at||0)-new Date(a.completed_at||0));
  const todayRows=allCompleted.filter(x=>qcCompletedDate(x)===today());
