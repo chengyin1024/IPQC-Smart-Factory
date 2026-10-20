@@ -108,7 +108,7 @@ body[data-role="owner"] .card.role-owner{display:block}
  </section>
 
  <section id="completedProductions" class="page hidden">
-  <div class="card"><h2>已完成生產</h2><p class="muted">同料號會收在一起；點料號展開後可查看每次完成日期與當時狀況。</p><div class="field" style="max-width:360px"><label>完成日期</label><input id="doneProductionDate" type="date"></div><div id="doneProductions" class="production-list"></div></div>
+  <div class="card"><h2>已完成生產</h2><p class="muted">同料號會收在一起；點料號展開後可查看每次完成日期與當時狀況。</p><h3>完成日期區間</h3><div class="row" style="max-width:760px"><div class="field"><label>開始日期</label><input id="doneProductionStartDate" type="date"></div><div class="field"><label>結束日期</label><input id="doneProductionEndDate" type="date"></div></div><div id="doneProductions" class="production-list"></div></div>
  </section>
 
  <section id="inspection" class="page hidden">
@@ -330,6 +330,7 @@ Object.assign(VI,{"⭐ 待評印刷難度":"⭐ Chờ đánh giá độ khó in"
 Object.assign(VI,{"已固定":"Đã cố định","此料號已評過星級，不需重新評分":"Mã hàng này đã được đánh giá và không cần chấm lại"});
 Object.assign(VI,{"修改料號":"Sửa mã hàng","請輸入正確料號":"Nhập mã hàng chính xác","料號修改成功":"Đã sửa mã hàng","只有 3F1、3F2 可以修改未完成批次的料號":"Chỉ 3F1 và 3F2 được sửa mã hàng của lô chưa hoàn thành","確定修改料號？":"Xác nhận sửa mã hàng?","原料號：":"Mã cũ: ","新料號：":"Mã mới: ","確認修改":"Xác nhận sửa","取消":"Hủy"});
 Object.assign(VI,{"完成":"Hoàn thành","完成本批 QC":"Hoàn thành lô QC này"});
+Object.assign(VI,{"完成日期區間":"Khoảng ngày hoàn thành","區間內沒有已完成生產單":"Không có lệnh sản xuất hoàn thành trong khoảng ngày đã chọn","開始日期不可晚於結束日期":"Ngày bắt đầu không được sau ngày kết thúc"});
 const VI_KEYS=Object.keys(VI).sort((a,b)=>b.length-a.length);
 function t(text){if(currentLang!=="vi")return text;return VI_KEYS.reduce((value,key)=>value.split(key).join(VI[key]),String(text))}
 function applyLanguage(){document.documentElement.lang=currentLang==="vi"?"vi":"zh-Hant";document.querySelectorAll("body *").forEach(el=>{for(const node of el.childNodes){if(node.nodeType===Node.TEXT_NODE&&node.nodeValue.trim()){if(!originalText.has(node))originalText.set(node,node.nodeValue);const raw=originalText.get(node),trim=raw.trim();node.nodeValue=raw.replace(trim,t(trim))}}["placeholder","title","aria-label","alt"].forEach(attr=>{if(!el.hasAttribute(attr))return;const dataKey=`original${attr.replace(/-([a-z])/g,(_,c)=>c.toUpperCase()).replace(/^./,c=>c.toUpperCase())}`;if(!el.dataset[dataKey])el.dataset[dataKey]=el.getAttribute(attr);el.setAttribute(attr,t(el.dataset[dataKey]))})});["langBtnLogin","langBtnHeader"].forEach(id=>{if($(id))$(id).textContent=currentLang==="zh"?"VI":"中文"});if(currentUser&&$("userInfo"))$("userInfo").textContent=`${t(currentUser.name)}｜${currentUser.account}`}
@@ -694,7 +695,7 @@ if($("qcHistoryViewBtn"))$("qcHistoryViewBtn").onclick=()=>setQcReportView("hist
  if($("qcStatsResetBtn"))$("qcStatsResetBtn").onclick=()=>{ $("qcStatsStartDate").value=`${today().slice(0,8)}01`;$("qcStatsEndDate").value=today();$("qcStatsPart").value="";renderQcRangeStats();renderQcBatchLists() };
  if($("businessApplyBtn"))$("businessApplyBtn").onclick=renderBusinessAnalysis;
  if($("businessResetBtn"))$("businessResetBtn").onclick=()=>{setBusinessAnalysisDefaults(true);$("businessKeyword").value="";renderBusinessAnalysis()};
- if($("doneProductionDate"))$("doneProductionDate").onchange=renderCompletedProductions;
+ ["doneProductionStartDate","doneProductionEndDate"].forEach(id=>{if($(id))$(id).onchange=renderCompletedProductions});
 $("loginBtn").onclick=()=>{const a=$("account").value.trim(),p=$("password").value,f=ACCOUNTS[a];if(!f||f.password!==p)return msg($("loginMsg"),"帳號或密碼錯誤");currentUser={account:a,...f};if($("remember").checked)localStorage.setItem("ipqc_v4_login",JSON.stringify(currentUser));enterApp()};
 $("logoutBtn").onclick=()=>{localStorage.removeItem("ipqc_v4_login");location.reload()};
 async function enterApp(){document.body.dataset.role=currentUser.role;$("loginPage").classList.add("hidden");$("appPage").classList.remove("hidden");$("userInfo").textContent=`${currentUser.name}｜${currentUser.account}`;await loadAll();const defaultPage=currentUser?.account==="chengyin"?"dashboard":currentUser?.account==="3F"?"production":"qcReport";showPage(defaultPage);}
@@ -778,14 +779,20 @@ function renderProductionCard(p,actions=true){
 }
 function renderCompletedProductions(){
  const container=$("doneProductions");if(!container)return;
- const selectedDate=$("doneProductionDate")?.value||"";
- const rows=productions.filter(p=>p.status==="completed"&&(!selectedDate||localDate(new Date(p.completed_at||p.updated_at||p.created_at))===selectedDate)).sort((a,b)=>new Date(b.completed_at||b.updated_at||0)-new Date(a.completed_at||a.updated_at||0));
+ const startInput=$("doneProductionStartDate"),endInput=$("doneProductionEndDate");
+ if(startInput&&!startInput.value&&endInput&&!endInput.value)startInput.value=endInput.value=today();
+ const startDate=startInput?.value||"",endDate=endInput?.value||"";
+ if(startDate&&endDate&&startDate>endDate){container.innerHTML='<div class="msg err">開始日期不可晚於結束日期</div>';applyLanguage();return}
+ const rows=productions.filter(p=>{if(p.status!=="completed")return false;const completedDate=localDate(new Date(p.completed_at||p.updated_at||p.created_at));return (!startDate||completedDate>=startDate)&&(!endDate||completedDate<=endDate)}).sort((a,b)=>new Date(b.completed_at||b.updated_at||0)-new Date(a.completed_at||a.updated_at||0));
  const groups={};
  rows.forEach(p=>{const key=p.part_number_code||"未分類";(groups[key]??=[]).push(p)});
- container.innerHTML=Object.entries(groups).map(([part,items])=>{
+ const rangeLabel=`${startDate||t("最早紀錄")} ～ ${endDate||t("今天")}｜${rows.length} ${t("筆")}`;
+ const groupHtml=Object.entries(groups).map(([part,items])=>{
   const latest=localDate(new Date(items[0].completed_at||items[0].updated_at||items[0].created_at));
   return `<div class="group-card"><button class="group-summary" onclick="this.parentElement.classList.toggle('open')"><div><div class="record-part">${esc(part)}</div><div class="small muted">${items.length} 筆｜最近完成：${esc(latest)}</div></div><span>▶</span></button><div class="group-detail">${items.map(p=>renderProductionCard(p,false)).join("")}</div></div>`;
- }).join("")||'<div class="muted">沒有符合日期的已完成生產單</div>';
+ }).join("");
+ container.innerHTML=`<div class="small muted" style="margin-bottom:10px">${esc(rangeLabel)}</div>${groupHtml||'<div class="muted">區間內沒有已完成生產單</div>'}`;
+ applyLanguage();
 }
 function renderQcProductionStats(){
  const card=$("qcProductionStatsCard");
