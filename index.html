@@ -348,7 +348,7 @@ const difficultyStarsHtml=level=>num(level)===.5?'<span class="half-star" role="
 function partDifficulty(partNumber){return parts.find(x=>String(x.code||"").trim().toLowerCase()===String(partNumber||"").trim().toLowerCase())}
 function updateQcPartDifficulty(){const el=$("qcPartDifficulty");if(!el)return;const part=partDifficulty($("qcBatchPartNumber")?.value),level=num(part?.difficulty_level);el.innerHTML=level?`印刷難度：${difficultyStarsHtml(level)}（×${difficultyFactor(level)}）`:"尚未評級，完成 QC 後會交給老闆評定"}
 const localDate=d=>{d=d||new Date();const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),day=String(d.getDate()).padStart(2,"0");return `${y}-${m}-${day}`};
-const localDateTime=value=>{const d=value instanceof Date?value:new Date(value);return Number.isNaN(d.getTime())?"":`${localDate(d)} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`};
+const localDateTime=value=>{const d=value instanceof Date?value:new Date(value);if(Number.isNaN(d.getTime()))return "";const y=String(d.getFullYear()).slice(-2),m=String(d.getMonth()+1).padStart(2,"0"),day=String(d.getDate()).padStart(2,"0");return `${y}/${m}/${day} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`};
 const today=()=>localDate(new Date());
 const nowParts=()=>{const d=new Date();return {date:localDate(d),time:d.toTimeString().slice(0,5),text:d.toLocaleString("zh-TW",{hour12:false})}};
 const msg=(el,text,ok=false)=>el.innerHTML=`<div class="msg ${ok?'ok':'err'}">${esc(t(text))}</div>`;
