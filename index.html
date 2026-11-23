@@ -148,10 +148,7 @@ body[data-role="owner"] .card.role-owner{display:block}
    <h2>QC 印刷批次</h2>
    <div id="qcBatchMsg"></div>
    <div id="qcNewBatchPanel">
-    <div class="row">
-     <div class="field"><label>料號</label><input id="qcBatchPartNumber" list="partList" placeholder="請輸入料號"></div>
-     <div class="field"><label>印刷人員（選填）</label><select id="qcBatchPrinter"><option value="">請選擇印刷手</option></select></div>
-    </div>
+    <div class="field"><label>料號</label><input id="qcBatchPartNumber" list="partList" placeholder="請輸入料號"></div>
     <div id="qcPartDifficulty" class="muted small" style="margin:-4px 0 10px">請輸入料號查看印刷難度</div>
     <button id="qcCreateBatchBtn" type="button" class="btn primary" style="width:100%;padding:13px 14px">開始新一批印刷</button>
    </div>
@@ -629,14 +626,13 @@ function selectQcBatch(id,restoring=false,completionIntent=false){
 async function createQcBatch(){
  if(!qcBatchReady)return qcBatchMessage("QC 批次資料表尚未建立，請先執行更新 SQL");
  const part=$("qcBatchPartNumber").value.trim();if(!part)return qcBatchMessage("請輸入料號");
- const printer=$("qcBatchPrinter").value.trim();
- const confirmation=currentLang==="vi"?`Xác nhận bắt đầu lô in mới?\nMã hàng: ${part}\nThợ in: ${printer||"Chưa chọn"}\nSau khi xác nhận, hệ thống sẽ tạo một lô QC mới.`:`請確認是否開始新的一批印刷？\n料號：${part}\n印刷手：${printer||"未選擇"}\n確認後會建立新的 QC 批次。`;
+ const confirmation=currentLang==="vi"?`Xác nhận bắt đầu lô in mới?\nMã hàng: ${part}\nThợ in sẽ được chọn khi ghi công đoạn in.\nSau khi xác nhận, hệ thống sẽ tạo một lô QC mới.`:`請確認是否開始新的一批印刷？\n料號：${part}\n印刷手將於登記本道印刷時選擇。\n確認後會建立新的 QC 批次。`;
  if(!confirm(confirmation))return;
  const difficulty=partDifficulty(part),level=num(difficulty?.difficulty_level)||null;
- const payload={batch_no:createQcBatchNo(),part_number:part,printer_name:printer||null,status:"in_progress",started_by:currentUser.account,difficulty_level:level,difficulty_factor:difficultyFactor(level)};
+ const payload={batch_no:createQcBatchNo(),part_number:part,printer_name:null,status:"in_progress",started_by:currentUser.account,difficulty_level:level,difficulty_factor:difficultyFactor(level)};
  const {data,error}=await sb.from("qc_batches").insert(payload).select().single();
  if(error)return qcBatchMessage(error.message);
- await ensurePart(part);$("qcBatchPartNumber").value="";$("qcBatchPrinter").value="";updateQcPartDifficulty();qcBatchMessage(`已建立 ${payload.part_number} 的新批次`,true);await loadAll();selectQcBatch(data.id);
+ await ensurePart(part);$("qcBatchPartNumber").value="";updateQcPartDifficulty();qcBatchMessage(`已建立 ${payload.part_number} 的新批次`,true);await loadAll();selectQcBatch(data.id);
 }
 async function ratePartDifficulty(code,level){
  if(currentUser?.account!=="chengyin")return alert("只有老闆帳號可以設定印刷難度");
@@ -933,7 +929,7 @@ function renderAll(){
  const printerOptions=employeeOptions(printerEmployees),qualityOptions=employeeOptions(qualityEmployees),supervisorOptions=employeeOptions(supervisorEmployees);
  ["prodOperator1","prodOperator2","prodOperator3"].forEach(id=>{const el=$(id);if(!el)return;const keep=el.value,first=id.endsWith("1")?'<option value="">請選擇印刷手</option>':'<option value="">不選擇</option>';el.innerHTML=first+printerOptions;if([...el.options].some(o=>o.value===keep))el.value=keep});
  ["qualityInspectorName1","qualityInspectorName2","qualityInspectorName3"].forEach(id=>{const el=$(id);if(!el)return;const keep=el.value,first=id.endsWith("1")?'<option value="">請選擇品檢人員</option>':'<option value="">不選擇</option>';el.innerHTML=first+qualityOptions;if([...el.options].some(o=>o.value===keep))el.value=keep});
- ["qcBatchPrinter","qcStepPrinter","relTester"].forEach(id=>{const el=$(id);if(!el)return;const keep=el.value,isPrinter=id==="qcBatchPrinter"||id==="qcStepPrinter",first=isPrinter?'<option value="">請選擇印刷手</option>':'<option value="">請選擇主管</option>';el.innerHTML=first+(isPrinter?printerOptions:supervisorOptions);if([...el.options].some(o=>o.value===keep))el.value=keep});
+ ["qcStepPrinter","relTester"].forEach(id=>{const el=$(id);if(!el)return;const keep=el.value,isPrinter=id==="qcStepPrinter",first=isPrinter?'<option value="">請選擇印刷手</option>':'<option value="">請選擇主管</option>';el.innerHTML=first+(isPrinter?printerOptions:supervisorOptions);if([...el.options].some(o=>o.value===keep))el.value=keep});
  const oldInspector=$("inspectorName").value;
  $("inspectorName").innerHTML='<option value="">請選擇主管</option>'+supervisorOptions;
  if([...$("inspectorName").options].some(o=>o.value===oldInspector))$("inspectorName").value=oldInspector;
