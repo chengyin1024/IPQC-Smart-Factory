@@ -101,7 +101,6 @@ body[data-role="owner"] .card.role-owner{display:block}
     <div class="field"><label>印刷手 1 *</label><select id="prodOperator1" class="employee-select"><option value="">請選擇印刷手</option></select></div>
     <div class="field"><label>印刷手 2</label><select id="prodOperator2" class="employee-select"><option value="">不選擇</option></select></div>
     <div class="field"><label>印刷手 3</label><select id="prodOperator3" class="employee-select"><option value="">不選擇</option></select></div>
-    <div class="field"><label>預計數量（選填）</label><input id="prodQty" type="number" min="0"></div>
     <div class="field"><label>備註</label><input id="prodNotes"></div>
    </div>
    <button id="createProductionBtn" class="btn primary">開始生產</button>
@@ -968,9 +967,9 @@ $("createProductionBtn").onclick=async()=>{
  if(!v4Ready)return msg($("prodMsg"),"請先執行 V4.1 的 install.sql");
  const part=$("prodPart").value.trim();if(!part)return msg($("prodMsg"),"請填寫料號");
  const operatorNames=joinUnique(["prodOperator1","prodOperator2","prodOperator3"],"印刷手");if(operatorNames===null)return;if(!operatorNames)return msg($("prodMsg"),"請選擇至少一位印刷手");
- const payload={production_no:await createProductionNo(),part_number_code:part,machine:$("prodMachine").value.trim(),operator_name:operatorNames,planned_qty:num($("prodQty").value)||null,notes:$("prodNotes").value.trim(),status:"active",started_at:new Date().toISOString(),created_by:currentUser.account};
+ const payload={production_no:await createProductionNo(),part_number_code:part,machine:$("prodMachine").value.trim(),operator_name:operatorNames,planned_qty:null,notes:$("prodNotes").value.trim(),status:"active",started_at:new Date().toISOString(),created_by:currentUser.account};
  const {error}=await sb.from("production_orders").insert(payload);if(error)return msg($("prodMsg"),error.message);
- await ensurePart(part);for(const name of operatorNames.split("｜"))await ensureEmployee(name,"印刷手");msg($("prodMsg"),`已建立 ${payload.production_no}`,true);["prodPart","prodMachine","prodOperator1","prodOperator2","prodOperator3","prodQty","prodNotes"].forEach(id=>$(id).value="");await loadAll()
+ await ensurePart(part);for(const name of operatorNames.split("｜"))await ensureEmployee(name,"印刷手");msg($("prodMsg"),`已建立 ${payload.production_no}`,true);["prodPart","prodMachine","prodOperator1","prodOperator2","prodOperator3","prodNotes"].forEach(id=>$(id).value="");await loadAll()
 }
 async function changeProduction(id,status){const payload={status};if(status==="paused")payload.paused_at=new Date().toISOString();if(status==="active")payload.resumed_at=new Date().toISOString();const {error}=await sb.from("production_orders").update(payload).eq("id",id);if(error)return alert(error.message);await loadAll()}
 async function completeProduction(id){const p=productions.find(x=>String(x.id)===String(id)),t=productionTotals(id);if(!confirm(`確定完成 ${p?.production_no}？\nOK ${t.ok}｜NG ${t.ng}｜良率 ${t.yield.toFixed(1)}%`))return;const {error}=await sb.from("production_orders").update({status:"completed",completed_at:new Date().toISOString()}).eq("id",id);if(error)return alert(error.message);await loadAll()}
