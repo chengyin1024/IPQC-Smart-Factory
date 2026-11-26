@@ -735,12 +735,11 @@ async function loadAll(){
    sb.from("qc_reports").select("*").order("created_at",{ascending:false}).limit(1000).abortSignal(controller.signal),
    sb.from("qc_batches").select("*").order("started_at",{ascending:false}).limit(1000).abortSignal(controller.signal),
    sb.from("qc_batch_steps").select("*").order("created_at",{ascending:false}).limit(3000).abortSignal(controller.signal),
-   sb.from("packing_reports").select("*").order("created_at",{ascending:false}).limit(1000).abortSignal(controller.signal),
-   sb.from("production_orders").select("quality_inspector_name").limit(1).abortSignal(controller.signal)
+   sb.from("packing_reports").select("*").order("created_at",{ascending:false}).limit(1000).abortSignal(controller.signal)
   ]);
- }catch(error){results=Array.from({length:11},()=>({error}))}
+ }catch(error){results=Array.from({length:10},()=>({error}))}
  clearTimeout(timeout);cloudLoadRunning=false;
- const [p,i,r,pa,e,ph,q,qb,qs,pr,pq]=results,hasError=results.slice(0,10).some(x=>x?.error);
+ const [p,i,r,pa,e,ph,q,qb,qs,pr]=results,hasError=results.some(x=>x?.error);
  if(!p.error)productions=p.data||[];
  if(!i.error)inspections=i.data||[];
  if(!r.error)reliability=r.data||[];
@@ -750,7 +749,7 @@ async function loadAll(){
  if(!q.error)qcReports=q.data||[];
  qcBatchReady=!qb.error&&!qs.error;if(!qb.error)qcBatches=qb.data||[];if(!qs.error)qcBatchSteps=qs.data||[];
  packingReportsReady=!pr.error;if(!pr.error)packingReports=pr.data||[];
- productionQualityReady=!pq.error;
+ productionQualityReady=true;
  v4Ready=!p.error;
  if(!pa.error&&!e.error)saveMasterCache();
  if(hasError){showCloudStatus(readMasterCache());cloudRetryTimer=setTimeout(loadAll,30000)}else{$("setupBanner").classList.add("hidden")}
@@ -974,7 +973,6 @@ function renderAll(){
 async function createProductionNo(){const d=today().replaceAll("-","");const same=productions.filter(x=>String(x.production_no||"").startsWith("P"+d));const n=String(same.length+1).padStart(3,"0");return `P${d}-${n}`}
 $("createProductionBtn").onclick=async()=>{
  if(!v4Ready)return msg($("prodMsg"),"請先執行 V4.1 的 install.sql");
- if(!productionQualityReady)return msg($("prodMsg"),"請先在 Supabase 執行 production_quality_inspector_migration.sql");
  const part=$("prodPart").value.trim();if(!part)return msg($("prodMsg"),"請填寫料號");
  const operatorNames=joinUnique(["prodOperator1","prodOperator2","prodOperator3"],"印刷手");if(operatorNames===null)return;if(!operatorNames)return msg($("prodMsg"),"請選擇至少一位印刷手");
  const qualityNames=joinUnique(["prodQualityInspector1","prodQualityInspector2","prodQualityInspector3"],"品檢人員");if(qualityNames===null)return;if(!qualityNames)return msg($("prodMsg"),"請選擇至少一位品檢人員");
