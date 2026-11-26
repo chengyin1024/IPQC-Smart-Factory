@@ -309,6 +309,7 @@ const SUPABASE_KEY="sb_publishable_cFXdFQJi9cAiBDNXMcHEYw_yYKMKP5D";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const ACCOUNTS={chengyin:{password:"0000",role:"owner",name:"老闆"},"3F":{password:"0000",role:"supervisor",name:"主管"},"3F1":{password:"0000",role:"worker",name:"阿霞"},"3F2":{password:"0000",role:"worker",name:"阿翠"},"3F3":{password:"0000",role:"packer",name:"阿英"}};
 const $=id=>document.getElementById(id);
+const PRODUCTION_QUALITY_NOTE_PREFIX="__QC_INSPECTORS__=";
 let currentUser=null, productions=[], inspections=[], reliability=[], parts=[], employees=[], photos=[], qcReports=[], qcBatches=[], qcBatchSteps=[], packingReports=[], v4Ready=true, qcBatchReady=true, packingReportsReady=true, productionQualityReady=true, inspectionDraftProductionId='', currentQcBatchId=null, editingQcBatchId=null, qcReportView='today', recordView='all';
 const CLOUD_CACHE_KEY="ipqc_v416_master_cache";
 let cloudLoadRunning=false,cloudRetryTimer=null;
@@ -976,7 +977,7 @@ $("createProductionBtn").onclick=async()=>{
  const part=$("prodPart").value.trim();if(!part)return msg($("prodMsg"),"請填寫料號");
  const operatorNames=joinUnique(["prodOperator1","prodOperator2","prodOperator3"],"印刷手");if(operatorNames===null)return;if(!operatorNames)return msg($("prodMsg"),"請選擇至少一位印刷手");
  const qualityNames=joinUnique(["prodQualityInspector1","prodQualityInspector2","prodQualityInspector3"],"品檢人員");if(qualityNames===null)return;if(!qualityNames)return msg($("prodMsg"),"請選擇至少一位品檢人員");
- const payload={production_no:await createProductionNo(),part_number_code:part,machine:$("prodMachine").value.trim(),operator_name:operatorNames,quality_inspector_name:qualityNames,planned_qty:null,notes:$("prodNotes").value.trim(),status:"active",started_at:new Date().toISOString(),created_by:currentUser.account};
+ const payload={production_no:await createProductionNo(),part_number_code:part,machine:$("prodMachine").value.trim(),operator_name:operatorNames,planned_qty:null,notes:notesWithProductionQuality($("prodNotes").value,qualityNames),status:"active",started_at:new Date().toISOString(),created_by:currentUser.account};
  const {error}=await sb.from("production_orders").insert(payload);if(error)return msg($("prodMsg"),error.message);
  await ensurePart(part);for(const name of operatorNames.split("｜"))await ensureEmployee(name,"印刷手");for(const name of qualityNames.split("｜"))await ensureEmployee(name,"品檢員");msg($("prodMsg"),`已建立 ${payload.production_no}`,true);["prodPart","prodMachine","prodOperator1","prodOperator2","prodOperator3","prodQualityInspector1","prodQualityInspector2","prodQualityInspector3","prodNotes"].forEach(id=>$(id).value="");await loadAll()
 }
@@ -988,7 +989,12 @@ function clearInspectionPhotos(){
 }
 function savedProductionQuality(p){
  const direct=String(p?.quality_inspector_name||"").trim();if(direct)return direct;
+ const noteLine=String(p?.notes||"").split(/\r?\n/).find(line=>line.startsWith(PRODUCTION_QUALITY_NOTE_PREFIX));if(noteLine)return noteLine.slice(PRODUCTION_QUALITY_NOTE_PREFIX.length).trim();
  return String(inspections.find(x=>String(x.production_id)===String(p?.id)&&String(x.quality_inspector_name||"").trim())?.quality_inspector_name||"").trim()
+}
+function notesWithProductionQuality(notes,names){
+ const clean=String(notes||"").split(/\r?\n/).filter(line=>!line.startsWith(PRODUCTION_QUALITY_NOTE_PREFIX)).join("\n").trim();
+ return [clean,PRODUCTION_QUALITY_NOTE_PREFIX+String(names||"").trim()].filter(Boolean).join("\n")
 }
 function syncInspectionQualityUi(){
  const p=productions.find(x=>String(x.id)===String($("inspectionProduction")?.value||inspectionDraftProductionId)),names=productionQualityReady?savedProductionQuality(p):"",savedField=$("inspectionQualitySavedField");
@@ -1048,7 +1054,7 @@ $("saveInspectionBtn").onclick=async()=>{
  const n=nowParts(),payload={production_id:pid,inspection_date:n.date,inspection_time:n.time,part_number_code:p.part_number_code,operator_name:p.operator_name||"",inspector_name:inspector,quality_inspector_name:qualityNames,machine:p.machine||"",printing_a_status:"check",printing_a_ok:num($("aOk").value),printing_a_ng:aNg,printing_a_notes:$("aNotes").value.trim(),printing_b_status:"check",printing_b_ok:num($("bOk").value),printing_b_ng:bNg,printing_b_notes:$("bNotes").value.trim(),packing_status:"check",packing_ok:num($("pOk").value),packing_ng:pNg,ng_reason:stationReasons,notes:$("notes").value.trim()};
  $("saveInspectionBtn").disabled=true;
  try{
-  if(productionQualityReady&&!String(p.quality_inspector_name||"").trim()){const {error:qualityError}=await sb.from("production_orders").update({quality_inspector_name:qualityNames}).eq("id",p.id);if(qualityError)throw qualityError;p.quality_inspector_name=qualityNames}
+  if(!savedProductionQuality(p)){const savedNotes=notesWithProductionQuality(p.notes,qualityNames),{error:qualityError}=await sb.from("production_orders").update({notes:savedNotes}).eq("id",p.id);if(qualityError)throw qualityError;p.notes=savedNotes}
   const {data,error}=await sb.from("inspections").insert(payload).select().single();
   if(error)throw error;
   await uploadPhoto($("firstPhoto").files[0],"inspection",data.id,"首件");
