@@ -33,6 +33,7 @@ body[data-role="owner"] .card.role-owner{display:block}
 .production-list{display:grid;gap:12px}.production-card{border:1px solid var(--line);border-radius:16px;padding:14px;background:#fff}.production-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.production-head-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}.delete-top{background:#fff5f5!important;color:#a51f1f!important;border:1px solid #efbcbc!important;padding:7px 11px!important}.delete-top:hover{background:#fee2e2!important}.production-no{font-weight:900;font-size:17px}.production-part{font-size:22px;font-weight:900;margin:5px 0}.meta{font-size:13px;color:#66766f;line-height:1.7}
 .process{border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}.process h3{margin-bottom:10px}
 .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.photo-box{border:1px dashed #aebdb7;border-radius:14px;padding:10px}.photo-box img,.field>img[id$="Preview"]{width:100%;aspect-ratio:4/3;object-fit:contain;border-radius:10px;margin-top:8px;background:#eef2f0}.photo-link{border:0;background:transparent;color:#176335;text-decoration:underline;font-weight:800;padding:0;cursor:pointer}.photo-viewer{position:fixed;inset:0;z-index:100;background:#000d;display:flex;align-items:center;justify-content:center;padding:58px 16px 16px}.photo-viewer img{display:block;max-width:100%;max-height:100%;object-fit:contain;border-radius:10px;background:#fff}.photo-viewer-close{position:absolute;top:14px;right:16px;background:#fff;color:#17332a;border:0;border-radius:10px;padding:9px 12px;font-weight:850;cursor:pointer}
+.first-article-panel{border:2px solid #c6ddd4;background:linear-gradient(145deg,#f5fbf8,#edf6f2);border-radius:16px;padding:14px;margin:2px 0 18px}.first-article-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}.first-article-head h3{margin:0 0 5px}.first-article-head p{margin:0}.first-article-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(230px,.65fr);gap:12px;align-items:start}.first-article-actions{display:flex;flex-direction:column;gap:10px}.first-article-production{padding:9px 11px;border-radius:10px;background:#fff;border:1px solid #d5e5de;font-weight:800;margin-bottom:10px}.first-article-panel .photo-box{background:#fff}.first-article-panel .photo-box input{margin-top:8px}.inspection-section-title{border-top:1px solid var(--line);padding-top:16px;margin-top:4px}.inspection-section-title h3{margin:0 0 4px}.inspection-section-title p{margin:0 0 12px}.inspection-extra-photos{grid-template-columns:minmax(0,1fr)}
 .edit-part-dialog{width:min(460px,100%);background:#fff;border-radius:18px;padding:20px;color:#17332a;box-shadow:0 16px 45px #0005}.edit-part-dialog .actions{justify-content:flex-end}
 .result-buttons{display:flex;gap:8px;flex-wrap:wrap}.result-btn{min-width:92px;border:1px solid var(--line);background:#fff;color:#17332a}.result-btn.active-ok{background:var(--ok);color:#fff}.result-btn.active-ng{background:var(--ng);color:#fff}
 .group-card{border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:10px;background:#fff}.group-summary{width:100%;display:flex;justify-content:space-between;gap:10px;align-items:center;padding:14px;border:0;background:#f8fbfa;text-align:left}.group-summary-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.group-detail{display:none;padding:12px}.group-card.open .group-detail{display:block}.record-filter{display:flex;gap:4px;background:#eef5f1;border-radius:12px;padding:4px}.record-filter .btn{border:0}.record-filter .active{background:#fff;color:#124c3c;box-shadow:0 2px 8px #123d2f18}
@@ -45,7 +46,7 @@ body[data-role="owner"] .card.role-owner{display:block}
 .dashboard-production-details{padding:0}.dashboard-production-details summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px;cursor:pointer}.dashboard-production-details summary::-webkit-details-marker{display:none}.dashboard-production-details summary h2{margin:0}.dashboard-production-details summary:after{content:"▶";color:var(--muted);font-size:15px;transition:transform .18s}.dashboard-production-details[open] summary:after{transform:rotate(90deg)}.dashboard-production-details .production-list{padding:0 20px 20px}
 .readonly-value{min-height:46px;display:flex;align-items:center;padding:10px 12px;border:1.5px solid #b8cbc4;border-radius:11px;background:#eef5f1;font-weight:850;color:#174b3a}
 .half-star{position:relative;display:inline-block;width:1em;height:1em;font-size:1.18em;line-height:1;vertical-align:-.1em;color:#c58d00}.half-star::before{content:"☆";position:absolute;inset:0}.half-star::after{content:"★";position:absolute;inset:0;width:50%;overflow:hidden;color:#f3b51b}
-@media(max-width:760px){.grid{grid-template-columns:repeat(2,1fr)}.row,.row3,.photo-grid{grid-template-columns:1fr}.wrap{padding:10px}.card{padding:14px}.production-head{display:flex}.production-head-actions{max-width:55%;gap:6px}.production-head-actions .btn{padding:7px 9px}.production-head .pill{margin-top:0}.nav{padding-bottom:3px}}
+@media(max-width:760px){.grid{grid-template-columns:repeat(2,1fr)}.row,.row3,.photo-grid,.first-article-grid{grid-template-columns:1fr}.wrap{padding:10px}.card{padding:14px}.production-head{display:flex}.production-head-actions{max-width:55%;gap:6px}.production-head-actions .btn{padding:7px 9px}.production-head .pill{margin-top:0}.nav{padding-bottom:3px}.first-article-panel{padding:12px}.first-article-head{display:block}.first-article-head .pill{margin-top:9px}.first-article-actions .btn{width:100%}}
 </style>
 </head>
 <body>
@@ -122,6 +123,17 @@ body[data-role="owner"] .card.role-owner{display:block}
    <div class="row">
     <div class="field"><label>生產單 *</label><select id="inspectionProduction"></select></div>
     <div class="field"><label>日期時間</label><input id="inspectionDateTime" readonly></div>
+   </div>
+   <section id="firstArticlePanel" class="first-article-panel" aria-labelledby="firstArticleTitle">
+    <div class="first-article-head"><div><h3 id="firstArticleTitle">📷 首件照片</h3><p class="muted small">選好生產單即可先拍照並儲存，不必現在填巡檢數量；晚點再回來完成巡檢。</p></div><span id="firstPhotoStatus" class="pill pending">請先選擇生產單</span></div>
+    <div id="firstPhotoProductionInfo" class="first-article-production muted">尚未選擇生產單</div>
+    <div class="first-article-grid">
+     <div class="photo-box"><b>首件照片</b><input id="firstPhoto" type="file" accept="image/*" capture="environment"><img id="firstPreview" class="hidden" alt="首件照片預覽"></div>
+     <div class="first-article-actions"><div id="firstPhotoMsg"></div><p class="muted small">儲存後可以先離開本頁；照片會保留在這張生產單，巡檢可稍後再填。</p><button id="saveFirstPhotoBtn" type="button" class="btn primary">儲存首件照片</button></div>
+    </div>
+   </section>
+   <div class="inspection-section-title"><h3>巡檢內容（可稍後完成）</h3><p class="muted small">首件照片儲存後，不需要立刻填寫以下巡檢資料。</p></div>
+   <div class="row">
     <div class="field"><label>巡檢人員 *</label><select id="inspectorName"><option value="">請選擇主管</option></select></div>
     <div id="inspectionQualitySavedField" class="field hidden"><label>品檢人員</label><div id="inspectionQualitySaved" class="readonly-value"></div></div>
     <div class="field inspection-quality-select"><label>品檢人員 1</label><select id="qualityInspectorName1" class="employee-select"><option value="">請選擇品檢人員</option></select></div>
@@ -143,7 +155,7 @@ body[data-role="owner"] .card.role-owner{display:block}
     <div class="row"><div class="field"><label>包裝－NG 原因</label><select id="pNgReason"><option value="">無</option><option>漏印</option><option>偏位</option><option>重影</option><option>刮傷</option><option>溢墨</option><option>色差</option><option>異物</option><option>包裝異常</option><option>其他</option></select></div><div class="field"><label>包裝－NG 照片</label><input id="pNgPhoto" type="file" accept="image/*" capture="environment"><img id="pNgPreview" class="hidden"></div></div>
    </div>
    <div class="field"><label>包裝－備註／處理方式</label><textarea id="notes" placeholder="請填寫包裝的處理方式"></textarea></div>
-   <div class="photo-grid"><div class="photo-box"><b>首件照片（第一筆巡檢可拍）</b><input id="firstPhoto" type="file" accept="image/*" capture="environment"><img id="firstPreview" class="hidden"></div><div class="photo-box"><b>其他照片</b><input id="otherPhoto" type="file" accept="image/*" capture="environment"><img id="otherPreview" class="hidden"></div></div>
+   <div class="photo-grid inspection-extra-photos"><div class="photo-box"><b>其他照片</b><input id="otherPhoto" type="file" accept="image/*" capture="environment"><img id="otherPreview" class="hidden"></div></div>
    <button id="saveInspectionBtn" class="btn primary" style="margin-top:14px">儲存巡檢</button>
   </div>
  </section>
@@ -310,6 +322,7 @@ const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const ACCOUNTS={chengyin:{password:"0000",role:"owner",name:"老闆"},"3F":{password:"0000",role:"supervisor",name:"主管"},"3F1":{password:"0000",role:"worker",name:"阿霞"},"3F2":{password:"0000",role:"worker",name:"阿翠"},"3F3":{password:"0000",role:"packer",name:"阿英"}};
 const $=id=>document.getElementById(id);
 const PRODUCTION_QUALITY_NOTE_PREFIX="__QC_INSPECTORS__=";
+const FIRST_ARTICLE_PARENT_TYPE="inspection",FIRST_ARTICLE_PHOTO_TYPE="首件（生產單）";
 let currentUser=null, productions=[], inspections=[], reliability=[], parts=[], employees=[], photos=[], qcReports=[], qcBatches=[], qcBatchSteps=[], packingReports=[], v4Ready=true, qcBatchReady=true, packingReportsReady=true, productionQualityReady=true, inspectionDraftProductionId='', currentQcBatchId=null, editingQcBatchId=null, qcReportView='today', recordView='all';
 const CLOUD_CACHE_KEY="ipqc_v416_master_cache";
 const CLOUD_LIVE_OVERLAP_MS=45*1000,CLOUD_LIVE_MIN_MS=15*1000,CLOUD_FULL_REFRESH_MIN_MS=15*60*1000,CLOUD_RECONCILE_MIN_MS=60*1000,CLOUD_QUOTA_RETRY_MS=15*60*1000,CLOUD_MAX_RETRY_MS=5*60*1000;
@@ -344,6 +357,7 @@ Object.assign(VI,{"Supabase 流量額度已達上限，雲端服務目前暫停�
 Object.assign(VI,{"Supabase 流量額度已達上限，生產資料目前暫停使用。":"Dung lượng Supabase đã đạt giới hạn; dữ liệu sản xuất đang tạm ngừng sử dụng.","Supabase 流量額度已達上限，包裝資料目前暫停使用。":"Dung lượng Supabase đã đạt giới hạn; dữ liệu đóng gói đang tạm ngừng sử dụng.","生產資料暫時無法載入，系統稍後會自動重試。":"Tạm thời không thể tải dữ liệu sản xuất; hệ thống sẽ tự động thử lại sau.","包裝資料暫時無法載入，系統稍後會自動重試。":"Tạm thời không thể tải dữ liệu đóng gói; hệ thống sẽ tự động thử lại sau.","雲端資料存取權限異常，請由管理員檢查 Supabase 權限設定。":"Quyền truy cập dữ liệu đám mây bất thường; quản trị viên cần kiểm tra quyền Supabase."});
 Object.assign(VI,{"雲端資料暫停，目前僅供查看":"Dữ liệu đám mây đang tạm dừng; hiện chỉ có thể xem"});
 Object.assign(VI,{"Supabase 流量額度已達上限，雲端資料暫停，目前僅供查看":"Dung lượng Supabase đã đạt giới hạn; dữ liệu đám mây tạm dừng và hiện chỉ có thể xem.","儲存回應中斷，系統無法確認本次狀態。請勿重複送出，待雲端恢復後按「立即重試」確認。":"Phản hồi lưu dữ liệu bị gián đoạn nên hệ thống không thể xác nhận trạng thái. Không gửi lại; sau khi đám mây khôi phục, hãy bấm “Thử lại ngay” để kiểm tra."});
+Object.assign(VI,{"📷 首件照片":"📷 Ảnh mẫu đầu tiên","選好生產單即可先拍照並儲存，不必現在填巡檢數量；晚點再回來完成巡檢。":"Chọn lệnh sản xuất để chụp và lưu ảnh trước; chưa cần nhập số lượng kiểm tra, có thể quay lại hoàn thành sau.","首件照片":"Ảnh mẫu đầu tiên","首件照片預覽":"Xem trước ảnh mẫu đầu tiên","尚未選擇生產單":"Chưa chọn lệnh sản xuất","儲存後可以先離開本頁；照片會保留在這張生產單，巡檢可稍後再填。":"Sau khi lưu, có thể rời trang; ảnh sẽ được giữ trong lệnh sản xuất và phần kiểm tra có thể điền sau.","儲存首件照片":"Lưu ảnh mẫu đầu tiên","巡檢內容（可稍後完成）":"Nội dung kiểm tra (có thể hoàn thành sau)","首件照片儲存後，不需要立刻填寫以下巡檢資料。":"Sau khi lưu ảnh mẫu đầu tiên, không cần điền ngay dữ liệu kiểm tra bên dưới.","尚未拍攝":"Chưa chụp","照片待儲存":"Ảnh đang chờ lưu","已儲存":"Đã lưu","更換照片":"Đổi ảnh","請先選擇生產單再拍攝首件照片":"Hãy chọn lệnh sản xuất trước khi chụp ảnh mẫu đầu tiên","請先拍攝或選擇首件照片":"Hãy chụp hoặc chọn ảnh mẫu đầu tiên trước","首件照片已儲存，可稍後再完成巡檢":"Đã lưu ảnh mẫu đầu tiên; có thể hoàn thành kiểm tra sau","首件照片儲存失敗：":"Lưu ảnh mẫu đầu tiên thất bại: ","首件照片儲存失敗，巡檢尚未送出":"Không lưu được ảnh mẫu đầu tiên; dữ liệu kiểm tra chưa được gửi","切換生產單會清除尚未儲存的首件照片，確定切換嗎？":"Đổi lệnh sản xuất sẽ xóa ảnh mẫu đầu tiên chưa lưu. Bạn có chắc muốn đổi không?","首件：":"Mẫu đầu tiên: ","巡檢照片：":"Ảnh kiểm tra: "});
 const VI_KEYS=Object.keys(VI).sort((a,b)=>b.length-a.length);
 function t(text){if(currentLang!=="vi")return text;return VI_KEYS.reduce((value,key)=>value.split(key).join(VI[key]),String(text))}
 function applyLanguage(){document.documentElement.lang=currentLang==="vi"?"vi":"zh-Hant";document.querySelectorAll("body *").forEach(el=>{for(const node of el.childNodes){if(node.nodeType===Node.TEXT_NODE&&node.nodeValue.trim()){if(!originalText.has(node))originalText.set(node,node.nodeValue);const raw=originalText.get(node),trim=raw.trim();node.nodeValue=raw.replace(trim,t(trim))}}["placeholder","title","aria-label","alt"].forEach(attr=>{if(!el.hasAttribute(attr))return;const dataKey=`original${attr.replace(/-([a-z])/g,(_,c)=>c.toUpperCase()).replace(/^./,c=>c.toUpperCase())}`;if(!el.dataset[dataKey])el.dataset[dataKey]=el.getAttribute(attr);el.setAttribute(attr,t(el.dataset[dataKey]))})});["langBtnLogin","langBtnHeader"].forEach(id=>{if($(id))$(id).textContent=currentLang==="zh"?"VI":"中文"});if(currentUser&&$("userInfo"))$("userInfo").textContent=`${t(currentUser.name)}｜${currentUser.account}`}
@@ -411,7 +425,14 @@ function relPill(pid){const p=productions.find(x=>String(x.id)===String(pid));if
 function canDeleteProduction(p){return isOwner()||(currentUser?.role==="supervisor"&&p.status!=="completed")}
 function openPhotoViewer(url){const viewer=$("photoViewer"),img=$("photoViewerImage");img.src=url;viewer.classList.remove("hidden")}
 function closePhotoViewer(){const viewer=$("photoViewer"),img=$("photoViewerImage");viewer.classList.add("hidden");img.removeAttribute("src")}
-function photoLinks(type,id){const ps=photos.filter(p=>p.parent_type===type&&String(p.parent_id)===String(id));return ps.length?ps.map(p=>`<button type="button" class="photo-link" data-url="${esc(p.public_url)}" onclick="openPhotoViewer(this.dataset.url)">查看照片</button>`).join("｜"):"-"}
+function photoLinks(type,id,excludeTypes=[]){const excluded=new Set(excludeTypes),ps=photos.filter(p=>p.parent_type===type&&String(p.parent_id)===String(id)&&!excluded.has(p.photo_type));return ps.length?ps.map(p=>`<button type="button" class="photo-link" data-url="${esc(p.public_url)}" onclick="openPhotoViewer(this.dataset.url)">查看照片</button>`).join("｜"):"-"}
+function newestPhoto(rows){return rows.slice().sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0))[0]||null}
+function directFirstArticlePhotos(productionId){return photos.filter(p=>p.parent_type===FIRST_ARTICLE_PARENT_TYPE&&String(p.parent_id)===String(productionId)&&p.photo_type===FIRST_ARTICLE_PHOTO_TYPE)}
+function firstArticlePhotoForProduction(productionId){
+ const inspectionIds=new Set(inspections.filter(x=>String(x.production_id)===String(productionId)).map(x=>String(x.id)));
+ const legacy=photos.filter(p=>p.parent_type==="inspection"&&inspectionIds.has(String(p.parent_id))&&p.photo_type==="首件");return newestPhoto([...directFirstArticlePhotos(productionId),...legacy])
+}
+function firstArticlePhotoLink(productionId){const photo=firstArticlePhotoForProduction(productionId);return photo?`<button type="button" class="photo-link" data-url="${esc(photo.public_url)}" onclick="openPhotoViewer(this.dataset.url)">查看照片</button>`:"-"}
 function isPackerUser(){return currentUser?.role==="packer"}
 function isQcReportOnlyUser(){return ["3F1","3F2","3F3"].includes(currentUser?.account)}
 function canEditQcBatchPart(){return isOwner()||["3F1","3F2"].includes(currentUser?.account)}
@@ -1121,6 +1142,7 @@ function renderAll(){
  $("inspectionProduction").innerHTML='<option value="">請選擇</option>'+activeSelectable.map(x=>`<option value="${esc(x.id)}">${esc(displayProductionNo(x.production_no))}｜${esc(x.part_number_code)}｜${esc(x.machine||"")}</option>`).join("");
  if([...$("inspectionProduction").options].some(o=>String(o.value)===String(selectedProduction)))$("inspectionProduction").value=selectedProduction;
  syncInspectionQualityUi();
+ syncFirstArticleUi();
  const todayRows=inspections.filter(x=>x.inspection_date===today());let ok=0,ng=0;todayRows.forEach(x=>{const t=totals(x);ok+=t.ok;ng+=t.ng});
  $("statActive").textContent=active.length;$("statInspections").textContent=todayRows.length;$("statPendingRel").textContent=productions.filter(x=>reliabilityState(x).pending).length;$("statYield").textContent=(ok+ng?ok/(ok+ng)*100:0).toFixed(1)+"%";
  const pending=productions.filter(x=>reliabilityState(x).pending);
@@ -1157,10 +1179,11 @@ $("createProductionBtn").onclick=async()=>{
 }
 async function changeProduction(id,status){if(!requireCloudWrite()||!v4Ready)return;const now=new Date().toISOString(),payload={status,updated_at:now};if(status==="paused")payload.paused_at=now;if(status==="active")payload.resumed_at=now;const {data,error}=await sb.from("production_orders").update(payload).eq("id",id).select().single();if(error)return alert(error.message);recordLocalMutation();productions=mergeFreshRows(productions,[data]);renderAll()}
 async function completeProduction(id){if(!requireCloudWrite()||!v4Ready)return;const p=productions.find(x=>String(x.id)===String(id)),t=productionTotals(id);if(!confirm(`確定完成 ${p?.production_no}？\nOK ${t.ok}｜NG ${t.ng}｜良率 ${t.yield.toFixed(1)}%`))return;const completedAt=new Date().toISOString(),{data,error}=await sb.from("production_orders").update({status:"completed",completed_at:completedAt,updated_at:completedAt}).eq("id",id).select().single();if(error)return alert(error.message);recordLocalMutation();productions=mergeFreshRows(productions,[data]);renderAll()}
-function clearInspectionPhotos(){
- ["firstPhoto","aNgPhoto","bNgPhoto","pNgPhoto","otherPhoto"].forEach(id=>{$(id).value=""});
- ["firstPreview","aNgPreview","bNgPreview","pNgPreview","otherPreview"].forEach(id=>{const img=$(id);if(img.src&&img.src.startsWith("blob:"))URL.revokeObjectURL(img.src);img.removeAttribute("src");img.classList.add("hidden")});
+function clearPhotoSelection(inputId,previewId){
+ const input=$(inputId),img=$(previewId);if(input)input.value="";if(!img)return;if(img.src&&img.src.startsWith("blob:"))URL.revokeObjectURL(img.src);img.removeAttribute("src");img.classList.add("hidden")
 }
+function clearInspectionPhotos(){[["aNgPhoto","aNgPreview"],["bNgPhoto","bNgPreview"],["pNgPhoto","pNgPreview"],["otherPhoto","otherPreview"]].forEach(ids=>clearPhotoSelection(...ids))}
+function clearFirstArticleSelection(){clearPhotoSelection("firstPhoto","firstPreview");$("firstPhotoMsg").innerHTML=""}
 function savedProductionQuality(p){
  const direct=String(p?.quality_inspector_name||"").trim();if(direct)return direct;
  const noteLine=String(p?.notes||"").split(/\r?\n/).find(line=>line.startsWith(PRODUCTION_QUALITY_NOTE_PREFIX));if(noteLine)return noteLine.slice(PRODUCTION_QUALITY_NOTE_PREFIX.length).trim();
@@ -1176,6 +1199,15 @@ function syncInspectionQualityUi(){
  savedField.classList.toggle("hidden",!names);$("inspectionQualitySaved").textContent=names?displayNames(names):"";
  document.querySelectorAll(".inspection-quality-select").forEach(el=>el.classList.toggle("hidden",!!names));
 }
+function setFirstArticleStatus(kind,text){const status=$("firstPhotoStatus");status.className=`pill ${kind}`;status.textContent=t(text)}
+function syncFirstArticleUi(){
+ const pid=$("inspectionProduction")?.value||inspectionDraftProductionId,p=productions.find(x=>String(x.id)===String(pid)),input=$("firstPhoto"),img=$("firstPreview"),button=$("saveFirstPhotoBtn"),panel=$("firstArticlePanel");
+ if(!p){if(input.files[0]||img.getAttribute("src"))clearFirstArticleSelection();panel.classList.remove("hidden");$("firstPhotoProductionInfo").textContent=t("尚未選擇生產單");setFirstArticleStatus("pending","請先選擇生產單");button.disabled=true;return}
+ $("firstPhotoProductionInfo").textContent=`${displayProductionNo(p.production_no)}｜${p.part_number_code}${p.machine?`｜${t("機台：")}${p.machine}`:""}`;
+ const saved=firstArticlePhotoForProduction(pid);if(saved&&!input.files[0]){panel.classList.add("hidden");button.disabled=true;return}
+ panel.classList.remove("hidden");if(input.files[0]){setFirstArticleStatus("pending","照片待儲存");button.disabled=!cloudWritesReady()||!v4Ready;return}
+ button.disabled=true;if(img.src&&img.src.startsWith("blob:"))URL.revokeObjectURL(img.src);img.removeAttribute("src");img.classList.add("hidden");setFirstArticleStatus("pending","尚未拍攝")
+}
 function resetInspectionForm(keepProduction=true){
  clearInspectionPhotos();
  ["aOk","aNg","bOk","bNg","pOk","pNg"].forEach(id=>$(id).value=0);
@@ -1185,22 +1217,43 @@ function resetInspectionForm(keepProduction=true){
  $("formMsg").innerHTML="";
  $("inspectionDateTime").value=nowParts().text;
  if(!keepProduction){inspectionDraftProductionId="";$("inspectionProduction").value=""}
- syncInspectionQualityUi()
+ syncInspectionQualityUi();syncFirstArticleUi()
 }
 function startInspectionFor(id){
  if(!requireCloudWrite()||!v4Ready)return;
- inspectionDraftProductionId=String(id||"");
+ const targetId=String(id||""),isDifferent=String(inspectionDraftProductionId)!==targetId;if(isDifferent&&$("firstPhoto").files[0]&&!confirm("切換生產單會清除尚未儲存的首件照片，確定切換嗎？"))return;
+ if(isDifferent)clearFirstArticleSelection();
+ inspectionDraftProductionId=targetId;
  showPage("inspection");
  $("inspectionProduction").value=inspectionDraftProductionId;
  resetInspectionForm(true);
 }
-$("inspectionProduction").onchange=()=>{inspectionDraftProductionId=$("inspectionProduction").value;syncInspectionQualityUi()};
+$("inspectionProduction").onchange=()=>{const next=$("inspectionProduction").value,previous=inspectionDraftProductionId;if($("firstPhoto").files[0]&&String(previous)!==String(next)&&!confirm("切換生產單會清除尚未儲存的首件照片，確定切換嗎？")){ $("inspectionProduction").value=previous;return }if(String(previous)!==String(next))clearFirstArticleSelection();inspectionDraftProductionId=next;syncInspectionQualityUi();syncFirstArticleUi()};
 function startReliability(id){if(!requireCloudWrite()||!v4Ready)return;const p=productions.find(x=>String(x.id)===String(id));if(!p)return;if(p.status==="paused")return alert("此生產單目前暫停，不列入信賴度待測；恢復生產後才能測試。");const previous=relFor(id),isRetest=reliabilityIsNg(previous),attempt=relRecordsFor(id).length+1;showPage("reliability");$("relProductionId").value=id;$("reliabilityFormTitle").textContent=isRetest?`信賴度重測（第 ${attempt} 次）`:`完成信賴度測試（第 ${attempt} 次）`;$("relProductionInfo").textContent=isRetest?`${p.production_no}｜${p.part_number_code}｜上次結果 NG，請在改善後重測並填寫改善說明`:`${p.production_no}｜${p.part_number_code}｜烤漆完成後進行測試`;$("reliabilityFormCard").classList.remove("hidden");window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"})}
 document.querySelectorAll(".result-buttons").forEach(g=>g.querySelectorAll(".result-btn").forEach(b=>b.onclick=()=>{const target=$(g.dataset.resultTarget);target.value=b.dataset.value;g.querySelectorAll(".result-btn").forEach(x=>x.classList.remove("active-ok","active-ng"));b.classList.add(b.dataset.value==="OK"?"active-ok":"active-ng")}));
 function setupPreview(inputId,imgId){$(inputId).onchange=()=>{inspectionDraftProductionId=$("inspectionProduction").value||inspectionDraftProductionId;const f=$(inputId).files[0];if(!f)return;const img=$(imgId);if(img.src&&img.src.startsWith("blob:"))URL.revokeObjectURL(img.src);img.src=URL.createObjectURL(f);img.classList.remove("hidden")}}
-[["firstPhoto","firstPreview"],["aNgPhoto","aNgPreview"],["bNgPhoto","bNgPreview"],["pNgPhoto","pNgPreview"],["otherPhoto","otherPreview"],["relPhoto","relPreview"]].forEach(x=>setupPreview(...x));
+$("firstPhoto").onchange=()=>{const pid=$("inspectionProduction").value;if(!pid){alert("請先選擇生產單再拍攝首件照片");clearFirstArticleSelection();syncFirstArticleUi();return}inspectionDraftProductionId=pid;$("firstPhotoMsg").innerHTML="";const file=$("firstPhoto").files[0];if(file){const img=$("firstPreview");if(img.src&&img.src.startsWith("blob:"))URL.revokeObjectURL(img.src);img.src=URL.createObjectURL(file);img.classList.remove("hidden")}syncFirstArticleUi()};
+[["aNgPhoto","aNgPreview"],["bNgPhoto","bNgPreview"],["pNgPhoto","pNgPreview"],["otherPhoto","otherPreview"],["relPhoto","relPreview"]].forEach(x=>setupPreview(...x));
 async function preparePhotoForUpload(file){if(!file?.type?.startsWith("image/"))return file;try{const source=await new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=reject;img.src=URL.createObjectURL(file)});const longest=Math.max(source.naturalWidth,source.naturalHeight),scale=Math.min(1,1600/longest);if(scale===1){URL.revokeObjectURL(source.src);return file}const canvas=document.createElement("canvas");canvas.width=Math.round(source.naturalWidth*scale);canvas.height=Math.round(source.naturalHeight*scale);canvas.getContext("2d").drawImage(source,0,0,canvas.width,canvas.height);URL.revokeObjectURL(source.src);const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",0.82));return blob?new File([blob],"ipqc-photo.jpg",{type:"image/jpeg"}):file}catch(e){return file}}
-async function uploadPhoto(file,parentType,parentId,photoType){if(!file)return;const prepared=await preparePhotoForUpload(file),ext=(prepared.name.split(".").pop()||"jpg").toLowerCase(),path=`${parentType}/${parentId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;const {error}=await sb.storage.from("ipqc-photos").upload(path,prepared,{cacheControl:"3600"});if(error)throw error;const {data:publicData}=sb.storage.from("ipqc-photos").getPublicUrl(path);const {data,error:dbErr}=await sb.from("inspection_photos").insert({parent_type:parentType,parent_id:String(parentId),photo_type:photoType,storage_path:path,public_url:publicData.publicUrl}).select().single();if(dbErr)throw dbErr;recordLocalMutation();photos=mergeFreshRows(photos,[data])}
+async function uploadPhoto(file,parentType,parentId,photoType){if(!file)return null;const prepared=await preparePhotoForUpload(file),ext=(prepared.name.split(".").pop()||"jpg").toLowerCase(),path=`${parentType}/${parentId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;const {error}=await sb.storage.from("ipqc-photos").upload(path,prepared,{cacheControl:"3600"});if(error)throw error;const {data:publicData}=sb.storage.from("ipqc-photos").getPublicUrl(path);const {data,error:dbErr}=await sb.from("inspection_photos").insert({parent_type:parentType,parent_id:String(parentId),photo_type:photoType,storage_path:path,public_url:publicData.publicUrl}).select().single();if(dbErr){await sb.storage.from("ipqc-photos").remove([path]);throw dbErr}recordLocalMutation();photos=mergeFreshRows(photos,[data]);return data}
+async function deletePhotoRows(rows){
+ const targets=(rows||[]).filter(Boolean),ids=targets.map(x=>x.id).filter(Boolean),paths=targets.map(x=>x.storage_path).filter(Boolean);if(!targets.length)return;
+ if(paths.length){const {error}=await sb.storage.from("ipqc-photos").remove(paths);if(error)throw error}
+ if(ids.length){const {error}=await sb.from("inspection_photos").delete().in("id",ids);if(error)throw error;recordLocalMutation();const removed=new Set(ids.map(String));photos=photos.filter(x=>!removed.has(String(x.id)))}
+}
+async function saveFirstArticlePhoto({silent=false}={}){
+ if(!requireCloudWrite()||!v4Ready)return false;
+ const pid=$("inspectionProduction").value,p=productions.find(x=>String(x.id)===String(pid)),file=$("firstPhoto").files[0],button=$("saveFirstPhotoBtn");
+ if(!p){if(!silent)alert("請先選擇生產單");return false}if(!file){if(!silent)alert("請先拍攝或選擇首件照片");return false}
+ const previous=directFirstArticlePhotos(pid);button.disabled=true;setFirstArticleStatus("pending","照片待儲存");$("firstPhotoMsg").innerHTML="";
+ try{
+  const saved=await uploadPhoto(file,FIRST_ARTICLE_PARENT_TYPE,pid,FIRST_ARTICLE_PHOTO_TYPE);
+  try{await deletePhotoRows(previous)}catch(cleanupError){console.warn("old first article cleanup failed",cleanupError)}
+  clearPhotoSelection("firstPhoto","firstPreview");syncFirstArticleUi();$("firstPhotoMsg").innerHTML=`<div class="msg ok">${esc(t("首件照片已儲存，可稍後再完成巡檢"))}</div>`;if(!silent)alert("首件照片已儲存，可稍後再完成巡檢");return !!saved
+ }catch(error){$("firstPhotoMsg").innerHTML=`<div class="msg err">${esc(t("首件照片儲存失敗：")+(error.message||""))}</div>`;setFirstArticleStatus("ng","照片待儲存");if(!silent)alert("首件照片儲存失敗："+(error.message||""));return false}
+ finally{button.disabled=!$("firstPhoto").files[0]||!cloudWritesReady()||!v4Ready}
+}
+$("saveFirstPhotoBtn").onclick=()=>saveFirstArticlePhoto();
 async function ensurePart(code){if(!code||parts.some(x=>String(x.code).toLowerCase()===code.toLowerCase()))return;const {data,error}=await sb.from("part_numbers").insert({code,keywords:""}).select().single();if(error&&error.code!=="23505")throw error;if(data){recordLocalMutation();parts=mergeFreshRows(parts,[data])}}
 async function ensureEmployee(name,role){if(!name||employees.some(x=>String(x.name).toLowerCase()===name.toLowerCase()))return;const {data,error}=await sb.from("employees").insert({name,role}).select().single();if(error&&error.code!=="23505")throw error;if(data){recordLocalMutation();employees=mergeFreshRows(employees,[data])}}
 $("saveInspectionBtn").onclick=async()=>{
@@ -1230,12 +1283,12 @@ $("saveInspectionBtn").onclick=async()=>{
  const n=nowParts(),payload={production_id:pid,inspection_date:n.date,inspection_time:n.time,part_number_code:p.part_number_code,operator_name:p.operator_name||"",inspector_name:inspector,quality_inspector_name:qualityNames,machine:p.machine||"",printing_a_status:"check",printing_a_ok:num($("aOk").value),printing_a_ng:aNg,printing_a_notes:$("aNotes").value.trim(),printing_b_status:"check",printing_b_ok:num($("bOk").value),printing_b_ng:bNg,printing_b_notes:$("bNotes").value.trim(),packing_status:"check",packing_ok:num($("pOk").value),packing_ng:pNg,ng_reason:stationReasons,notes:$("notes").value.trim()};
   $("saveInspectionBtn").disabled=true;
   try{
+   if($("firstPhoto").files[0]&&!await saveFirstArticlePhoto({silent:true}))throw new Error("首件照片儲存失敗，巡檢尚未送出");
    if(!savedProductionQuality(p)){const savedNotes=notesWithProductionQuality(p.notes,qualityNames),{error:qualityError}=await sb.from("production_orders").update({notes:savedNotes,updated_at:new Date().toISOString()}).eq("id",p.id);if(qualityError)throw qualityError;recordLocalMutation();p.notes=savedNotes}
    for(const name of qualityNames.split("｜").filter(Boolean))await ensureEmployee(name,"品檢員");
    const {data,error}=await sb.from("inspections").insert(payload).select().single();
    if(error)throw error;
    recordLocalMutation();inspections=mergeFreshRows(inspections,[data]);
-  await uploadPhoto($("firstPhoto").files[0],"inspection",data.id,"首件");
   await uploadPhoto($("aNgPhoto").files[0],"inspection",data.id,"印刷A NG");
   await uploadPhoto($("bNgPhoto").files[0],"inspection",data.id,"印刷B NG");
   await uploadPhoto($("pNgPhoto").files[0],"inspection",data.id,"包裝 NG");
@@ -1306,7 +1359,7 @@ async function deleteProduction(id){
  const p=productions.find(x=>String(x.id)===String(id));if(!p||!canDeleteProduction(p))return alert("你沒有刪除此生產單的權限");
  if(!confirm(`確定刪除 ${p.production_no}？\n相關 IPQC、信賴度與照片也會一起刪除，且無法復原。`))return;
  const insIds=inspections.filter(x=>String(x.production_id)===String(id)).map(x=>x.id),relIds=reliability.filter(x=>String(x.production_id)===String(id)).map(x=>x.id);
- try{await deleteStoredPhotos("inspection",insIds);await deleteStoredPhotos("reliability",relIds);if(insIds.length){const {error}=await sb.from("inspections").delete().in("id",insIds);if(error)throw error}if(relIds.length){const {error}=await sb.from("reliability_tests").delete().in("id",relIds);if(error)throw error}const {error}=await sb.from("production_orders").delete().eq("id",id);if(error)throw error;await loadAll()}catch(e){alert(e.message)}
+ try{await deletePhotoRows(directFirstArticlePhotos(id));await deleteStoredPhotos("inspection",insIds);await deleteStoredPhotos("reliability",relIds);if(insIds.length){const {error}=await sb.from("inspections").delete().in("id",insIds);if(error)throw error}if(relIds.length){const {error}=await sb.from("reliability_tests").delete().in("id",relIds);if(error)throw error}const {error}=await sb.from("production_orders").delete().eq("id",id);if(error)throw error;await loadAll()}catch(e){alert(e.message)}
 }
 async function deleteInspection(id){if(!requireCloudWrite()||!v4Ready)return;if(!canManage())return alert("沒有刪除權限");if(!confirm("確定刪除這筆巡檢紀錄？"))return;try{await deleteStoredPhotos("inspection",id);const {error}=await sb.from("inspections").delete().eq("id",id);if(error)throw error;await loadAll()}catch(e){alert(e.message)}}
 async function deleteReliability(id){if(!requireCloudWrite()||!v4Ready)return;if(!canManage())return alert("沒有刪除權限");if(!confirm("確定刪除這筆信賴度紀錄？刪除後該生產單可能重新顯示待測。"))return;try{await deleteStoredPhotos("reliability",id);const {error}=await sb.from("reliability_tests").delete().eq("id",id);if(error)throw error;await loadAll()}catch(e){alert(e.message)}}
@@ -1353,7 +1406,7 @@ function renderRecords(){
    pNg?`<div class="record-solution"><b>包裝處理方式：</b>${esc(r.notes||"未填寫")}</div>`:""
   ].filter(Boolean).join("");
   const stationCard=(name,ok,ng)=>`<div class="record-station"><b>${name}</b><div class="station-quality station-ok"><span class="quality-dot" aria-hidden="true"></span><strong>OK ${num(ok)} <small>PS</small></strong></div><div class="station-quality station-ng"><span class="quality-dot" aria-hidden="true"></span><strong>NG ${num(ng)} <small>PS</small></strong></div></div>`;
-  return `<div class="record-entry ${hasNg?"issue":""}"><div class="record-entry-headbar"><button class="record-entry-toggle" onclick="this.closest('.record-entry').classList.toggle('open')"><div><b>${esc(r.inspection_date)} ${esc((r.inspection_time||"").slice(0,5))}</b><div class="small muted">巡檢：${esc(r.inspector_name||"-")}｜品檢：${displayNames(r.quality_inspector_name)}</div><div class="small muted">印刷手：${displayNames(r.operator_name)}</div></div><div class="record-entry-summary"><span class="oktxt">OK ${totalOk}</span><span class="ngtxt">NG ${totalNg}</span></div><div class="head-actions"><span class="record-status ${hasNg?"issue":"normal"}">${hasNg?"需處理":"全部正常"}</span><span class="record-chevron">⌄</span></div></button>${canManage()?`<div class="record-entry-actions"><button class="btn danger" onclick="deleteInspection('${r.id}')">刪除</button></div>`:""}</div><div class="record-entry-detail"><div class="record-stations">${stationCard("印刷 A",r.printing_a_ok,aNg)}${stationCard("印刷 B",r.printing_b_ok,bNg)}${stationCard("包裝",r.packing_ok,pNg)}</div>${hasNg?`<div class="record-ng-info"><b>NG 原因：</b>${reason}</div>`:""}${stationNotes}<div style="margin-top:9px"><b>照片：</b>${photoLinks("inspection",r.id)}</div></div></div>`;
+   return `<div class="record-entry ${hasNg?"issue":""}"><div class="record-entry-headbar"><button class="record-entry-toggle" onclick="this.closest('.record-entry').classList.toggle('open')"><div><b>${esc(r.inspection_date)} ${esc((r.inspection_time||"").slice(0,5))}</b><div class="small muted">巡檢：${esc(r.inspector_name||"-")}｜品檢：${displayNames(r.quality_inspector_name)}</div><div class="small muted">印刷手：${displayNames(r.operator_name)}</div></div><div class="record-entry-summary"><span class="oktxt">OK ${totalOk}</span><span class="ngtxt">NG ${totalNg}</span></div><div class="head-actions"><span class="record-status ${hasNg?"issue":"normal"}">${hasNg?"需處理":"全部正常"}</span><span class="record-chevron">⌄</span></div></button>${canManage()?`<div class="record-entry-actions"><button class="btn danger" onclick="deleteInspection('${r.id}')">刪除</button></div>`:""}</div><div class="record-entry-detail"><div class="record-stations">${stationCard("印刷 A",r.printing_a_ok,aNg)}${stationCard("印刷 B",r.printing_b_ok,bNg)}${stationCard("包裝",r.packing_ok,pNg)}</div>${hasNg?`<div class="record-ng-info"><b>NG 原因：</b>${reason}</div>`:""}${stationNotes}<div style="margin-top:9px"><b>首件：</b>${firstArticlePhotoLink(r.production_id)}</div><div style="margin-top:9px"><b>巡檢照片：</b>${photoLinks("inspection",r.id,["首件"])}</div></div></div>`;
  }).join("")}</div></div>`}).join("")||'<div class="muted">沒有符合的巡檢紀錄</div>';
  applyLanguage();
 }
