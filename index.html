@@ -727,7 +727,7 @@ async function saveQcBatchStep(sendToPacking=false){
   recordLocalMutation();qcBatchSteps=mergeFreshRows(qcBatchSteps,[stepData]);if(batchData)qcBatches=mergeFreshRows(qcBatches,[batchData]);renderAll();resetQcStepPanel();qcBatchMessage(sendToPacking?"本批 QC 已完成":"已完成此道，可由下一位 QC 接手",true)
  }catch(error){
   if(ambiguousMutationError(error)){if(stepData)recordLocalMutation();cloudLoadError=error;qcBatchLoadError=error;qcBatchReady=false;showCloudStatus(readMasterCache(),error);scheduleCloudRetry(error);renderAll();restoreQcStepPanel();alert(t("儲存回應中斷，系統無法確認本次狀態。請勿重複送出，待雲端恢復後按「立即重試」確認。"));return}
-  if(sendToPacking&&!batchCommitted&&stepData?.id){const rollback=await sb.from("qc_batch_steps").delete().eq("id",stepData.id);if(rollback.error){recordLocalMutation();queuedFullReload=true;alert(`完成批次失敗，且系統無法自動回復本道資料：${rollback.error.message}\n請先勿重複送出，並通知管理員。`);return}}
+  if(sendToPacking&&!batchCommitted&&stepData?.id){const rollback=await sb.from("qc_batch_steps").delete().eq("id",stepData.id);if(rollback.error){recordLocalMutation();queuedFullReload=true;cloudLoadError=rollback.error;qcBatchLoadError=rollback.error;qcBatchReady=false;showCloudStatus(readMasterCache(),rollback.error);scheduleCloudRetry(rollback.error);renderAll();restoreQcStepPanel();alert(`完成批次失敗，且系統無法自動回復本道資料：${rollback.error.message}\n請先勿重複送出，並通知管理員。`);return}}
   alert(error.message||"儲存 QC 道次失敗")
  }finally{qcStepPending=false;if(saveButton)saveButton.disabled=!qcBatchReady;if(completeButton)completeButton.disabled=!qcBatchReady}
 }
