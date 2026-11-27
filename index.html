@@ -312,8 +312,9 @@ const $=id=>document.getElementById(id);
 const PRODUCTION_QUALITY_NOTE_PREFIX="__QC_INSPECTORS__=";
 let currentUser=null, productions=[], inspections=[], reliability=[], parts=[], employees=[], photos=[], qcReports=[], qcBatches=[], qcBatchSteps=[], packingReports=[], v4Ready=true, qcBatchReady=true, packingReportsReady=true, productionQualityReady=true, inspectionDraftProductionId='', currentQcBatchId=null, editingQcBatchId=null, qcReportView='today', recordView='all';
 const CLOUD_CACHE_KEY="ipqc_v416_master_cache";
-const CLOUD_LIVE_OVERLAP_MS=2*60*1000,CLOUD_LIVE_MIN_MS=15*1000,CLOUD_FULL_REFRESH_MIN_MS=5*60*1000,CLOUD_QUOTA_RETRY_MS=15*60*1000,CLOUD_MAX_RETRY_MS=5*60*1000;
-let cloudLoadRunning=false,queuedFullReload=false,cloudRetryTimer=null,cloudRetryDelay=60000,cloudPausedUntil=0,lastLiveSyncAt=null,lastLiveRequestAt=0,lastFullLoadAt=0,localMutationVersion=0,cloudLoadError=null,productionLoadError=null,qcBatchLoadError=null,packingReportsLoadError=null,qcCreatePending=false,qcStepPending=false,packingReportPending=false;
+const CLOUD_LIVE_OVERLAP_MS=45*1000,CLOUD_LIVE_MIN_MS=15*1000,CLOUD_FULL_REFRESH_MIN_MS=15*60*1000,CLOUD_RECONCILE_MIN_MS=60*1000,CLOUD_QUOTA_RETRY_MS=15*60*1000,CLOUD_MAX_RETRY_MS=5*60*1000;
+let cloudLoadRunning=false,queuedFullReload=false,cloudRetryTimer=null,cloudRetryDelay=60000,cloudPausedUntil=0,lastLiveSyncAt=null,lastLiveRequestAt=0,lastFullLoadAt=0,lastReconcileAt=0,localMutationVersion=0,cloudLoadError=null,productionLoadError=null,qcBatchLoadError=null,packingReportsLoadError=null,qcCreatePending=false,qcStepPending=false,packingReportPending=false,cloudRealtimeReady=false,cloudReconcileRunning=false,realtimeRenderTimer=null;
+const cloudTableCounts={},cloudRealtimeChannels=[],cloudRealtimeStatus={};
 let currentLang=localStorage.getItem("ipqc_v416_lang")||"zh";
 const originalText=new WeakMap();
 const VI={"V4.1.6 多人與紀錄顯示版｜2026-07-22":"Phiên bản V4.1.6 nhiều nhân viên và hiển thị hồ sơ｜2026-07-22","公司帳號":"Tài khoản công ty","密碼":"Mật khẩu","記住登入":"Ghi nhớ đăng nhập","登入":"Đăng nhập","登出":"Đăng xuất","首頁":"Trang chủ","生產管理":"Quản lý sản xuất","IPQC巡檢":"Kiểm tra IPQC","信賴度測試":"Kiểm tra độ tin cậy","巡檢紀錄":"Lịch sử kiểm tra","信賴度紀錄":"Lịch sử độ tin cậy","基礎資料":"Dữ liệu cơ bản","生產中":"Đang sản xuất","今日巡檢":"Kiểm tra hôm nay","待信賴度":"Chờ kiểm tra độ tin cậy","今日良率":"Tỷ lệ đạt hôm nay","今日待辦":"Việc cần làm hôm nay","目前生產狀態":"Trạng thái sản xuất hiện tại","建立生產":"Tạo lệnh sản xuất","料號 *":"Mã hàng *","機台":"Máy","作業員 1 *":"Công nhân 1 *","作業員 2":"Công nhân 2","作業員 3":"Công nhân 3","請選擇作業員":"Chọn công nhân","不選擇":"Không chọn","預計數量（選填）":"Số lượng dự kiến (không bắt buộc)","備註":"Ghi chú","開始生產":"Bắt đầu sản xuất","生產中／暫停":"Đang sản xuất / Tạm dừng","最近完成":"Hoàn thành gần đây","新增 IPQC 巡檢":"Thêm kiểm tra IPQC","生產單 *":"Lệnh sản xuất *","日期時間":"Ngày giờ","巡檢人員 *":"Nhân viên kiểm tra *","請選擇巡檢人員":"Chọn nhân viên kiểm tra","品檢人員 1":"Nhân viên QC 1","品檢人員 2":"Nhân viên QC 2","品檢人員 3":"Nhân viên QC 3","請選擇品檢人員":"Chọn nhân viên QC","印刷 A":"In A","印刷 B":"In B","包裝":"Đóng gói","印刷 A－NG 原因":"In A - Nguyên nhân NG","印刷 B－NG 原因":"In B - Nguyên nhân NG","包裝－NG 原因":"Đóng gói - Nguyên nhân NG","印刷 A－NG 照片":"In A - Ảnh NG","印刷 B－NG 照片":"In B - Ảnh NG","包裝－NG 照片":"Đóng gói - Ảnh NG","無":"Không","漏印":"Thiếu in","偏位":"Lệch vị trí","重影":"Bóng đôi","刮傷":"Trầy xước","溢墨":"Tràn mực","色差":"Sai màu","異物":"Dị vật","包裝異常":"Lỗi đóng gói","其他":"Khác","備註／處理方式":"Ghi chú / Cách xử lý","首件照片（第一筆巡檢可拍）":"Ảnh sản phẩm đầu tiên","其他照片":"Ảnh khác","儲存巡檢":"Lưu kiểm tra","搜尋生產單／料號／人員":"Tìm lệnh sản xuất / mã hàng / nhân viên","日期":"Ngày","處理方式":"Cách xử lý","NG 原因":"Nguyên nhân NG","巡檢／品檢":"Kiểm tra / QC","照片":"Ảnh","操作":"Thao tác","刪除":"Xóa","完成信賴度測試":"Hoàn thành kiểm tra độ tin cậy","測試人員":"Người kiểm tra","信賴度照片":"Ảnh độ tin cậy","完成測試":"Hoàn thành kiểm tra","料號管理":"Quản lý mã hàng","品名／關鍵字":"Tên hàng / từ khóa","新增料號":"Thêm mã hàng","人員管理":"Quản lý nhân viên","姓名 *":"Tên *","職務":"Chức vụ","作業員":"Công nhân","巡檢員":"Nhân viên kiểm tra","品檢員":"Nhân viên QC","主管":"Quản lý","新增人員":"Thêm nhân viên","目前料號":"Mã hàng hiện có","目前人員":"Nhân viên hiện có","查看照片":"Xem ảnh","沒有符合的巡檢紀錄":"Không có hồ sơ kiểm tra phù hợp"};
@@ -760,7 +761,7 @@ if($("qcHistoryViewBtn"))$("qcHistoryViewBtn").onclick=()=>setQcReportView("hist
  if($("doneProductionPart"))$("doneProductionPart").oninput=renderCompletedProductions;
 $("loginBtn").onclick=()=>{const a=$("account").value.trim(),p=$("password").value,f=ACCOUNTS[a];if(!f||f.password!==p)return msg($("loginMsg"),"帳號或密碼錯誤");currentUser={account:a,...f};if($("remember").checked)localStorage.setItem("ipqc_v4_login",JSON.stringify(currentUser));enterApp()};
 $("logoutBtn").onclick=()=>{localStorage.removeItem("ipqc_v4_login");location.reload()};
-async function enterApp(){document.body.dataset.role=currentUser.role;$("loginPage").classList.add("hidden");$("appPage").classList.remove("hidden");$("userInfo").textContent=`${currentUser.name}｜${currentUser.account}`;await loadAll();const defaultPage=currentUser?.account==="chengyin"?"dashboard":currentUser?.account==="3F"?"production":"qcReport";showPage(defaultPage);}
+async function enterApp(){document.body.dataset.role=currentUser.role;$("loginPage").classList.add("hidden");$("appPage").classList.remove("hidden");$("userInfo").textContent=`${currentUser.name}｜${currentUser.account}`;setupRealtimeSync();await loadAll();const defaultPage=currentUser?.account==="chengyin"?"dashboard":currentUser?.account==="3F"?"production":"qcReport";showPage(defaultPage);}
 function readMasterCache(){try{return JSON.parse(localStorage.getItem(CLOUD_CACHE_KEY)||"null")||{}}catch{return {}}}
 function saveMasterCache(){try{localStorage.setItem(CLOUD_CACHE_KEY,JSON.stringify({savedAt:new Date().toISOString(),parts,employees}))}catch{}}
 function cloudErrorText(error){return [error?.status,error?.code,error?.message,error?.details,error?.hint,error?.name,String(error||"")].filter(Boolean).join(" ").toLowerCase()}
@@ -855,8 +856,68 @@ function mergeFreshRows(current,fresh){
  return [...map.values()]
 }
 function recordLocalMutation(){localMutationVersion++;if(cloudLoadRunning)queuedFullReload=true}
+function bumpCloudTableCount(table,delta){if(Number.isFinite(cloudTableCounts[table]))cloudTableCounts[table]=Math.max(0,cloudTableCounts[table]+delta)}
+function scheduleRealtimeRender(){clearTimeout(realtimeRenderTimer);realtimeRenderTimer=setTimeout(()=>{renderAll();restoreQcStepPanel()},60)}
+function applyRealtimeChange(table,payload){
+ const event=payload?.eventType,row=event==="DELETE"?payload.old:payload.new,id=String(row?.id||"");if(!id)return;
+ const apply=(current,activeOnly=false)=>event==="DELETE"||(activeOnly&&row.active===false)?current.filter(item=>String(item.id)!==id):mergeFreshRows(current,[row]);
+ if(event==="INSERT")bumpCloudTableCount(table,1);else if(event==="DELETE")bumpCloudTableCount(table,-1);
+ if(table==="production_orders")productions=apply(productions);
+ else if(table==="inspections")inspections=apply(inspections);
+ else if(table==="reliability_tests")reliability=apply(reliability);
+ else if(table==="part_numbers")parts=apply(parts,true);
+ else if(table==="employees")employees=apply(employees,true);
+ else if(table==="inspection_photos")photos=apply(photos);
+ else if(table==="qc_reports")qcReports=apply(qcReports);
+ else if(table==="qc_batches"){
+  qcBatches=apply(qcBatches);
+  if(event==="DELETE"){qcBatchSteps=qcBatchSteps.filter(step=>String(step.batch_id)!==id);if(String(currentQcBatchId)===id)currentQcBatchId=null}
+ }
+ else if(table==="qc_batch_steps")qcBatchSteps=apply(qcBatchSteps);
+ else if(table==="packing_reports")packingReports=apply(packingReports);
+ else return;
+ recordLocalMutation();scheduleRealtimeRender()
+}
+function setupRealtimeSync(){
+ if(cloudRealtimeChannels.length)return;
+ const tables=["production_orders","inspections","reliability_tests","part_numbers","employees","inspection_photos","qc_reports","qc_batches","qc_batch_steps","packing_reports"];
+ tables.forEach(table=>{
+  const channel=sb.channel(`ipqc-v32-${table}`).on("postgres_changes",{event:"*",schema:"public",table},payload=>applyRealtimeChange(table,payload)).subscribe(status=>{cloudRealtimeStatus[table]=status==="SUBSCRIBED";cloudRealtimeReady=Object.values(cloudRealtimeStatus).some(Boolean)});
+  cloudRealtimeChannels.push(channel)
+ })
+}
+function stopRealtimeSync(){
+ cloudRealtimeChannels.splice(0).forEach(channel=>sb.removeChannel(channel).catch(()=>{}));
+ Object.keys(cloudRealtimeStatus).forEach(table=>delete cloudRealtimeStatus[table]);cloudRealtimeReady=false
+}
+async function reconcileCloudState(){
+ if(document.hidden||!currentUser||cloudLoadRunning||cloudReconcileRunning||Date.now()<cloudPausedUntil||Date.now()-lastReconcileAt<CLOUD_RECONCILE_MIN_MS)return;
+ lastReconcileAt=Date.now();cloudReconcileRunning=true;
+ const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),10000),countTables=["inspections","qc_reports","part_numbers","employees","inspection_photos"];
+ let results;
+ try{
+  results=await Promise.all([
+   sb.from("production_orders").select("id").order("created_at",{ascending:false}).limit(500).abortSignal(controller.signal),
+   sb.from("qc_batches").select("id").order("started_at",{ascending:false}).limit(1000).abortSignal(controller.signal),
+   ...countTables.map(table=>sb.from(table).select("id",{count:"exact",head:true}).abortSignal(controller.signal))
+  ])
+ }catch(error){results=Array.from({length:2+countTables.length},()=>({error}))}
+ clearTimeout(timeout);cloudReconcileRunning=false;
+ if(results.some(result=>result?.error))return;
+ const productionIds=new Set((results[0].data||[]).map(row=>String(row.id))),qcIds=new Set((results[1].data||[]).map(row=>String(row.id)));
+ const oldProductionLength=productions.length,oldQcLength=qcBatches.length;
+ productions=productions.filter(row=>productionIds.has(String(row.id)));
+ qcBatches=qcBatches.filter(row=>qcIds.has(String(row.id)));
+ qcBatchSteps=qcBatchSteps.filter(step=>qcIds.has(String(step.batch_id)));
+ if(currentQcBatchId&&!qcIds.has(String(currentQcBatchId)))currentQcBatchId=null;
+ let countMismatch=false;
+ countTables.forEach((table,index)=>{const count=Number(results[index+2].count);if(Number.isFinite(cloudTableCounts[table])&&cloudTableCounts[table]!==count)countMismatch=true;cloudTableCounts[table]=count});
+ if(oldProductionLength!==productions.length||oldQcLength!==qcBatches.length)scheduleRealtimeRender();
+ if(countMismatch)await loadAll(true)
+}
 async function loadLiveData(){
- if(cloudLoadRunning||document.hidden||!currentUser||Date.now()<cloudPausedUntil)return;
+ if(document.hidden)return;
+ if(cloudLoadRunning||!currentUser||Date.now()<cloudPausedUntil)return;
  if(!lastLiveSyncAt){loadAll(false);return}
  if(Date.now()-lastLiveRequestAt<CLOUD_LIVE_MIN_MS)return;
  lastLiveRequestAt=Date.now();
@@ -866,19 +927,23 @@ async function loadLiveData(){
  let results;
  try{
   results=await Promise.all([
-   sb.from("production_orders").select("*").order("created_at",{ascending:false}).limit(150).abortSignal(controller.signal),
+   sb.from("production_orders").select("*").or(`created_at.gt.${since},updated_at.gt.${since}`).limit(150).abortSignal(controller.signal),
    sb.from("inspections").select("*").gt("created_at",since).order("created_at",{ascending:true}).limit(150).abortSignal(controller.signal),
    sb.from("reliability_tests").select("*").gt("created_at",since).order("created_at",{ascending:true}).limit(100).abortSignal(controller.signal),
-   sb.from("qc_batches").select("*").order("started_at",{ascending:false}).limit(120).abortSignal(controller.signal),
+   sb.from("inspection_photos").select("*").gt("created_at",since).order("created_at",{ascending:true}).limit(150).abortSignal(controller.signal),
+   sb.from("qc_reports").select("*").or(`created_at.gt.${since},updated_at.gt.${since}`).limit(100).abortSignal(controller.signal),
+   sb.from("qc_batches").select("*").or(`created_at.gt.${since},updated_at.gt.${since}`).limit(120).abortSignal(controller.signal),
    sb.from("qc_batch_steps").select("*").gt("created_at",since).order("created_at",{ascending:true}).limit(400).abortSignal(controller.signal),
    sb.from("packing_reports").select("*").gt("created_at",since).order("created_at",{ascending:true}).limit(100).abortSignal(controller.signal)
   ])
- }catch(error){results=Array.from({length:6},()=>({error}))}
+ }catch(error){results=Array.from({length:8},()=>({error}))}
  clearTimeout(timeout);cloudLoadRunning=false;
- const [p,i,r,qb,qs,pr]=results,errors=results.map(x=>x?.error).filter(Boolean),mainError=primaryCloudError(errors),saturated=!errors.length&&[i?.data?.length>=150,r?.data?.length>=100,qs?.data?.length>=400,pr?.data?.length>=100].some(Boolean),staleResult=localMutationVersion!==requestMutationVersion;
+ const [p,i,r,ph,q,qb,qs,pr]=results,errors=results.map(x=>x?.error).filter(Boolean),mainError=primaryCloudError(errors),saturated=!errors.length&&[p?.data?.length>=150,i?.data?.length>=150,r?.data?.length>=100,ph?.data?.length>=150,q?.data?.length>=100,qb?.data?.length>=120,qs?.data?.length>=400,pr?.data?.length>=100].some(Boolean),staleResult=localMutationVersion!==requestMutationVersion;
  if(!staleResult&&!p.error)productions=mergeFreshRows(productions,p.data);
  if(!staleResult&&!i.error)inspections=mergeFreshRows(inspections,i.data);
  if(!staleResult&&!r.error)reliability=mergeFreshRows(reliability,r.data);
+ if(!staleResult&&!ph.error)photos=mergeFreshRows(photos,ph.data);
+ if(!staleResult&&!q.error)qcReports=mergeFreshRows(qcReports,q.data);
  productionLoadError=p.error||null;v4Ready=!productionLoadError;
  qcBatchLoadError=qb.error||qs.error||null;qcBatchReady=!qcBatchLoadError;if(!staleResult&&!qb.error)qcBatches=mergeFreshRows(qcBatches,qb.data);if(!staleResult&&!qs.error)qcBatchSteps=mergeFreshRows(qcBatchSteps,qs.data);
  packingReportsLoadError=pr.error||null;packingReportsReady=!packingReportsLoadError;if(!staleResult&&!pr.error)packingReports=mergeFreshRows(packingReports,pr.data);
@@ -1090,8 +1155,8 @@ $("createProductionBtn").onclick=async()=>{
  const {data,error}=await sb.from("production_orders").insert(payload).select().single();if(error)return msg($("prodMsg"),error.message);
  recordLocalMutation();productions=mergeFreshRows(productions,[data]);msg($("prodMsg"),`已建立 ${payload.production_no}`,true);["prodPart","prodMachine","prodOperator1","prodOperator2","prodOperator3","prodQualityInspector1","prodQualityInspector2","prodQualityInspector3","prodNotes"].forEach(id=>$(id).value="");renderAll()
 }
-async function changeProduction(id,status){if(!requireCloudWrite()||!v4Ready)return;const payload={status};if(status==="paused")payload.paused_at=new Date().toISOString();if(status==="active")payload.resumed_at=new Date().toISOString();const {data,error}=await sb.from("production_orders").update(payload).eq("id",id).select().single();if(error)return alert(error.message);recordLocalMutation();productions=mergeFreshRows(productions,[data]);renderAll()}
-async function completeProduction(id){if(!requireCloudWrite()||!v4Ready)return;const p=productions.find(x=>String(x.id)===String(id)),t=productionTotals(id);if(!confirm(`確定完成 ${p?.production_no}？\nOK ${t.ok}｜NG ${t.ng}｜良率 ${t.yield.toFixed(1)}%`))return;const {data,error}=await sb.from("production_orders").update({status:"completed",completed_at:new Date().toISOString()}).eq("id",id).select().single();if(error)return alert(error.message);recordLocalMutation();productions=mergeFreshRows(productions,[data]);renderAll()}
+async function changeProduction(id,status){if(!requireCloudWrite()||!v4Ready)return;const now=new Date().toISOString(),payload={status,updated_at:now};if(status==="paused")payload.paused_at=now;if(status==="active")payload.resumed_at=now;const {data,error}=await sb.from("production_orders").update(payload).eq("id",id).select().single();if(error)return alert(error.message);recordLocalMutation();productions=mergeFreshRows(productions,[data]);renderAll()}
+async function completeProduction(id){if(!requireCloudWrite()||!v4Ready)return;const p=productions.find(x=>String(x.id)===String(id)),t=productionTotals(id);if(!confirm(`確定完成 ${p?.production_no}？\nOK ${t.ok}｜NG ${t.ng}｜良率 ${t.yield.toFixed(1)}%`))return;const completedAt=new Date().toISOString(),{data,error}=await sb.from("production_orders").update({status:"completed",completed_at:completedAt,updated_at:completedAt}).eq("id",id).select().single();if(error)return alert(error.message);recordLocalMutation();productions=mergeFreshRows(productions,[data]);renderAll()}
 function clearInspectionPhotos(){
  ["firstPhoto","aNgPhoto","bNgPhoto","pNgPhoto","otherPhoto"].forEach(id=>{$(id).value=""});
  ["firstPreview","aNgPreview","bNgPreview","pNgPreview","otherPreview"].forEach(id=>{const img=$(id);if(img.src&&img.src.startsWith("blob:"))URL.revokeObjectURL(img.src);img.removeAttribute("src");img.classList.add("hidden")});
@@ -1165,7 +1230,7 @@ $("saveInspectionBtn").onclick=async()=>{
  const n=nowParts(),payload={production_id:pid,inspection_date:n.date,inspection_time:n.time,part_number_code:p.part_number_code,operator_name:p.operator_name||"",inspector_name:inspector,quality_inspector_name:qualityNames,machine:p.machine||"",printing_a_status:"check",printing_a_ok:num($("aOk").value),printing_a_ng:aNg,printing_a_notes:$("aNotes").value.trim(),printing_b_status:"check",printing_b_ok:num($("bOk").value),printing_b_ng:bNg,printing_b_notes:$("bNotes").value.trim(),packing_status:"check",packing_ok:num($("pOk").value),packing_ng:pNg,ng_reason:stationReasons,notes:$("notes").value.trim()};
   $("saveInspectionBtn").disabled=true;
   try{
-   if(!savedProductionQuality(p)){const savedNotes=notesWithProductionQuality(p.notes,qualityNames),{error:qualityError}=await sb.from("production_orders").update({notes:savedNotes}).eq("id",p.id);if(qualityError)throw qualityError;recordLocalMutation();p.notes=savedNotes}
+   if(!savedProductionQuality(p)){const savedNotes=notesWithProductionQuality(p.notes,qualityNames),{error:qualityError}=await sb.from("production_orders").update({notes:savedNotes,updated_at:new Date().toISOString()}).eq("id",p.id);if(qualityError)throw qualityError;recordLocalMutation();p.notes=savedNotes}
    for(const name of qualityNames.split("｜").filter(Boolean))await ensureEmployee(name,"品檢員");
    const {data,error}=await sb.from("inspections").insert(payload).select().single();
    if(error)throw error;
@@ -1327,7 +1392,7 @@ setupZeroClearInputs();
 applyLanguage();
 
 window.changeProduction=changeProduction;window.completeProduction=completeProduction;window.startInspectionFor=startInspectionFor;window.startReliability=startReliability;window.deleteProduction=deleteProduction;window.deleteInspection=deleteInspection;window.deleteReliability=deleteReliability;window.deletePart=deletePart;window.deleteEmployee=deleteEmployee;window.selectQcBatch=selectQcBatch;window.deleteQcBatch=deleteQcBatch;window.ratePartDifficulty=ratePartDifficulty;window.editQcBatchPart=editQcBatchPart;window.closeEditQcPartModal=closeEditQcPartModal;
-setInterval(loadLiveData,30000);setInterval(()=>{if(currentUser&&!document.hidden)loadAll(false)},900000);setInterval(updateQcSelectedBatchInfo,60000);document.addEventListener("visibilitychange",()=>{if(!document.hidden){loadLiveData();updateQcSelectedBatchInfo()}});
+setInterval(loadLiveData,30000);setInterval(reconcileCloudState,60000);setInterval(()=>{if(currentUser&&!document.hidden)loadAll(false)},900000);setInterval(updateQcSelectedBatchInfo,60000);document.addEventListener("visibilitychange",()=>{if(document.hidden){stopRealtimeSync();return}if(currentUser){setupRealtimeSync();loadLiveData();reconcileCloudState();updateQcSelectedBatchInfo()}});window.addEventListener("pagehide",stopRealtimeSync);
 (async()=>{try{const saved=JSON.parse(localStorage.getItem("ipqc_v4_login")||"null");if(saved&&ACCOUNTS[saved.account]){currentUser=saved;await enterApp()}}catch(e){}})();
 </script>
 </body>
